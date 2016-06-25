@@ -30,18 +30,14 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import me.acf.lobby.gadgets.Gadgets;
-import me.acf.lobby.gadgets.Menu;
 import me.acf.lobby.patentes.Patente;
 import me.acf.lobby.perfil.Perfil;
 import me.hub.Main;
-import me.hub.API.Enchant;
 import me.hub.API.Util.UtilInv;
 import me.hub.API.Util.UtilServer;
 import me.hub.Scoreboard.ScoreboardAPI;
 import me.hub.effect.ParticleEffect;
 import me.site.account.Account;
-import me.site.account.rank.Rank;
 
 public class ChestMagic implements Listener
 {

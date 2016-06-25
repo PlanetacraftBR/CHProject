@@ -16,8 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.acf.lobby.gadgets.Gadgets;
-import me.acf.lobby.gadgets.Menu;
 import me.hub.MiniPlugin;
 import me.hub.API.Enchant;
 

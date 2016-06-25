@@ -5,13 +5,6 @@ package me.acf.lobby.MagicChest;
 
 import java.util.Random;
 
-import org.bukkit.entity.Player;
-
-import me.hub.Scoreboard.ScoreboardAPI;
-import me.hub.config.Config;
-import me.acf.lobby.patentes.Patente;
-import me.site.account.Account;
-
 /**
  * @author adriancf
  *
