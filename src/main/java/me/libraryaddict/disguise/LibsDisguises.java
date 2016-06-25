@@ -45,16 +45,16 @@ public class LibsDisguises {
     
     public static  void Iniciar() {
 
-        PacketsManager.init(Main.plugin);
-        DisguiseUtilities.init(Main.plugin);
-        DisguiseConfig.initConfig(Main.plugin.getConfig());
+        PacketsManager.init(Main.main);
+        DisguiseUtilities.init(Main.main);
+        DisguiseConfig.initConfig(Main.main.getConfig());
 
         PacketsManager.addPacketListeners();
         listener = new DisguiseListener();
-        Bukkit.getPluginManager().registerEvents(listener, Main.plugin);
+        Bukkit.getPluginManager().registerEvents(listener, Main.main);
         
         registerValues();
-        instance = Main.plugin;
+        instance = Main.main;
 
     }
 

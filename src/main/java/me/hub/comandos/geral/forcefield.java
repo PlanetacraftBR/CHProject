@@ -47,7 +47,7 @@ public class forcefield implements CommandExecutor {
 	                 }
 					final Player alvo =  Bukkit.getPlayerExact(args[0]);
 					
-					 UtilAuraCheck check = new UtilAuraCheck(Main.plugin, alvo);
+					 UtilAuraCheck check = new UtilAuraCheck(Main.main, alvo);
 					    UtilAuraCheck.running.put(alvo.getUniqueId(), check);
 					    check.invoke(alvo, new UtilAuraCheck.Callback()
 					    {
@@ -100,7 +100,7 @@ public class forcefield implements CommandExecutor {
                  }
 				final Player alvo =  Bukkit.getPlayerExact(args[0]);
 				
-				 UtilAuraCheck check = new UtilAuraCheck(Main.plugin, alvo);
+				 UtilAuraCheck check = new UtilAuraCheck(Main.main, alvo);
 				    UtilAuraCheck.running.put(alvo.getUniqueId(), check);
 				    check.invoke(sender, new UtilAuraCheck.Callback()
 				    {

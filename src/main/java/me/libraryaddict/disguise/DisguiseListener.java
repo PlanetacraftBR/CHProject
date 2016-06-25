@@ -51,7 +51,7 @@ public class DisguiseListener implements Listener {
     private BukkitTask updaterTask;
 
     public DisguiseListener() {
-        plugin = Main.plugin;
+        plugin = Main.main;
         if (plugin.getConfig().getBoolean("NotifyUpdate")) {
             currentVersion = plugin.getDescription().getVersion();
             updaterTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {

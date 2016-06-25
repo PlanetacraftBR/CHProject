@@ -105,9 +105,18 @@ import net.citizensnpcs.util.Util;
 public class Main extends JavaPlugin
 implements Listener, CitizensPlugin
 {
-public static Main plugin;
+public static JavaPlugin plugin;
 public static String NomeDoServidor = "§f§lPlanetaCraft_BR";
 public static String site = "http://api.planetacraft.com.br";
+public static Main main;
+
+public Main(JavaPlugin java)
+{
+	plugin = java;
+	main = this;
+}
+
+
 
 //Every possible error or warning report type
 	public static final ReportType REPORT_CANNOT_LOAD_CONFIG = new ReportType("Cannot load configuration");
@@ -208,7 +217,7 @@ public static String site = "http://api.planetacraft.com.br";
 	private boolean skipDisable;
 
 	//NPC
-	 private final CommandManager commands = new CommandManager();
+	    private final CommandManager commands = new CommandManager();
 	    private boolean compatible;
 	    private Settings npconfig;
 	    private CitizensNPCRegistry npcRegistry;
@@ -218,7 +227,7 @@ public static String site = "http://api.planetacraft.com.br";
 	    private final Map<String, NPCRegistry> storedRegistries = Maps.newHashMap();
 	    private CitizensTraitFactory traitFactory;
 	
-	@Override
+	
 	public void onLoad() {
 		
 		  File file = new File("plugins/CHub/saves.yml");
@@ -229,7 +238,7 @@ public static String site = "http://api.planetacraft.com.br";
 		Application.registerPrimaryThread();
 
 		// Initialize enhancer factory
-		EnhancerFactory.getInstance().setClassLoader(getClassLoader());
+		EnhancerFactory.getInstance().setClassLoader(plugin.getClass().getClassLoader());
 
 		// Initialize executors
 		executorAsync = BukkitExecutors.newAsynchronous(this);
@@ -274,7 +283,7 @@ public static String site = "http://api.planetacraft.com.br";
 
 			unhookTask = new DelayedSingleTask(this);
 			protocolManager = PacketFilterManager.newBuilder()
-					.classLoader(getClassLoader())
+					.classLoader(plugin.getClass().getClassLoader())
 					.server(getServer())
 					.library(this)
 					.minecraftVersion(version)
@@ -350,15 +359,6 @@ public static String site = "http://api.planetacraft.com.br";
 		return config.getFile().delete();
 	}
 
-	@Override
-	public void reloadConfig() {
-		super.reloadConfig();
-
-		// Reload configuration
-		if (config != null) {
-			config.reloadConfig();
-		}
-	}
 
 	private void setupBroadcastUsers(final String permission) {
 		// Guard against multiple calls
@@ -393,7 +393,6 @@ public static String site = "http://api.planetacraft.com.br";
 
 	public void onEnable() {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "timings on");
-	    plugin = this;
         Config conf = new Config();
 		try {
 			Server server = getServer();
@@ -424,7 +423,7 @@ public static String site = "http://api.planetacraft.com.br";
 
 			// Initialize background compiler
 			if (backgroundCompiler == null && config.isBackgroundCompilerEnabled()) {
-				backgroundCompiler = new BackgroundCompiler(getClassLoader(), reporter);
+				backgroundCompiler = new BackgroundCompiler(plugin.getClass().getClassLoader(), reporter);
 				BackgroundCompiler.setInstance(backgroundCompiler);
 
 				logger.info("Started structure compiler thread.");
@@ -509,7 +508,7 @@ public static String site = "http://api.planetacraft.com.br";
 	            Messaging.severeTr(Messages.LOAD_TASK_NOT_SCHEDULED);
 	            getServer().getPluginManager().disablePlugin(this);
 	        }
-		    getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(this), 200L, 2L);
+		    getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(plugin), 200L, 2L);
 	}
 
 	// Plugin authors: Notify me to remove these
@@ -563,7 +562,7 @@ public static String site = "http://api.planetacraft.com.br";
 		MinecraftVersion newestVersion = null;
 
 		// Skip the file that contains this current instance however
-		File loadedFile = getFile();
+		File loadedFile = plugin.getDataFolder();
 
 		try {
 			// Scan the plugin folder for newer versions of ProtocolLib
@@ -605,7 +604,7 @@ public static String site = "http://api.planetacraft.com.br";
 			if (executor == null)
 				return;
 
-			PluginCommand command = getCommand(name);
+			PluginCommand command = plugin.getCommand(name);
 
 			// Try to load the command
 			if (command != null) {
@@ -960,7 +959,7 @@ public static String site = "http://api.planetacraft.com.br";
 
 	    @Override
 	    public ClassLoader getOwningClassLoader() {
-	        return getClassLoader();
+	        return plugin.getClass().getClassLoader();
 	    }
 
 	    @Override

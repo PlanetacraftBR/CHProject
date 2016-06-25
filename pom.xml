@@ -43,45 +43,6 @@
               <shadedArtifactAttached>false</shadedArtifactAttached>
               <createDependencyReducedPom>false</createDependencyReducedPom>
 
-              <relocations>
-                <relocation>
-                  <pattern>net.sf</pattern>
-                  <shadedPattern>net.acf.api</shadedPattern>
-                </relocation>
-                 <relocation>
-                  <pattern>net.citizensnpcs</pattern>
-                  <shadedPattern>net.acf.api.citizens</shadedPattern>
-                </relocation>
-                    <relocation>
-                  <pattern>org.jnbt</pattern>
-                  <shadedPattern>net.acf.api.jnbt</shadedPattern>
-                </relocation>
-                  <relocation>
-                  <pattern>me.hub</pattern>
-                  <shadedPattern>net.acf.ch</shadedPattern>
-                </relocation>
-                          <relocation>
-                  <pattern>me.acf</pattern>
-                  <shadedPattern>net.acf.ch.plataforma</shadedPattern>
-                    </relocation>
-                  <relocation>
-                  <pattern>com.comphenix</pattern>
-                  <shadedPattern>net.acf.api</shadedPattern>
-                </relocation>
-                           <relocation>
-                  <pattern>me.libraryaddict</pattern>
-                  <shadedPattern>net.acf.api</shadedPattern>
-                </relocation>
-                        <relocation>
-                  <pattern>org.joda</pattern>
-                  <shadedPattern>net.acf.api.joda</shadedPattern>
-                   </relocation>
-                     <relocation>
-                  <pattern>org.json</pattern>
-                  <shadedPattern>net.acf.api.json</shadedPattern>
-                </relocation>
-              </relocations>
-
               <artifactSet>
                 <excludes>
                   <exclude>org.spigotmc:spigot</exclude>
