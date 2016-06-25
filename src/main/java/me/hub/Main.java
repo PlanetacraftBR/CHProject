@@ -110,9 +110,8 @@ public static String NomeDoServidor = "§f§lPlanetaCraft_BR";
 public static String site = "http://api.planetacraft.com.br";
 public static Main main;
 
-public Main(JavaPlugin java)
+public Main()
 {
-	plugin = java;
 	main = this;
 }
 
