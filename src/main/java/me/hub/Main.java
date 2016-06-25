@@ -686,14 +686,6 @@ public static String site = "http://api.planetacraft.com.br";
 	public void onDisable() {
 	    
 		  File file = new File("plugins/CHub/saves.yml");
-		deleteDir(file);
-		try {
-		Ler.GetBlockRestore().ForceExpireBlocks();
-		}
-		catch (Exception ex)
-		{
-			
-		}
 		UtilHolo.RemoveAllHolo();
 		ChestMagic.Remove_Stop();
 		BarAPI.Desativar();
@@ -741,8 +733,6 @@ public static String site = "http://api.planetacraft.com.br";
         }
 
         CitizensAPI.shutdown();
-        
-        Fechar.stop();
 	}
 
 	// Get the Bukkit logger first, before we try to create our own
