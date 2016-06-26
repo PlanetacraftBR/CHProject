@@ -78,7 +78,7 @@ public class UtilServerPlayerStatos {
 	private static String Statos(String sala)
 	{
 		
-	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§e§o", ""), "online");
+	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§a§o", ""), "online");
 	   String nome =  Servidor + " Jogadores Online";
 	   
 	   
