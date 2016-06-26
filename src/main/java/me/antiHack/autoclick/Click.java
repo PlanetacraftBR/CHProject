@@ -58,11 +58,11 @@ Plugin plugin;
 		@EventHandler
 		public void HitMob(EntityDamageByEntityEvent e)
 		{
-			
-			if (e.getEntity().getType().PLAYER == EntityType.PLAYER){
-				if (e.getDamager().getType().PLAYER == EntityType.PLAYER){
+
 			Player p = (Player) e.getDamager();
-			if (p.getType().PLAYER == EntityType.PLAYER){
+			
+		  if (e.getDamager().getType() == EntityType.PLAYER){
+			
 		      if (Click.containsKey(p))
 				{
 		    	  
@@ -92,8 +92,6 @@ Plugin plugin;
 					Click.put(p, "1");
 				}
 			}
-		  }
-		}
 			
 		}
 
