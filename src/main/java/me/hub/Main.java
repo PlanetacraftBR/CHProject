@@ -311,6 +311,7 @@ public static String site = "http://api.planetacraft.com.br";
 			reporter.reportDetailed(this, Report.newBuilder(REPORT_PLUGIN_LOAD_ERROR).error(e).callerParam(protocolManager));
 			disablePlugin();
 		}
+		CHub.onLoad();
 	}
 
 
@@ -514,7 +515,7 @@ public static String site = "http://api.planetacraft.com.br";
 	            getServer().getPluginManager().disablePlugin(this);
 	        }
 		    getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(this), 200L, 2L);
-	
+	        CHub.onEnable();
 	}
 
 	// Plugin authors: Notify me to remove these
@@ -739,7 +740,7 @@ public static String site = "http://api.planetacraft.com.br";
         }
 
         CitizensAPI.shutdown();
-        
+        CHub.onDisable();
 
 	}
 
