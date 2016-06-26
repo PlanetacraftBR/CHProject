@@ -89,11 +89,11 @@ public class UtilServerPlayerStatos {
 	public static void Stats(Location loc,String ent,String skin,String nome){
 		NPCRegistry re = CitizensAPI.getNPCRegistry();
 		NPC entity = re.createNPC(EntityType.PLAYER, ent);
-        entity.setName(ent);
+                entity.setName(ent);
 		entity.setProtected(true);
-        entity.isFlyable();
-        entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
-        entity.despawn(DespawnReason.PENDING_RESPAWN);
+                entity.isFlyable();
+                entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
+                entity.despawn(DespawnReason.PENDING_RESPAWN);
 		entity.spawn(loc);
 		UtilNPC.entitys.get(nome).remove();
 		UtilNPC.entitys.put(nome, entity.getEntity());
