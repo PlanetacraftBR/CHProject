@@ -42,12 +42,12 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.hub.API.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.DespawnReason;
@@ -61,7 +61,7 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 public class UtilNPC {
 
 	public static HashMap<String,Entity> entitys = new HashMap<String, Entity>();
-	
+	public static HashMap<String,String> nomes = new HashMap<String, String>();
 	public static void SpawnEntity(String nome_entity,String em_baixo,String em_cima,String skin, Location loc)
 	{
 		
@@ -74,10 +74,18 @@ public class UtilNPC {
         entity.despawn(DespawnReason.PENDING_RESPAWN);
 		entity.spawn(loc);
         entitys.put(nome_entity,entity.getEntity());
-        UtilHolo.Holo(loc.clone().add(0,0,0), em_cima);
+        nomes.put(nome_entity,em_cima);
+        
 	}
 	
-		public static void DarUpdate_All()
+	public static void AparecerHolo(Player p)
+	{
+		for (String s : nomes.keySet()) {
+		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getLocation().clone().add(0,-0.5,0));
+		}
+		}
+	
+	public static void DarUpdate_All()
 	{
 		UtilServerPlayerStatos.UpdateAll();
 	}
