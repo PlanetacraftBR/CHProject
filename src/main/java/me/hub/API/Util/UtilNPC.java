@@ -77,6 +77,11 @@ public class UtilNPC {
         UtilHolo.Holo(loc.clone().add(0,0,0), em_cima);
 	}
 	
+		public static void DarUpdate_All()
+	{
+		UtilServerPlayerStatos.UpdateAll();
+	}
+	
 	public static void RenameEntity(String entity, String novo_Nome)
 	{
 		entitys.get(entity).setCustomName(novo_Nome);
