@@ -51,7 +51,7 @@ import me.site.account.AccountWeb;
  */
 public class UtilServerPlayerStatos {
 
-	public static String Embreve = "EM BREVE";
+	public static String Embreve = "BREVE";
 	public static String Beta = "BETA";
 	
 	public static void UpdateAll()
