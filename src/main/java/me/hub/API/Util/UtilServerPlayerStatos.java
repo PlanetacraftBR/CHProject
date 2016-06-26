@@ -69,7 +69,7 @@ public class UtilServerPlayerStatos {
 			if (nome.contains(Embreve))
 			{
 			   Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
-			   UtilNPC.entitys.get(nome).setName("§cINDISPONÍVEL");
+			   UtilNPC.entitys.get(nome).setName("§fIndisponível");
 			   UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
 			   UtilNPC.entitys.get(nome).spawn(loc);
 				
