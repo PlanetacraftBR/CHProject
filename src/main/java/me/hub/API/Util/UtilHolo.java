@@ -31,6 +31,14 @@ public class UtilHolo {
 	
 	public static void Holo(Location loc, String name)
 	{
+	     List<Entity> entities = Bukkit.getWorld(loc.getWorld().getName()).getEntities();
+   	  for (Entity entity : entities){
+   	  if (entity.getType() == EntityType.ARMOR_STAND)
+   	  {
+   		  if (entity.getLocation().equals(loc))
+   			  entity.remove();
+   	  }
+   	  }
         ArmorStand hologram = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         hologram.setCustomName("§7§o" + name);
         hologram.setCustomNameVisible(true);
