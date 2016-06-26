@@ -68,42 +68,44 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
-			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§c§lINDISPONIVEL",UtilNPC.skin.get(nome));
-				UtilNPC.entitys.get(nome).remove();	
+			   Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
+			   UtilNPC.entitys.get(nome).setName("§cINDISPONÍVEL");
+			   UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+			   UtilNPC.entitys.get(nome).spawn(loc);
 				
 			}
 			else {
 				String rename = Statos(nome);
 				
 				if (name.contains(Beta))
-					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
+				{
+					  Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
+					  UtilNPC.entitys.get(nome).setName("§a§o" + rename);
+					  UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+					  UtilNPC.entitys.get(nome).spawn(loc);	
+				}
 				else
 				{
-				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome));
-				    UtilNPC.entitys.get(nome).remove();	
+					  Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
+					  UtilNPC.entitys.get(nome).setName("§e§o" + rename);
+					  UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+					  UtilNPC.entitys.get(nome).spawn(loc);
+					  
+				    
 				}
 			}
 			
 		}
 	}
 	
-	public static void Stats(Location loc,String ent,String skin){
-		NPCRegistry re = CitizensAPI.getNPCRegistry();
-		NPC entity = re.createNPC(EntityType.PLAYER, ent);
-        entity.setName(ent);
-		entity.setProtected(true);
-        entity.isFlyable();
-        entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
-        entity.despawn(DespawnReason.PENDING_RESPAWN);
-		entity.spawn(loc);
-	}
 	
 	private static String Statos(String sala)
 	{
 		
 	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§a§o", ""), "online");
-	   String nome =  Servidor + " Jogadores Online";
-	   
+	   String nome =  Servidor + " Player(s)";
+	   if (Servidor.equals("0"))
+               nome = "Ninguem";
 	   
 	   
 	     return nome;
