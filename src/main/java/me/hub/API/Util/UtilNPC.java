@@ -76,11 +76,11 @@ public class UtilNPC {
 		entity.spawn(loc);
         entitys.put(nome_entity,entity.getEntity());
         nomes.put(nome_entity,em_cima);
-        location.put(entity.getEntity(), nome_entity);
+        location.put(entity.getEntity().getLocation(), nome_entity);
 	}
 	
 	/*
-	  UtilNPC.location.get(entity) -- Pegar o nome do NPC no local
+	  UtilNPC.location.get(loc) -- Pegar o nome do NPC no local
 	 
 	
 	*/
