@@ -42,8 +42,15 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.hub.API.Util;
 
+import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+
 import me.hub.Main;
 import me.site.account.AccountWeb;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.event.DespawnReason;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
 
 /**
  * Código por adriancf, Group CH-Project
@@ -61,7 +68,9 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
-				UtilNPC.entitys.get(nome).setCustomName("§c§lFECHADO");
+			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§c§lINDISPONIVEL",UtilNPC.skin.get(nome));
+				UtilNPC.entitys.get(nome).remove();	
+				
 			}
 			else {
 				String rename = Statos(nome);
@@ -69,10 +78,24 @@ public class UtilServerPlayerStatos {
 				if (name.contains(Beta))
 					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
 				else
-				UtilNPC.entitys.get(nome).setCustomName("§e§o" + rename);
+				{
+				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome));
+				    UtilNPC.entitys.get(nome).remove();	
+				}
 			}
 			
 		}
+	}
+	
+	public static void Stats(Location loc,String ent,String skin){
+		NPCRegistry re = CitizensAPI.getNPCRegistry();
+		NPC entity = re.createNPC(EntityType.PLAYER, ent);
+        entity.setName(ent);
+		entity.setProtected(true);
+        entity.isFlyable();
+        entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
+        entity.despawn(DespawnReason.PENDING_RESPAWN);
+		entity.spawn(loc);
 	}
 	
 	private static String Statos(String sala)
