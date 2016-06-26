@@ -68,18 +68,29 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
+			   Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
 			   UtilNPC.entitys.get(nome).setName("§cINDISPONÍVEL");
-	
+			   UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+			   UtilNPC.entitys.get(nome).spawn(loc);
 				
 			}
 			else {
 				String rename = Statos(nome);
 				
 				if (name.contains(Beta))
-					  UtilNPC.entitys.get(nome).setName("§a§o" + rename);		
+				{
+					  Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
+					  UtilNPC.entitys.get(nome).setName("§a§o" + rename);
+					  UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+					  UtilNPC.entitys.get(nome).spawn(loc);	
+				}
 				else
 				{
+					  Location loc = UtilNPC.entitys.get(nome).getEntity().getLocation();	
 					  UtilNPC.entitys.get(nome).setName("§e§o" + rename);
+					  UtilNPC.entitys.get(nome).despawn(DespawnReason.PENDING_RESPAWN);
+					  UtilNPC.entitys.get(nome).spawn(loc);
+					  
 				    
 				}
 			}
