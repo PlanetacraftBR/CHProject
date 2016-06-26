@@ -80,7 +80,6 @@ public class UtilServerPlayerStatos {
 				else
 				{
 				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome),nome);
-				    UtilNPC.entitys.get(nome).remove();	
 				}
 			}
 			
