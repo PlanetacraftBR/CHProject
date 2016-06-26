@@ -26,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.executors.BukkitExecutors;
@@ -55,7 +56,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 
+
 import me.acf.lobby.MagicChest.ChestMagic;
+import me.acf.servidor.Servidor;
 import me.hub.API.VoidWorld;
 import me.hub.API.Util.BarAPI;
 import me.hub.API.Util.UtilHolo;
@@ -101,14 +104,14 @@ import net.citizensnpcs.util.Messages;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.StringHelper;
 import net.citizensnpcs.util.Util;
+import net.milkbowl.vault.economy.Economy;
 
 public class Main extends JavaPlugin
 implements Listener, CitizensPlugin
 {
-public static JavaPlugin plugin;
+public static Main plugin;
 public static String NomeDoServidor = "§f§lPlanetaCraft_BR";
 public static String site = "http://api.planetacraft.com.br";
-public static Main main;
 
 //Every possible error or warning report type
 	public static final ReportType REPORT_CANNOT_LOAD_CONFIG = new ReportType("Cannot load configuration");
@@ -209,7 +212,7 @@ public static Main main;
 	private boolean skipDisable;
 
 	//NPC
-	    private final CommandManager commands = new CommandManager();
+	 private final CommandManager commands = new CommandManager();
 	    private boolean compatible;
 	    private Settings npconfig;
 	    private CitizensNPCRegistry npcRegistry;
@@ -219,13 +222,10 @@ public static Main main;
 	    private final Map<String, NPCRegistry> storedRegistries = Maps.newHashMap();
 	    private CitizensTraitFactory traitFactory;
 	
-	
+	@Override
 	public void onLoad() {
 		
-		plugin = this.plugin;
-		main = this;
-		
-		File file = new File("plugins/CHub/saves.yml");
+		  File file = new File("plugins/CHub/saves.yml");
 		deleteDir(file);
 		
 		// Load configuration
@@ -233,7 +233,7 @@ public static Main main;
 		Application.registerPrimaryThread();
 
 		// Initialize enhancer factory
-		EnhancerFactory.getInstance().setClassLoader(plugin.getClass().getClassLoader());
+		EnhancerFactory.getInstance().setClassLoader(getClassLoader());
 
 		// Initialize executors
 		executorAsync = BukkitExecutors.newAsynchronous(this);
@@ -278,7 +278,7 @@ public static Main main;
 
 			unhookTask = new DelayedSingleTask(this);
 			protocolManager = PacketFilterManager.newBuilder()
-					.classLoader(plugin.getClass().getClassLoader())
+					.classLoader(getClassLoader())
 					.server(getServer())
 					.library(this)
 					.minecraftVersion(version)
@@ -311,7 +311,6 @@ public static Main main;
 			reporter.reportDetailed(this, Report.newBuilder(REPORT_PLUGIN_LOAD_ERROR).error(e).callerParam(protocolManager));
 			disablePlugin();
 		}
-		CHub.onLoad();
 	}
 
 
@@ -355,6 +354,15 @@ public static Main main;
 		return config.getFile().delete();
 	}
 
+	@Override
+	public void reloadConfig() {
+		super.reloadConfig();
+
+		// Reload configuration
+		if (config != null) {
+			config.reloadConfig();
+		}
+	}
 
 	private void setupBroadcastUsers(final String permission) {
 		// Guard against multiple calls
@@ -389,6 +397,7 @@ public static Main main;
 
 	public void onEnable() {
 		Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "timings on");
+	    plugin = this;
         Config conf = new Config();
 		try {
 			Server server = getServer();
@@ -419,7 +428,7 @@ public static Main main;
 
 			// Initialize background compiler
 			if (backgroundCompiler == null && config.isBackgroundCompilerEnabled()) {
-				backgroundCompiler = new BackgroundCompiler(plugin.getClass().getClassLoader(), reporter);
+				backgroundCompiler = new BackgroundCompiler(getClassLoader(), reporter);
 				BackgroundCompiler.setInstance(backgroundCompiler);
 
 				logger.info("Started structure compiler thread.");
@@ -504,8 +513,8 @@ public static Main main;
 	            Messaging.severeTr(Messages.LOAD_TASK_NOT_SCHEDULED);
 	            getServer().getPluginManager().disablePlugin(this);
 	        }
-		    getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(plugin), 200L, 2L);
-	        CHub.onEnable();
+		    getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(this), 200L, 2L);
+	
 	}
 
 	// Plugin authors: Notify me to remove these
@@ -559,7 +568,7 @@ public static Main main;
 		MinecraftVersion newestVersion = null;
 
 		// Skip the file that contains this current instance however
-		File loadedFile = plugin.getDataFolder();
+		File loadedFile = getFile();
 
 		try {
 			// Scan the plugin folder for newer versions of ProtocolLib
@@ -601,7 +610,7 @@ public static Main main;
 			if (executor == null)
 				return;
 
-			PluginCommand command = plugin.getCommand(name);
+			PluginCommand command = getCommand(name);
 
 			// Try to load the command
 			if (command != null) {
@@ -682,6 +691,7 @@ public static Main main;
 	public void onDisable() {
 	    
 		  File file = new File("plugins/CHub/saves.yml");
+		deleteDir(file);
 		UtilHolo.RemoveAllHolo();
 		ChestMagic.Remove_Stop();
 		BarAPI.Desativar();
@@ -729,7 +739,8 @@ public static Main main;
         }
 
         CitizensAPI.shutdown();
-        CHub.onDisable();
+        
+
 	}
 
 	// Get the Bukkit logger first, before we try to create our own
@@ -957,7 +968,7 @@ public static Main main;
 
 	    @Override
 	    public ClassLoader getOwningClassLoader() {
-	        return plugin.getClass().getClassLoader();
+	        return getClassLoader();
 	    }
 
 	    @Override
