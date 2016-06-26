@@ -48,13 +48,25 @@ package me.hub.API.Util;
  */
 public class UtilServerPlayerStatos {
 
-	
+	public static String Embreve = "EmBreve";
+	public static String Beta = "BETA";
 	
 	public void UpdateAll()
 	{
 		for (String nome : UtilNPC.entitys.keySet())
 		{
-			UtilNPC.entitys.get(nome).setCustomName("§c0 / 0");
+			String name = UtilNPC.entitys.get(nome).getName();
+			if (name.equals(Embreve))
+			{
+				UtilNPC.entitys.get(nome).setCustomName("§c- / -");
+			}
+			else {
+				if (name.equals(Beta))
+					UtilNPC.entitys.get(nome).setCustomName("§60 / 0" );
+				else
+				UtilNPC.entitys.get(nome).setCustomName("§e0 / 0");
+			}
+			
 		}
 	}
 }
