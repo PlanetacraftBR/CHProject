@@ -61,12 +61,24 @@ public class UtilServerPlayerStatos {
 				UtilNPC.entitys.get(nome).setCustomName("§c- / -");
 			}
 			else {
+				String rename = Statos(nome);
+				
 				if (name.equals(Beta))
-					UtilNPC.entitys.get(nome).setCustomName("§60 / 0" );
+					UtilNPC.entitys.get(nome).setCustomName("§6" + rename );
 				else
-				UtilNPC.entitys.get(nome).setCustomName("§e0 / 0");
+				UtilNPC.entitys.get(nome).setCustomName("§e" + rename);
 			}
 			
 		}
 	}
+	
+	public String Statos(String sala)
+	{
+	   String nome = "0 / 0";
+	   
+	   
+	   
+	     return nome;
+	}
+	
 }
