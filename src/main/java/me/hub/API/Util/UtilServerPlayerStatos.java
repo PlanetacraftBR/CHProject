@@ -42,19 +42,49 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.hub.API.Util;
 
+import me.hub.Main;
+import me.site.account.AccountWeb;
+
 /**
  * Código por adriancf, Group CH-Project
 
  */
 public class UtilServerPlayerStatos {
 
+	public static String Embreve = "EM BREVE";
+	public static String Beta = "BETA";
 	
-	
-	public void UpdateAll()
+	public static void UpdateAll()
 	{
 		for (String nome : UtilNPC.entitys.keySet())
 		{
-			UtilNPC.entitys.get(nome).setCustomName("§c0 / 0");
+			String name = UtilNPC.entitys.get(nome).getName();
+			if (name.contains(Embreve))
+			{
+				UtilNPC.entitys.get(nome).setCustomName("§c§lFECHADO");
+			}
+			else {
+				String rename = Statos(nome);
+				
+				if (name.contains(Beta))
+					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
+				else
+				UtilNPC.entitys.get(nome).setCustomName("§e§o" + rename);
+			}
+			
 		}
 	}
+	
+	private static String Statos(String sala)
+	{
+	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§e§o", ""), "online");
+	   String nome =  Servidor + " Jogadores Online";
+	   
+	   
+	   
+	     return nome;
+	}
+	
+	
+	
 }

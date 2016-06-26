@@ -42,12 +42,12 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.hub.API.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.DespawnReason;
@@ -61,10 +61,10 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 public class UtilNPC {
 
 	public static HashMap<String,Entity> entitys = new HashMap<String, Entity>();
-	
+	public static HashMap<String,String> nomes = new HashMap<String, String>();
+	public static HashMap<Location,String> location = new HashMap<Location, String>();
 	public static void SpawnEntity(String nome_entity,String em_baixo,String em_cima,String skin, Location loc)
 	{
-		
 		NPCRegistry re = CitizensAPI.getNPCRegistry();
 		NPC entity = re.createNPC(EntityType.PLAYER, nome_entity);
         entity.setName(em_baixo);
@@ -73,8 +73,31 @@ public class UtilNPC {
         entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
         entity.despawn(DespawnReason.PENDING_RESPAWN);
 		entity.spawn(loc);
+		if (entitys.containsKey(entity))
+		{
+			nome_entity = nome_entity+ "" + UtilTexto.TextoAleatorio(5);
+		}
         entitys.put(nome_entity,entity.getEntity());
-        UtilHolo.Holo(loc.clone().add(0,0.5,0), em_cima);
+        nomes.put(nome_entity,em_cima);
+        location.put(entity.getEntity().getLocation(), nome_entity);
+	}
+	
+	/*
+	  UtilNPC.location.get(entity) -- Pegar o nome do NPC no local
+	 
+	
+	*/
+	
+	public static void AparecerHolo(Player p)
+	{
+		for (String s : nomes.keySet()) {
+		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getLocation().clone().add(0,-0.5,0));
+		}
+		}
+	
+	public static void DarUpdate_All()
+	{
+		UtilServerPlayerStatos.UpdateAll();
 	}
 	
 	public static void RenameEntity(String entity, String novo_Nome)
