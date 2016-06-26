@@ -17,7 +17,7 @@ import me.hub.comandos.ComandosAPI;
  *
  */
 public class Lobby implements CommandExecutor{
-	public String[] atalhos = new String[] { "planetacraft_br","pc-br","planetacraft","hub","main","inicio" };
+	public String[] atalhos = new String[] { "planetacraft_br","pc-br","planetacraft","hub","main","inicio","sair","leave" };
     public String desc = "Ir para o lobby";
     
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
@@ -28,8 +28,8 @@ public class Lobby implements CommandExecutor{
 			   return true;
 		   }
 		  
-		   Player jogador = (Player) sender;
-		   Bungee.SendPlayerToServer(jogador, "lobby");
+		   Player p = (Player) sender;
+		   Bungee.SendPlayerToServer(p, "lobby");
 		
 		return false;
 	  }
