@@ -1,19 +1,15 @@
 package me.security.registrar.comandos;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.acf.FormatText.Format;
-import me.hub.API.Util.UtilTitle;
 import me.hub.API.Util.message.Message;
 import me.hub.Bungee.Bungee;
 import me.hub.comandos.ComandosAPI;
 import me.security.LoginManager;
-import me.security.SecurityManager;
 
 public class limbo implements CommandExecutor {
 
