@@ -32,13 +32,22 @@ public class CageCreate {
 		if (staffs.containsKey(jogador))
 		{
 			cages.get(staffs.get(jogador)).Remover_Block();
-			staffs.remove(jogador);
+			staffs.remove(cages.get(jogador).staff);
 			cages.remove(staffs.get(jogador));
+			staffs.remove(jogador);
+			cages.remove(jogador);
 			return;
 		}
-		cages.get(jogador).Remover_Block();
-		cages.remove(jogador);
+		if (cages.containsKey(jogador)){
+		cages.get(staffs.get(jogador)).Remover_Block();
 		staffs.remove(cages.get(jogador).staff);
+		cages.remove(staffs.get(jogador));
+		staffs.remove(jogador);
+		cages.remove(jogador);
+		}else{
+		staffs.remove(jogador);
+		cages.remove(jogador);
+		}
 		
 	}
 
