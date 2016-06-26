@@ -68,7 +68,7 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
-			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§c§lINDISPONIVEL",UtilNPC.skin.get(nome),nome);
+			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§cINDISPONÍVEL",UtilNPC.skin.get(nome),nome);
 	
 				
 			}
