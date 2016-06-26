@@ -74,7 +74,7 @@ public class UtilNPC {
         entity.despawn(DespawnReason.PENDING_RESPAWN);
 		entity.spawn(loc);
         entitys.put(nome_entity,entity.getEntity());
-        UtilHolo.Holo(loc.clone().add(0,0.50,0), em_cima);
+        UtilHolo.Holo(loc.clone().add(0,0.5,0), em_cima);
 	}
 	
 	public static void RenameEntity(String entity, String novo_Nome)

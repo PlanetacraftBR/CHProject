@@ -27,7 +27,7 @@ public class Chat implements CommandExecutor {
 		  
 		   Player jogador = (Player) sender;
 		   
-		   if ((Account.getRank(jogador)).Has(jogador, Rank.STAFF, true))
+		   if ((Account.getRank(jogador)).Has(jogador, Rank.DONO, true))
 		   {
 
 			if (args.length  <= 0)
