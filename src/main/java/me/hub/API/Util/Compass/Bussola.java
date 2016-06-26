@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -23,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.hub.MiniPlugin;
+import me.hub.API.Chat;
 import me.hub.API.Util.UtilGear;
 import me.hub.API.Util.UtilInv;
 import me.hub.API.Util.UtilMath;
@@ -43,7 +45,7 @@ public class Bussola extends MiniPlugin
   }
 
   public static ArrayList<Player> ignorar = new ArrayList<Player>();
-  
+  public static HashMap<Player,String> msg = new HashMap<Player,String>();
   
   @EventHandler
   public void Update(Atualizar event) {
@@ -80,31 +82,28 @@ public class Bussola extends MiniPlugin
       if (!player.getInventory().contains(Material.COMPASS)) {
         return;
       }
+      if (target.getGameMode() == GameMode.SPECTATOR)
+    	  return;
       player.setCompassTarget(target.getLocation());
 
         ItemStack stack = new ItemStack(Material.COMPASS);
 
         double heightDiff = target.getLocation().getY() - player.getLocation().getY();
 
-        ItemMeta itemMeta = stack.getItemMeta();
-        itemMeta.setDisplayName(
-          "    " + C.cWhite + C.Bold + "Jogador:§e "+ target.getName() + 
-          "    " + C.cWhite + C.Bold + "Distancia:§e " + UtilMath.format_Double(bestDist) + 
-          "    " + C.cWhite + C.Bold + "Altura:§e "  + UtilMath.format_Double(heightDiff));
-        stack.setItemMeta(itemMeta);
-        player.getInventory().remove(Material.COMPASS);
-        player.getInventory().addItem(stack);
+
+        String text = 
+                "    " + C.cWhite + C.Bold + "Jogador:§e "+ target.getName() + 
+                "    " + C.cWhite + C.Bold + "Distancia:§e " + UtilMath.format_Double(bestDist) + 
+                "    " + C.cWhite + C.Bold + "Altura:§e "  + UtilMath.format_Double(heightDiff);
+        if (player.getItemInHand().getType() == Material.COMPASS)
+          Chat.ActionBar(player, text);
+        if (msg.containsKey(player))
+        	msg.remove(player);
+        msg.put(player, text);
       }
     }
   
 
-  @EventHandler
-  public void DropItem(PlayerDropItemEvent event)
-  {
-    if (UtilInv.IsItem(event.getItemDrop().getItemStack(), Material.COMPASS, (byte) 0)) {
-        event.setCancelled(true);
-    }
-  }
 
   @EventHandler
   public void DeathRemove(PlayerDeathEvent event) {
@@ -120,29 +119,19 @@ public class Bussola extends MiniPlugin
     
   }
 
-  @EventHandler
-  public void InventoryClick(InventoryClickEvent event)
-  {
-  }
 
   @EventHandler
   public void PlayerInteract(PlayerInteractEvent event) {
  
     Player player = event.getPlayer();
+    
+    if (player.getItemInHand().getType() != Material.COMPASS)
+    	return;
+    
+    player.sendMessage(msg.get(player));
+    
+    
+    
 
-    if (!UtilGear.isMat(player.getItemInHand(), Material.COMPASS)) {
-      return;
-    }
-
-
-    Player target = null;
-    double bestDist = 0.0D;
-
-
-
-    if (target != null)
-    {
-      player.teleport(target.getLocation().add(0.0D, 1.0D, 0.0D));
-    }
   }
 }
