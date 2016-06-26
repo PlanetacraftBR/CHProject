@@ -258,7 +258,7 @@ public class LoginManager extends MiniPlugin {
 	@EventHandler
 	public void RemoveLimbo(Atualizar event)
 	{
-		if (event.getType() == ModosUpdate.MIN_01)
+		if (event.getType() == ModosUpdate.MIN_02)
 		{
 			
 				Original.clear();
