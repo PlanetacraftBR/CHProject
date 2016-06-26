@@ -70,7 +70,8 @@ public class UtilSchematic {
 	 
 	 
 	 public enum Modo {
-		 Bau,
+		 PreFeast,
+		 Feast,
 		 SetSpawn;
 	 }
 	 
@@ -89,12 +90,22 @@ public class UtilSchematic {
 	                for (int z = 0; z < length; ++z) {
 	                    int index = y * width * length + z * width + x;
 	                    Block block = new Location(world, x + loc.getX(), y + loc.getY(), z + loc.getZ()).getBlock();
-	                    block.setTypeIdAndData(blocks[index], blockData[index], true);
-	                    
-	                    if (modo == Modo.Bau) {
+	                    if (modo == Modo.PreFeast) {
+	                    if ((block.getLocation().getBlock().getType() == Material.CHEST) || (block.getLocation().getBlock().getType() == Material.CAKE_BLOCK) || (block.getLocation().getBlock().getType() == Material.GOLD_BLOCK)){
+	                        block.setType(Material.AIR);
+	                    }else{
+	                    	block.setTypeIdAndData(blocks[index], blockData[index], true);
+	                    }
+	                    if (block.getLocation().getBlock().getType() == Material.ENCHANTMENT_TABLE)
+	                    {
+	                    	world.setSpawnLocation((int)block.getLocation().getX(), (int)block.getLocation().getY()+2, (int)block.getLocation().getZ());
+	                    }
+	                    }
+	                    if (modo == Modo.Feast) {
+	                    	block.setTypeIdAndData(blocks[index], blockData[index], true);
 	                    if (block.getLocation().getBlock().getType() == Material.CHEST){
 	                    	 Chest chest = (Chest) block.getLocation().getBlock().getState();
-	                    	  fillChest(chest,  getRandom(Main.plugin.getConfig().getStringList("Feast-itens")));
+	                    	 fillChest(chest,  getRandom(Main.plugin.getConfig().getStringList("Feast-itens-HG")));
 	                    }
 	                    if (block.getLocation().getBlock().getType() == Material.ENCHANTMENT_TABLE)
 	                    {
@@ -103,6 +114,7 @@ public class UtilSchematic {
 	                    }
 	                    
 	                    if (modo == Modo.SetSpawn) {
+		                  	block.setTypeIdAndData(blocks[index], blockData[index], true);
 	                    if (block.getLocation().getBlock().getType() == Material.REDSTONE_BLOCK)
 	                    {
 	                    	world.setSpawnLocation((int)block.getLocation().getX(), (int)block.getLocation().getY()+2, (int)block.getLocation().getZ());
