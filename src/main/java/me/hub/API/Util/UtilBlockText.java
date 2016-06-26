@@ -23,7 +23,7 @@ public class UtilBlockText
 
 	
 	
-	public static void SetBlock()
+
 	
 	
 	public static ArrayList<Location> GetTextLocations(String string, Location loc, BlockFace face)
