@@ -188,6 +188,45 @@ public class UtilInv {
           }
     	}
     	
+    
+    public static byte GetData(ItemStack stack)
+	{
+		if (stack == null)
+			return (byte)0;
+		
+		if (stack.getData() == null)
+			return (byte)0;
+		
+		return stack.getData().getData();
+}
+    
+    public static boolean IsItem(ItemStack item, Material type, byte data)
+	{
+		return IsItem(item, null, type.getId(), data);
+	}
+	
+	public static boolean IsItem(ItemStack item, String name, Material type, byte data)
+	{
+		return IsItem(item, name, type.getId(), data);
+	}
+	
+	public static boolean IsItem(ItemStack item, String name, int id, byte data)
+	{
+		if (item == null)
+			return false;
+		
+		if (item.getTypeId() != id)
+			return false;
+		
+		if (data != -1 && GetData(item) != data)
+			return false;
+		
+		if (name != null && (item.getItemMeta().getDisplayName() == null || !item.getItemMeta().getDisplayName().contains(name)))
+			return false;
+		
+		return true;
+}
+	
     public static boolean Material_Quebravel(ItemStack Item)
     {
        if ((Item.getType() == Material.WOOD_SWORD) ||

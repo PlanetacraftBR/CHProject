@@ -45,7 +45,6 @@ package me.hub.API.Util;
 import java.util.HashMap;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
