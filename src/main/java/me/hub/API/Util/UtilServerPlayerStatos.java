@@ -51,7 +51,7 @@ public class UtilServerPlayerStatos {
 	public static String Embreve = "EmBreve";
 	public static String Beta = "BETA";
 	
-	public void UpdateAll()
+	public static void UpdateAll()
 	{
 		for (String nome : UtilNPC.entitys.keySet())
 		{
@@ -72,7 +72,7 @@ public class UtilServerPlayerStatos {
 		}
 	}
 	
-	public String Statos(String sala)
+	private static String Statos(String sala)
 	{
 	   String nome = "0 / 0";
 	   
