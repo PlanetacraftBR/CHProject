@@ -88,7 +88,7 @@ public class UtilNPC {
 	public static void AparecerHolo(Player p)
 	{
 		for (String s : nomes.keySet()) {
-		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getLocation().clone().add(0,-0.5,0));
+		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getLocation().clone().add(0,0,0));
 		}
 		}
 	
