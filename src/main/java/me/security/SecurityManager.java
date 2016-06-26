@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -56,6 +57,44 @@ public class SecurityManager extends MiniPlugin {
 	}
 	
 	
+	  @EventHandler
+	  public void Kick(PlayerKickEvent event)
+	  {
+	    if (event.getReason().equalsIgnoreCase("You logged in from another location")) {
+	      event.setCancelled(true);
+	      return;
+	    }
+	    if (event.getReason().equalsIgnoreCase("Invalid move packet received")) {
+		      event.setCancelled(true);
+		return;    
+	    }
+	    if (event.getReason().equals("Illegal characters in chat")) {
+	        event.setCancelled(true);
+	      return;
+	      }
+	      
+	    if (event.getReason().contains("fly")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+
+	    if (event.getReason().equals("Illegal position")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	      
+	    if (event.getReason().equals("Kicked for spamming")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	    
+	    if (event.getReason().equals("The authentication are currently down for maintenance.")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	      
+	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
+	  }
 	
 	@EventHandler
 	public void Entrar (PlayerJoinEvent event)

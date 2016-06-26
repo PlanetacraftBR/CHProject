@@ -314,19 +314,7 @@ public class Account extends MiniPlugin
 	  }
 	  
 	  
-	  @EventHandler
-	  public void Kick(PlayerKickEvent event)
-	  {
-	    if (event.getReason().equalsIgnoreCase("You logged in from another location")) {
-	      event.setCancelled(true);
-	      return;
-	    }
-	    if (event.getReason().equalsIgnoreCase("Invalid move packet received")) {
-		      event.setCancelled(true);
-		return;    
-	    }
-	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
-	  }
+
 	  
 	
 	   
