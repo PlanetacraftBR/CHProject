@@ -68,7 +68,7 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
-			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§cINDISPONÍVEL",UtilNPC.skin.get(nome),nome);
+			   UtilNPC.entitys.get(nome).setName("§cINDISPONÍVEL");
 	
 				
 			}
@@ -76,35 +76,25 @@ public class UtilServerPlayerStatos {
 				String rename = Statos(nome);
 				
 				if (name.contains(Beta))
-					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
+					  UtilNPC.entitys.get(nome).setName("§a§o" + rename);		
 				else
 				{
-				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome),nome);
+					  UtilNPC.entitys.get(nome).setName("§e§o" + rename);
+				    
 				}
 			}
 			
 		}
 	}
 	
-	public static void Stats(Location loc,String ent,String skin,String nome){
-		NPCRegistry re = CitizensAPI.getNPCRegistry();
-		NPC entity = re.createNPC(EntityType.PLAYER, ent);
-                entity.setName(ent);
-		entity.setProtected(true);
-                entity.isFlyable();
-                entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
-                entity.despawn(DespawnReason.PENDING_RESPAWN);
-		entity.spawn(loc);
-		UtilNPC.entitys.get(nome).remove();
-		UtilNPC.entitys.put(nome, entity.getEntity());
-	}
 	
 	private static String Statos(String sala)
 	{
 		
 	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§a§o", ""), "online");
-	   String nome =  Servidor + " Jogadores Online";
-	   
+	   String nome =  Servidor + " Player(s)";
+	   if (Servidor.equals("0"))
+               nome = "Ninguem";
 	   
 	   
 	     return nome;
