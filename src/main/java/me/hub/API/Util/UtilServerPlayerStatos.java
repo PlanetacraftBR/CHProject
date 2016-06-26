@@ -59,14 +59,14 @@ public class UtilServerPlayerStatos {
 		for (String nome : UtilNPC.entitys.keySet())
 		{
 			String name = UtilNPC.entitys.get(nome).getName();
-			if (name.equals(Embreve))
+			if (name.contains(Embreve))
 			{
 				UtilNPC.entitys.get(nome).setCustomName("§c§lFECHADO");
 			}
 			else {
 				String rename = Statos(nome);
 				
-				if (name.equals(Beta))
+				if (name.contains(Beta))
 					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
 				else
 				UtilNPC.entitys.get(nome).setCustomName("§e§o" + rename);
