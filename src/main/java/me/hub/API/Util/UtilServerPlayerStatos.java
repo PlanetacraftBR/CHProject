@@ -59,7 +59,7 @@ public class UtilServerPlayerStatos {
 		for (String nome : UtilNPC.entitys.keySet())
 		{
 			String name = UtilNPC.entitys.get(nome).getName();
-			if (name.contains(Embreve))
+			if (nome.contains(Embreve))
 			{
 				UtilNPC.entitys.get(nome).setCustomName("§c§lFECHADO");
 			}
@@ -77,6 +77,7 @@ public class UtilServerPlayerStatos {
 	
 	private static String Statos(String sala)
 	{
+		
 	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§e§o", ""), "online");
 	   String nome =  Servidor + " Jogadores Online";
 	   
