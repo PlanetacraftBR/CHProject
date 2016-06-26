@@ -24,7 +24,8 @@ public class Servidor {
 	
 	public static void AddLeave()
 	{
-		System.out.print(AccountWeb.Conectar(Main.site + "/API/sala.php?modo=LEAVE&nome=" + Bukkit.getServerName() + "&onlines=" + Bukkit.getOnlinePlayers().size()));
+		int Leave = Bukkit.getOnlinePlayers().size()-1;
+		System.out.print(AccountWeb.Conectar(Main.site + "/API/sala.php?modo=LEAVE&nome=" + Bukkit.getServerName() + "&onlines=" + Leave));
 	}
 	
 	public static void ModoGame(String modo)
