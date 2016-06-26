@@ -62,6 +62,7 @@ public class UtilNPC {
 
 	public static HashMap<String,Entity> entitys = new HashMap<String, Entity>();
 	public static HashMap<String,String> nomes = new HashMap<String, String>();
+	public static HashMap<Location,String> location = new HashMap<Location, String>();
 	public static void SpawnEntity(String nome_entity,String em_baixo,String em_cima,String skin, Location loc)
 	{
 		
@@ -75,8 +76,14 @@ public class UtilNPC {
 		entity.spawn(loc);
         entitys.put(nome_entity,entity.getEntity());
         nomes.put(nome_entity,em_cima);
-        
+        location.put(entity.getEntity().getLocation(), nome_entity);
 	}
+	
+	/*
+	  UtilNPC.location.get(loc) -- Pegar o nome do NPC no local
+	 
+	
+	*/
 	
 	public static void AparecerHolo(Player p)
 	{
