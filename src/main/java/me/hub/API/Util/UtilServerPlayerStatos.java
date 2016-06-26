@@ -68,8 +68,8 @@ public class UtilServerPlayerStatos {
 			String name = UtilNPC.entitys.get(nome).getName();
 			if (nome.contains(Embreve))
 			{
-			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§c§lINDISPONIVEL",UtilNPC.skin.get(nome));
-				UtilNPC.entitys.get(nome).remove();	
+			    Stats(UtilNPC.entitys.get(nome).getLocation(),"§c§lINDISPONIVEL",UtilNPC.skin.get(nome),nome);
+	
 				
 			}
 			else {
@@ -79,7 +79,7 @@ public class UtilServerPlayerStatos {
 					UtilNPC.entitys.get(nome).setCustomName("§6§o" + rename );
 				else
 				{
-				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome));
+				    Stats(UtilNPC.entitys.get(nome).getLocation(),"§e§o" + rename,UtilNPC.skin.get(nome),nome);
 				    UtilNPC.entitys.get(nome).remove();	
 				}
 			}
@@ -87,7 +87,7 @@ public class UtilServerPlayerStatos {
 		}
 	}
 	
-	public static void Stats(Location loc,String ent,String skin){
+	public static void Stats(Location loc,String ent,String skin,String nome){
 		NPCRegistry re = CitizensAPI.getNPCRegistry();
 		NPC entity = re.createNPC(EntityType.PLAYER, ent);
         entity.setName(ent);
@@ -96,6 +96,8 @@ public class UtilServerPlayerStatos {
         entity.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
         entity.despawn(DespawnReason.PENDING_RESPAWN);
 		entity.spawn(loc);
+		UtilNPC.entitys.get(nome).remove();
+		UtilNPC.entitys.put(nome, entity.getEntity());
 	}
 	
 	private static String Statos(String sala)
