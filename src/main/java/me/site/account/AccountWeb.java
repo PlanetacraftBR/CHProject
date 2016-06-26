@@ -60,6 +60,7 @@ public class AccountWeb {
     {
     	String respond = null;
       URL host = null;
+      System.out.print("Conenctando no " + link);
       try
       {
         host = new URL(link);
@@ -79,13 +80,16 @@ public class AccountWeb {
         reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
   
         String inputLine;
+        
         while ((inputLine = reader.readLine()) != null)
         {
         	String json = inputLine;
+        	System.out.print(inputLine);
         	JSONObject obj = new JSONObject(json);
             respond = obj.getString(buscar);
         }
         reader.close();
+      
       }
       catch (Exception e)
       {
