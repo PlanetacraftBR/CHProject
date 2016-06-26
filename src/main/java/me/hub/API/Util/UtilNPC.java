@@ -42,7 +42,6 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.hub.API.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bukkit.Location;
@@ -75,6 +74,11 @@ public class UtilNPC {
 		entity.spawn(loc);
         entitys.put(nome_entity,entity.getEntity());
         UtilHolo.Holo(loc.clone().add(0,0.5,0), em_cima);
+	}
+	
+	public static void DarUpdate_All()
+	{
+		UtilServerPlayerStatos.UpdateAll();
 	}
 	
 	public static void RenameEntity(String entity, String novo_Nome)
