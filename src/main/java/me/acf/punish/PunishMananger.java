@@ -13,6 +13,7 @@ import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilTime;
 import me.hub.API.calendario.Calendario;
+import me.hub.Admin.Staff;
 import me.hub.Bungee.Bungee;
 import me.site.account.Account;
 import me.site.account.AccountWeb;
@@ -81,7 +82,7 @@ public class PunishMananger extends MiniPlugin{
 	        tempo = UtilTime.convertString(sec, 0, UtilTime.TimeUnit.FIT);
 	    	}
 	    	e.getPlayer().kickPlayer("§6" + Main.NomeDoServidor + " - Kickado \n§fVocê foi banido do servidor\n§f§o" + getMotivo(e.getPlayer()) + "\n\n§fInformações (" + e.getPlayer().getName() + ")\n§fTempo: §a" + tempo + "\n§fStaff que baniu:§6 " + getStaff(e.getPlayer()) + "\n§fDia do ban:§7 " + getDiaData(e.getPlayer()));
-	    	
+	    	Staff.MandarMSGBungee("§c§lSecurity §7Jogador " + e.getPlayer().getName() + " tentou entrar mais esta banido");	
 	    	
 	    }    
 	    catch (Exception exception)
