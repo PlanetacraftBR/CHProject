@@ -22,6 +22,7 @@ import me.acf.FormatText.Format;
 import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilTitle;
+import me.hub.Admin.Staff;
 import me.hub.Bungee.Bungee;
 import me.security.move.AntiMove;
 import me.security.system.staff.cage.events.CageEvent;
@@ -94,17 +95,31 @@ public class SecurityManager extends MiniPlugin {
 	      }
 	      
 	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
+	    if (!VerificarBungee(event.getPlayer()))
+		    event.setCancelled(false);
+	    else
+	    	event.setCancelled(true);
 	  }
 	
+	  public static boolean VerificarBungee(Player p)
+	  {
+		    String IP = p.getAddress().getHostString();
+		    Bukkit.getLogger().info("IP: " + IP);
+			if (!IP.contains("192.99.3.96")) {
+				Staff.MandarMSGBungee("§c§lSecurity §7Tentativa invalida de login do jogador §6" + p.getName() + " §7IP: " + IP);	
+				return false;
+			}
+			
+		  return true;
+	  }
+	  
+	  
 	@EventHandler
 	public void Entrar (PlayerJoinEvent event)
 	{
-	    String IP = event.getPlayer().getAddress().getHostString();
-	    Bukkit.getLogger().info("IP: " + IP);
-		if (!IP.contains("192.99.3.96"))
-		{
+		if (!VerificarBungee(event.getPlayer()))
 			event.getPlayer().kickPlayer("§6Servidor Privado");
-		}
+		
 	}
 	
 	public static void AddSenha(String senha,String email, Player p,boolean teleport)
