@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -121,6 +122,12 @@ public class SecurityManager extends MiniPlugin {
 			event.getPlayer().kickPlayer("§6Servidor Privado");
 		
 	}
+	
+	
+	
+	
+	
+	
 	
 	public static void AddSenha(String senha,String email, Player p,boolean teleport)
 	{
