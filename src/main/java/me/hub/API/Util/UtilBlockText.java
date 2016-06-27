@@ -576,8 +576,10 @@ public class UtilBlockText
    }
 	  else
 	  {
-		  world.getBlockAt(x,y,z).setData(data);
-		  world.getBlockAt(x,y,z).setTypeId(id);
+		  Location loc = new Location(world,x,y,z);
+		  loc.getBlock().setTypeId(id);
+		  loc.getBlock().setData(data);
+		  
 	
 	  }
 	  
