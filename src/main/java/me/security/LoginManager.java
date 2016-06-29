@@ -206,13 +206,21 @@ public class LoginManager extends MiniPlugin {
 	{
 	 String resultado = AccountWeb.Conectar(Main.site + "/API/uuid.php?nick=" + event.getPlayer().getName());
 	event.setJoinMessage(null);
+	
+	String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=lobby", "status");
+	if (!Servidor.equals("ON"))
+	{
+	       UtilPlayer.Kick(event.getPlayer(), "Lobby não esta online");
+		return;
+	}
+	
 	for (Player p : Bukkit.getOnlinePlayers())
 	{
 		event.getPlayer().hidePlayer(p);
 		p.hidePlayer(event.getPlayer());
 	}
 	event.getPlayer().teleport(Bukkit.getWorld("world").getSpawnLocation());
-	     if (resultado.contains("PIRATA"))
+	if (resultado.contains("PIRATA"))
 	     {
 		 SecurityManager.Add(event.getPlayer());
 		 String verificar = AccountWeb.Conectar(Main.site + "/API/registrado.php?nick=" + event.getPlayer().getName(), "registrado");
@@ -258,7 +266,7 @@ public class LoginManager extends MiniPlugin {
 	@EventHandler
 	public void RemoveLimbo(Atualizar event)
 	{
-		if (event.getType() == ModosUpdate.MIN_01)
+		if (event.getType() == ModosUpdate.MIN_02)
 		{
 			
 				Original.clear();
@@ -296,5 +304,7 @@ public class LoginManager extends MiniPlugin {
 			    }
 		}
 	}
+	
+	
 	
 }

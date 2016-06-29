@@ -45,7 +45,6 @@ package me.hub.API.Util;
 import java.util.HashMap;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
@@ -60,8 +59,9 @@ import net.citizensnpcs.api.npc.NPCRegistry;
  */
 public class UtilNPC {
 
-	public static HashMap<String,Entity> entitys = new HashMap<String, Entity>();
+	public static HashMap<String,NPC> entitys = new HashMap<String, NPC>();
 	public static HashMap<String,String> nomes = new HashMap<String, String>();
+	public static HashMap<String,String> skin = new HashMap<String, String>();
 	public static HashMap<Location,String> location = new HashMap<Location, String>();
 	public static void SpawnEntity(String nome_entity,String em_baixo,String em_cima,String skin, Location loc)
 	{
@@ -77,8 +77,9 @@ public class UtilNPC {
 		{
 			nome_entity = nome_entity+ "" + UtilTexto.TextoAleatorio(5);
 		}
-        entitys.put(nome_entity,entity.getEntity());
+        entitys.put(nome_entity,entity);
         nomes.put(nome_entity,em_cima);
+        UtilNPC.skin.put(nome_entity,skin);
         location.put(entity.getEntity().getLocation(), nome_entity);
 	}
 	
@@ -91,7 +92,7 @@ public class UtilNPC {
 	public static void AparecerHolo(Player p)
 	{
 		for (String s : nomes.keySet()) {
-		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getLocation().clone().add(0,-0.5,0));
+		UtilHolo.showHolo(p,nomes.get(s),entitys.get(s).getEntity().getLocation().clone().add(0,0.1,0));
 		}
 		}
 	
@@ -102,7 +103,7 @@ public class UtilNPC {
 	
 	public static void RenameEntity(String entity, String novo_Nome)
 	{
-		entitys.get(entity).setCustomName(novo_Nome);
+		entitys.get(entity).setName(novo_Nome);
 	}
 	
 	

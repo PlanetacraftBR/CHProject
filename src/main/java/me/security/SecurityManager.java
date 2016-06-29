@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -21,7 +22,10 @@ import me.acf.FormatText.Format;
 import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilTitle;
+import me.hub.Admin.Staff;
 import me.hub.Bungee.Bungee;
+import me.security.GeoIP.API.GeoIPLite;
+import me.security.GeoIP.API.GeoIP_Login;
 import me.security.move.AntiMove;
 import me.security.system.staff.cage.events.CageEvent;
 import me.site.account.AccountWeb;
@@ -40,6 +44,8 @@ public class SecurityManager extends MiniPlugin {
 		super("Sistema de Security Unix",plugin);
 		AntiMove anti = new AntiMove(plugin);
 	    CageEvent event = new CageEvent(plugin);	
+	    GeoIPLite.isDataAvailable();
+	    Bukkit.getPluginManager().registerEvents(new GeoIP_Login(), plugin);
 	}
 	
 	
@@ -56,17 +62,75 @@ public class SecurityManager extends MiniPlugin {
 	}
 	
 	
+	  @EventHandler
+	  public void Kick(PlayerKickEvent event)
+	  {
+	    if (event.getReason().equalsIgnoreCase("You logged in from another location")) {
+	      event.setCancelled(true);
+	      return;
+	    }
+	    if (event.getReason().equalsIgnoreCase("Invalid move packet received")) {
+		      event.setCancelled(true);
+		return;    
+	    }
+	    if (event.getReason().equals("Illegal characters in chat")) {
+	        event.setCancelled(true);
+	      return;
+	      }
+	      
+	    if (event.getReason().contains("fly")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+
+	    if (event.getReason().equals("Illegal position")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	      
+	    if (event.getReason().equals("Kicked for spamming")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	    
+	    if (event.getReason().equals("The authentication are currently down for maintenance.")) {
+	        event.setCancelled(true);
+	        return;
+	      }
+	      
+	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
+	    if (!VerificarBungee(event.getPlayer()))
+		    event.setCancelled(false);
+	    else
+	    	event.setCancelled(true);
+	  }
 	
+	  public static boolean VerificarBungee(Player p)
+	  {
+		    String IP = p.getAddress().getHostString();
+		    Bukkit.getLogger().info("IP: " + IP);
+			if (!IP.contains("192.99.3.96")) {
+				Staff.MandarMSGBungee("§c§lSecurity §7Tentativa invalida de login do jogador §6" + p.getName() + " §7IP: " + IP);	
+				return false;
+			}
+			
+		  return true;
+	  }
+	  
+	  
 	@EventHandler
 	public void Entrar (PlayerJoinEvent event)
 	{
-	    String IP = event.getPlayer().getAddress().getHostString();
-	    Bukkit.getLogger().info("IP: " + IP);
-		if (!IP.contains("192.99.3.96"))
-		{
+		if (!VerificarBungee(event.getPlayer()))
 			event.getPlayer().kickPlayer("§6Servidor Privado");
-		}
+		
 	}
+	
+	
+	
+	
+	
+	
 	
 	public static void AddSenha(String senha,String email, Player p,boolean teleport)
 	{

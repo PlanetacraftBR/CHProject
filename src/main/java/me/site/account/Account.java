@@ -53,6 +53,7 @@ public class Account extends MiniPlugin
 	  private static HashMap<Player, Rank> grupo = new HashMap();
 	  private static HashMap<Player, Patente> patente = new HashMap();
 	  private static HashMap<Player, String> ponto_staff = new HashMap();
+	  private static HashMap<Player, String> ip = new HashMap();
 	  public static String bot = "Sistema_PlanetaCraft_BR";
 	  @EventHandler
 	  public void AccountRemove(PlayerQuitEvent event)
@@ -154,6 +155,7 @@ public class Account extends MiniPlugin
 		  grupo.put(p, Rank.valueOf(group));
 		  String patentes = obj.getString("patente");
 		  patente.put(p, Patente.valueOf(patentes));
+		  ip.put(p, obj.getString("ip"));
 		  PunishMananger.Ban_Motivo.put(p, obj.getString("ban_mt"));
 		  PunishMananger.Ban_Staff.put(p, obj.getString("ban_st"));
 		  PunishMananger.Dia_Ban.put(p, obj.getString("ban_at"));
@@ -204,6 +206,7 @@ public class Account extends MiniPlugin
 		  grupo.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  patente.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  ponto_staff.remove(Bukkit.getOfflinePlayer(p.getName()));
+		  ip.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  Clan.clan.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  DonateMananger.Exp_VIP.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  PunishMananger.Ban_Motivo.remove(Bukkit.getOfflinePlayer(p.getName()));
@@ -230,6 +233,10 @@ public class Account extends MiniPlugin
 	  public static String getCoins(Player p)
 	  {
 		  return (String)coins.get(p).replace(".", "");
+	  }
+	  public static String getIP(Player p)
+	  {
+		  return (String)ip.get(p);
 	  }
 	  public static Rank getRank(Player p)
 	  {
@@ -314,19 +321,7 @@ public class Account extends MiniPlugin
 	  }
 	  
 	  
-	  @EventHandler
-	  public void Kick(PlayerKickEvent event)
-	  {
-	    if (event.getReason().equalsIgnoreCase("You logged in from another location")) {
-	      event.setCancelled(true);
-	      return;
-	    }
-	    if (event.getReason().equalsIgnoreCase("Invalid move packet received")) {
-		      event.setCancelled(true);
-		return;    
-	    }
-	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
-	  }
+
 	  
 	
 	   

@@ -4,6 +4,7 @@ import me.acf.FormatText.Format;
 import me.hub.API.Util.message.Message;
 import me.hub.Message.Anuncio;
 import me.hub.comandos.ComandosAPI;
+import me.security.GeoIP.API.GeoIPLite;
 import me.site.account.Account;
 import me.site.account.AccountOFF;
 import me.site.account.rank.Rank;
@@ -41,6 +42,7 @@ public class check implements CommandExecutor {
 				
 			  JSONObject obj = new JSONObject(AccountOFF.loadAccount(args[0]));
 			  try {
+				    String countryCode = GeoIPLite.getCountryCode(obj.getString("ip"));
 			   jogador.sendMessage(" ");
 			   jogador.sendMessage("§a§lPlanetacraft§f§l_§e§lBR §f§l- §c§lConta do(a) §f"+obj.getString("nome"));
 			   jogador.sendMessage(" ");
@@ -48,7 +50,7 @@ public class check implements CommandExecutor {
 			   jogador.sendMessage(" ");
 			   if ((Account.getRank(jogador)).Has(jogador, Rank.DONO, false))
 			   {
-			   jogador.sendMessage("§9§lIP §c§l§c§l|§f "+obj.getString("ip"));
+			   jogador.sendMessage("§9§lIP §c§l§c§l|§f "+obj.getString("ip") + " (" + countryCode + ")");
 			   jogador.sendMessage(" ");
 			   }
 			   jogador.sendMessage("§9§lUUID §c§l§c§l|§f "+obj.getString("uuid"));
