@@ -190,6 +190,7 @@ public class Account extends MiniPlugin
 	  
 	  public static void removeAccount(Player p)
 	  {
+			 try {
 	         for (Player online : Bukkit.getOnlinePlayers()) {
 			    	String rank = "" + Account.getRank(online);
 			    	if (Account.getRank(online).Has(online, Rank.VIP, false))
@@ -200,6 +201,8 @@ public class Account extends MiniPlugin
 			    	}
 			   
 		         }
+			 } catch (Exception exception) { }
+			 
 		  uuid.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  nome.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  kdr.remove(Bukkit.getOfflinePlayer(p.getName()));
