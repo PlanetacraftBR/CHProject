@@ -25,7 +25,6 @@ import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilInv;
 import me.hub.API.Util.UtilServer;
-
 import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
 import me.hub.config.Config;
@@ -56,13 +55,18 @@ public class Account extends MiniPlugin
 	  private static HashMap<Player, String> ip = new HashMap();
 	  public static String bot = "Sistema_PlanetaCraft_BR";
 	  @EventHandler
-	  public void AccountRemove(PlayerQuitEvent event)
+	  public void AccountRemove(final PlayerQuitEvent event)
 	  {
 		  if (Main.plugin.getConfig().getString("Carregar").equals("Registro")) {
 			  
 		  }else{
+			  Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
+				   public void run() {
 		  removeAccount(event.getPlayer());
 		  Servidor.AddLeave();
+		              }
+	           }
+	      , 5L);
 		  }
 	  }
 	  
