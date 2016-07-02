@@ -42,6 +42,13 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.security.Accout;
 
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import me.hub.API.Util.UtilPlayer;
+import me.security.Accout.buffer.AccountBuffer;
+
 /**
  * Código por adriancf, Group CH-Project
 
@@ -51,6 +58,24 @@ public class Account {
 	///API 2.0 de Account 
 	
 	
+	  @EventHandler
+	  public void Login(PlayerLoginEvent event)
+	  {
+		AccountBuffer.add(event.getPlayer());
+		AccountAPI conta = AccountBuffer.Return(event.getPlayer());
+		if (conta.erro)
+		{
+			UtilPlayer.Kick(event.getPlayer(), conta.erro_info);
+		}
+	  }
 	
+	  
+	  @EventHandler
+	  public void Leave(PlayerQuitEvent event)
+	  {
+		  AccountBuffer.Remove(event.getPlayer());
+	  }
+	  
+	  
 	
 }

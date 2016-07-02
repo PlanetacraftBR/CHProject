@@ -70,13 +70,20 @@ public class AccountAPI {
 	public String ip;
 	public int Numero_Load;
 	public JSONObject json;
+	public boolean erro = false;
+	public String erro_log;
+	public String erro_info;
 	
 	public AccountAPI(String nome)
 	{
 		AccountBuffer.TotalLoad++;
 		Numero_Load = AccountBuffer.TotalLoad;
 		this.nome = nome;
-		JSONObject obj = new JSONObject(AccountWeb.Conectar(Main.site + "/API/conta.php?nick=" + nome));
+		AddJogador();
+		if (erro)
+			return;
+		try {
+	    JSONObject obj = new JSONObject(AccountWeb.Conectar(Main.site + "/API/conta.php?nick=" + nome));	
 		json = obj;
 		uuid = obj.getString("uuid");
 		cash = obj.getString("cash");
@@ -89,6 +96,35 @@ public class AccountAPI {
 		rank = Rank.valueOf(obj.getString("grupo"));
 		patente = Patente.valueOf(obj.getString("patente"));
 		ip = obj.getString("ip");	
+		}
+		 catch (Exception exception)
+	    {
+			 erro_log = exception.getMessage();
+			 erro = true;
+			 erro_info = "§7Erro ao recuperar informações da web, por favor, tente novamente em um minuto.";
+			 exception.printStackTrace();
+	    }
+		}
+	
+	
+	private void AddJogador()
+	{
+		try {
+		  String site = AccountWeb.Conectar(Main.site + "/API/addconta.php?nick="+ nome);
+		  if (site.contains("Servidor da mojang esta offline e nao conseguimos validar o jogador"))
+  		{
+			  erro = true;
+			  erro_log = site;
+			  erro_info = "§7Servidor da mojang esta offline tente novamente mais tarde";
+  		}
+		}
+		 catch (Exception exception)
+	    {
+			 erro_log = exception.getMessage();
+			 erro = true;
+			 erro_info = "§7Erro ao recuperar informações da web, por favor, tente novamente em um minuto.";
+			 exception.printStackTrace();
+	    }
 	}
 	
 }
