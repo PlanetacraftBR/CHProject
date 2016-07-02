@@ -109,6 +109,15 @@ import net.milkbowl.vault.economy.Economy;
 public class Main extends JavaPlugin
 implements Listener, CitizensPlugin
 {
+	
+	
+/** Nota de AdrianCF:
+ *  Este é uma API do CHProject
+ *  Não são os MiniGames ou salas
+ *  Porfavor não adicionar nenhuma sala ou MiniGame neste projeto
+ */
+	
+	
 public static Main plugin;
 public static String NomeDoServidor = "§f§lPlanetaCraft_BR";
 public static String site = "http://api.planetacraft.com.br";

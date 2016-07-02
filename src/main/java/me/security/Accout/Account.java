@@ -45,7 +45,6 @@ package me.security.Accout;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -59,8 +58,8 @@ import me.site.account.rank.Rank;
 
 /**
  * Código por adriancf, Group CH-Project
-
  */
+
 public class Account {
 
 	///API 2.0 de Account 
