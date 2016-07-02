@@ -25,7 +25,6 @@ import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilInv;
 import me.hub.API.Util.UtilServer;
-
 import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
 import me.hub.config.Config;
@@ -56,13 +55,16 @@ public class Account extends MiniPlugin
 	  private static HashMap<Player, String> ip = new HashMap();
 	  public static String bot = "Sistema_PlanetaCraft_BR";
 	  @EventHandler
-	  public void AccountRemove(PlayerQuitEvent event)
+	  public void AccountRemove(final PlayerQuitEvent event)
 	  {
 		  if (Main.plugin.getConfig().getString("Carregar").equals("Registro")) {
 			  
 		  }else{
-		  removeAccount(event.getPlayer());
-		  Servidor.AddLeave();
+	 Bukkit.getScheduler().runTaskLater(Main.plugin, new Runnable() {
+	 public void run() {
+	removeAccount(event.getPlayer());
+		  } }, 5L);
+	      Servidor.AddLeave();
 		  }
 	  }
 	  
@@ -186,6 +188,7 @@ public class Account extends MiniPlugin
 	  
 	  public static void removeAccount(Player p)
 	  {
+			 try {
 	         for (Player online : Bukkit.getOnlinePlayers()) {
 			    	String rank = "" + Account.getRank(online);
 			    	if (Account.getRank(online).Has(online, Rank.VIP, false))
@@ -196,6 +199,8 @@ public class Account extends MiniPlugin
 			    	}
 			   
 		         }
+			 } catch (Exception exception) { }
+			 
 		  uuid.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  nome.remove(Bukkit.getOfflinePlayer(p.getName()));
 		  kdr.remove(Bukkit.getOfflinePlayer(p.getName()));
