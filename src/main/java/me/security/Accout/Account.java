@@ -62,7 +62,12 @@ import me.site.account.rank.Rank;
 
 public class Account {
 
-	///API 2.0 de Account 
+	/** Nota AdrianCF:
+	 *  Account 2.0 
+	 *  Essa Plataforma de Account tem melhorias e novidades 
+	 *  Favor não alterar nada nesta class
+	 */
+	
 	
 	  @EventHandler
 	  public void Login(PlayerLoginEvent event)

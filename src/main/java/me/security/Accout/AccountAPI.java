@@ -75,6 +75,7 @@ public class AccountAPI {
 	public String erro_log;
 	public String erro_info;
 	public int ExpAdd = 0;
+	public int PlanetsAdd = 0;
 	
 	
 	public AccountAPI(String nome)
@@ -133,7 +134,26 @@ public class AccountAPI {
 	public void Pedente()
 	{
 		AddExp();
+		AddPlanets();
 	}
+	
+	public int Planets()
+	{
+		return Integer.parseInt((String)planets.replace(".", ""));
+	}
+	
+	 private void AddPlanets()
+	 {
+		 if (PlanetsAdd >= 1) {
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=ADD&nick=" + nome + "&quantidade=" + PlanetsAdd, "OK");
+		     System.out.print(buscar);
+		 }
+		 if (PlanetsAdd < 0) {
+			 //Não sei o URL da API de remover Planets kkkkkk
+		 }
+	 }
+	 
+	 
 	
 	 private void AddExp()
 	  {
@@ -142,5 +162,6 @@ public class AccountAPI {
 		  System.out.print(buscar);  
 		 }
 	  }
+	 
 	
 }

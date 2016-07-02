@@ -46,6 +46,7 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 
+import me.hub.API.Util.UtilPlayer;
 import me.security.Accout.AccountAPI;
 
 /**
@@ -97,5 +98,14 @@ public class AccountBuffer {
 		contas_name.remove(jogador);
 	}
 	
+	public static void Reload(Player jogador)
+	{
+		Remove(jogador);
+		add(jogador);
+		if (contas.get(jogador).erro)
+		{
+			UtilPlayer.Kick(jogador, contas.get(jogador).erro_info);
+		}
+	}
 	
 }
