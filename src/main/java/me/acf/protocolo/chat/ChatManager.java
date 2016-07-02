@@ -4,6 +4,7 @@
 package me.acf.protocolo.chat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
@@ -23,7 +24,7 @@ public class ChatManager {
 	 private static ArrayList<String> palavras = new ArrayList<>();
 	 private static ArrayList<String> palavras_chat = new ArrayList<>();
 	 private static ArrayList<String> Geral_Ofensivas = new ArrayList<>();
-	 private static ArrayList<Player> avisos = new ArrayList<>();
+	 private static HashMap<Player,Integer> avisos = new HashMap<>();
 	 
 	 public ChatManager()
 	 {
@@ -40,17 +41,13 @@ public class ChatManager {
 		 palavras.add("abuser");
 		 palavras.add("redtube");
 		 palavras.add("porno");
-		 palavras_chat.add("ez");
-		 palavras_chat.add("nb");
-		 palavras_chat.add("nub");
-		 palavras_chat.add("nob");
 	 }
 	 
 	 public static void Load_Server()
 	 {
 		for (String text : Main.plugin.getConfig().getStringList("Palavras-proibidas"))
 		{
-		 Geral_Ofensivas.add(text);
+		 palavras_chat.add(text);
 		}
 		 
 	 }
@@ -88,17 +85,25 @@ public class ChatManager {
 		
 		if ((Verificar(chat)) || (Verificar_Chat(chat)))
 		{
-			if (avisos.contains(p))
-			{
-				PunishMananger.AddPunish(p.getName(), "inadequadas", "_zUnix");
-				return true;
-			}
 			p.sendMessage("");
 			p.sendMessage("§4§lAVISO §f§lVocê foi alertado pelo.");
 			p.sendMessage("§a§lStaff: §6§l_zUnix");
 			p.sendMessage("§a§lMotivo: §f§lChat inadequado.");
+			p.sendMessage("§a§lAvisos: " + avisos.get(p) + "/6");
 			p.sendMessage("");
-		    avisos.add(p);
+		    if (avisos.containsKey(p))
+		    {
+		    	int warn = avisos.get(p)+1;
+		    	avisos.remove(p);
+		    	avisos.put(p, warn);
+		    }
+		    else
+		     avisos.put(p, 1);
+			if (avisos.get(p) >= 6)
+			{
+				PunishMananger.AddPunish(p.getName(), "inadequadas", "_zUnix");
+				return true;
+			}
 			return true;
 		}
 		return false;
@@ -135,12 +140,5 @@ public class ChatManager {
 	   
 	   
 	   
-	   public static void FiltroStaff_Ofensas(String text)
-	   {
-		    for (String word : text.toLowerCase().split(" "))		
-		    {
-		    	if (Geral_Ofensivas.contains(word))
-			 Staff.MandarMSGBungee("§c§lAVISO [" + Bukkit.getServerName() +"] §f"+ text);
-	      }
-	   }
+
 }

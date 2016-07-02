@@ -101,7 +101,8 @@ public class Chat extends MiniPlugin{
 			       
 			      TextComponent tc = new TextComponent(converted);
 			      
-		  ChatManager.FiltroStaff_Ofensas(text);
+		  if (ChatManager.ChatVerificar(e.getPlayer(), chat)) 
+			  return;
 				    
 		          for (Player p : Bukkit.getOnlinePlayers()) {
 		          p.spigot().sendMessage(tc);
