@@ -40,7 +40,7 @@ public class Account extends MiniPlugin
 		AddSistema();
 	
 	}
-	 private static Pattern VALIDO = Pattern.compile("[A-Za-z0-9_]");
+
 	  private static HashMap<Player, String> uuid = new HashMap();
 	  private static HashMap<Player, String> nome = new HashMap();
 	  private static HashMap<Player, String> kdr = new HashMap();
@@ -81,17 +81,7 @@ public class Account extends MiniPlugin
 	  {
 		  String url_add = Main.site + "/API/addconta.php?nick=";
 		 
-		   String invalidChars = getInvalidChars(event.getPlayer().getName());
-		   if (event.getPlayer().getName().length() > 16)
-		   {
-			   event.getPlayer().kickPlayer("§cSeu Nick esta invalido.");
-			   return;
-		   }
-		   if (!invalidChars.isEmpty())
-		    {
-			   event.getPlayer().kickPlayer("§cSeu Nick esta invalido.");
-		   return;
-		    }
+
 		   if (ChatManager.ProtocolNick(event.getPlayer()))
 		   {
 			   event.getPlayer().kickPlayer("§7Erro ao verificar seu nome, porfavor entre em contato com nossa staff.\nVerifique que seu nome não contem palavras inadequadas");
@@ -330,10 +320,7 @@ public class Account extends MiniPlugin
 	  
 	
 	   
-	   public static String getInvalidChars(String s)
-		  {
-		    return VALIDO.matcher(s).replaceAll("");
-		  }
+
 	  }
 
 

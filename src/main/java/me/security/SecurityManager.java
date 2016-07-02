@@ -13,6 +13,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -38,6 +40,7 @@ public class SecurityManager extends MiniPlugin {
 
 	public static List<Player> sj = new ArrayList<>(); 
 	
+	 private static Pattern VALIDO = Pattern.compile("[A-Za-z0-9_]");
 	
 	public SecurityManager(JavaPlugin plugin)
 	{
@@ -115,6 +118,24 @@ public class SecurityManager extends MiniPlugin {
 			}
 			
 		  return true;
+	  }
+	  
+	  
+	  @EventHandler
+	  public void Login (AsyncPlayerPreLoginEvent event)
+	  {
+		   String invalidChars = getInvalidChars(event.getName());
+		   if (event.getName().length() > 16)
+		   {
+			   event.disallow(Result.ALLOWED, "§cSeu Nick esta invalido.");
+			   
+			   return;
+		   }
+		   if (!invalidChars.isEmpty())
+		    {
+			   event.disallow(Result.ALLOWED, "§cSeu Nick esta invalido.");
+		   return;
+		    }
 	  }
 	  
 	  
@@ -230,4 +251,8 @@ if (verificar.contains("ERRO"))
      
         return false;
     }
+	   public static String getInvalidChars(String s)
+		  {
+		    return VALIDO.matcher(s).replaceAll("");
+		  }
 }
