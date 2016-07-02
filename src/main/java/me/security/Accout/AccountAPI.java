@@ -42,6 +42,7 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.security.Accout;
 
+import org.bukkit.entity.Player;
 import org.json.JSONObject;
 
 import me.acf.lobby.patentes.Patente;
@@ -73,6 +74,8 @@ public class AccountAPI {
 	public boolean erro = false;
 	public String erro_log;
 	public String erro_info;
+	public int ExpAdd = 0;
+	
 	
 	public AccountAPI(String nome)
 	{
@@ -126,5 +129,18 @@ public class AccountAPI {
 			 exception.printStackTrace();
 	    }
 	}
+	
+	public void Pedente()
+	{
+		AddExp();
+	}
+	
+	 private void AddExp()
+	  {
+		 if (ExpAdd >= 1) {
+		String buscar = AccountWeb.Conectar(Main.site + "/API/exp.php?modo=UPAR&nick=" + nome + "&quantidade=" + ExpAdd);
+		  System.out.print(buscar);  
+		 }
+	  }
 	
 }

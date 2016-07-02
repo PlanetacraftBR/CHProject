@@ -88,6 +88,7 @@ public class AccountBuffer {
 	
 	public static void Remove(Player jogador)
 	{
+        contas.get(jogador).Pedente();
 		contas.remove(jogador);
 	}
 	
@@ -95,5 +96,6 @@ public class AccountBuffer {
 	{
 		contas_name.remove(jogador);
 	}
+	
 	
 }

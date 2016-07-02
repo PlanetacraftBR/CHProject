@@ -45,6 +45,9 @@ public class Servidor {
 			  System.out.print("Não foi possivel verificar o modo manutenção do servidor!");
 	    }
 		
+		if (Bukkit.hasWhitelist())
+			return true;
+		
 		return false;
 	}
 

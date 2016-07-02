@@ -56,6 +56,8 @@ public class ChatManager {
 	 
 	private static boolean Verificar(String msg)
 	{
+		if ((msg.contains("hack")) || (msg.contains("cheat")))
+			return false;
 		String chat = msg.toLowerCase();
 		chat = chat.replace(" ", "");
 		chat = chat.replace("@", "a");
@@ -80,6 +82,9 @@ public class ChatManager {
 		}
 		return false;
 	}
+	
+	
+	
 	public static boolean ChatVerificar(Player p, String chat)
 	{
 		
