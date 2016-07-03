@@ -1,20 +1,26 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class BatWatcher extends LivingWatcher {
+public class BatWatcher extends InsentientWatcher
+{
 
-    public BatWatcher(Disguise disguise) {
+    public BatWatcher(Disguise disguise)
+    {
         super(disguise);
-        setFlying(true);
+
+        setHanging(false);
     }
 
-    public boolean isFlying() {
-        return (Byte) getValue(16, (byte) 1) == 0;
+    public boolean isHanging()
+    {
+        return ((byte) getValue(FlagType.BAT_HANGING)) == 1;
     }
 
-    public void setFlying(boolean flying) {
-        setValue(16, (byte) (flying ? 0 : 1));
-        sendData(16);
+    public void setHanging(boolean hanging)
+    {
+        setValue(FlagType.BAT_HANGING, hanging ? (byte) 1 : (byte) 0);
+        sendData(FlagType.BAT_HANGING);
     }
 }

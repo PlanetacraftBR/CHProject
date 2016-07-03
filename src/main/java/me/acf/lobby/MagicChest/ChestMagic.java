@@ -279,7 +279,6 @@ public class ChestMagic implements Listener
         {
           ParticleEffect.VILLAGER_HAPPY.display(0.0F, 0.0F, 0.0F, 0.0F, 1, localArmorStand.getEyeLocation(), 20);
           ParticleEffect.REDSTONE.display(0.0F, 0.0F, 0.0F, 5.0F, 1, localArmorStand.getEyeLocation(), 20);
-          localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.NOTE_PIANO, 0.5F, 2.0F);
           localArmorStand.teleport(localArmorStand.getLocation().add(0, 0.1D, 0));
           localArmorStand2.teleport(localArmorStand.getLocation().add(0, 0.1D, 0));
           localArmorStand3.teleport(localArmorStand.getLocation().add(0, 0.1D, 0));
@@ -295,7 +294,7 @@ public class ChestMagic implements Listener
             {
               this.step3 += 1;
               if (this.step3 <= 5) {
-            	  localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.FIREWORK_TWINKLE2, 2.0F, 1.0F);
+            	  localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.ENTITY_FIREWORK_TWINKLE, 2.0F, 1.0F);
               } else {
                 cancel();
               }
@@ -311,8 +310,7 @@ public class ChestMagic implements Listener
              ParticleEffect.REDSTONE.display(0.0F, 0.0F, 0.0F, 5.0F, 1, localArmorStand.getEyeLocation(), 20);
              ParticleEffect.SPELL_WITCH.display(0.0F, 0.0F, 0.0F, 0.0F, 1, localArmorStand2.getEyeLocation(), 20);
              ParticleEffect.SPELL_WITCH.display(0.0F, 0.0F, 0.0F, 0.0F, 1, localArmorStand3.getEyeLocation(), 20);
-             localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.NOTE_BASS_GUITAR, 2.0F, 0.7F);
-             localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.FIREWORK_TWINKLE2, 2.0F, 1.0F);
+          
         
         }
         else if ((this.step < 136) && (this.step > 110))
@@ -327,8 +325,7 @@ public class ChestMagic implements Listener
              localArmorStand.setCustomNameVisible(true);
              localArmorStand2.setCustomNameVisible(true);
              localArmorStand3.setCustomNameVisible(true);
-             localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.NOTE_BASS_GUITAR, 2.0F, 0.2F);
-             localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.NOTE_STICKS, 2.0F, 1.0F);
+             
         }
         else if (this.step == 139)
         {
@@ -343,7 +340,7 @@ public class ChestMagic implements Listener
             localArmorStand3.setCustomName("§b§lBau §a§l#3");
             
 
-            localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.ANVIL_LAND, 10.0F, 1.0F);
+          
             ParticleEffect.LAVA.display(0.0F, 0.0F, 0.0F, 1.0F, 50, localArmorStand.getLocation(), 20);
             ParticleEffect.LAVA.display(0.0F, 0.0F, 0.0F, 1.0F, 50, localArmorStand2.getLocation(), 20);
             ParticleEffect.LAVA.display(0.0F, 0.0F, 0.0F, 1.0F, 50, localArmorStand3.getLocation(), 20);
@@ -379,7 +376,7 @@ public class ChestMagic implements Listener
  		     localArmorStand.setCustomName("§a§l" + c2);
              localArmorStand2.setCustomName("§a§l" + c1);
     		 localArmorStand3.setCustomName("§a§l" + c3);
-        	 localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.CHEST_CLOSE, 10.0F, 1.0F);
+        	 localArmorStand.getWorld().playSound(localArmorStand.getLocation(), Sound.BLOCK_CHEST_CLOSE, 10.0F, 1.0F);
         	 if (!armor.get(paramPlayer).contains("#2"))
         		localArmorStand.remove();
         	if (!armor.get(paramPlayer).contains("#1"))

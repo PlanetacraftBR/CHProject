@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.bukkit.plugin.Plugin;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.events.ListeningWhitelist;
@@ -38,8 +39,6 @@ import com.comphenix.protocol.timing.TimedTracker;
 import com.comphenix.protocol.utility.WrappedScheduler;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-
-import me.hub.Main;
 
 /**
  * Represents a handler for an asynchronous event.
@@ -126,7 +125,7 @@ public class AsyncListenerHandler {
 		warningTask = filterManager.getScheduler().scheduleSyncDelayedTask(getPlugin(), new Runnable() {
 			@Override
 			public void run() {
-				Main.getErrorReporter().reportWarning(AsyncListenerHandler.this, Report.
+				ProtocolLibrary.getErrorReporter().reportWarning(AsyncListenerHandler.this, Report.
 						newBuilder(REPORT_HANDLER_NOT_STARTED).
 						messageParam(listener.getPlugin(), AsyncListenerHandler.this).
 						build()

@@ -1,39 +1,54 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-public class ItemFrameWatcher extends FlagWatcher {
+import com.google.common.base.Optional;
 
-    public ItemFrameWatcher(Disguise disguise) {
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
+import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
+
+public class ItemFrameWatcher extends FlagWatcher
+{
+    public ItemFrameWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    public ItemStack getItem() {
-        if (getValue(2, null) == null) {
-            return new ItemStack(0);
+    public ItemStack getItem()
+    {
+        if (getValue(FlagType.ITEMFRAME_ITEM) == null)
+        {
+            return new ItemStack(Material.AIR);
         }
-        return (ItemStack) getValue(8, null);
+
+        return (ItemStack) getValue(FlagType.ITEMFRAME_ITEM).get();
     }
 
-    public int getRotation() {
-        return (Integer) getValue(9, 0);
+    public int getRotation()
+    {
+        return getValue(FlagType.ITEMFRAME_ROTATION);
     }
 
-    public void setItem(ItemStack newItem) {
-        if (newItem == null) {
-            newItem = new ItemStack(0);
+    public void setItem(ItemStack newItem)
+    {
+        if (newItem == null)
+        {
+            newItem = new ItemStack(Material.AIR);
         }
+
         newItem = newItem.clone();
         newItem.setAmount(1);
-        setValue(8, newItem);
-        sendData(8);
+
+        setValue(FlagType.ITEMFRAME_ITEM, Optional.<ItemStack> of(newItem));
+        sendData(FlagType.ITEMFRAME_ITEM);
     }
 
-    public void setRotation(int rotation) {
-        setValue(9, (byte) (rotation % 4));
-        sendData(9);
+    public void setRotation(int rotation)
+    {
+        setValue(FlagType.ITEMFRAME_ROTATION, rotation % 4);
+        sendData(FlagType.ITEMFRAME_ROTATION);
     }
 
 }

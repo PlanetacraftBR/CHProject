@@ -2,4 +2,4 @@ name: CHub
 version: 3.6.5-SNAPSHOT
 description: Plugin do PlanetaCraft.
 authors: [AdrianCF]
-main: net.acf.ch.Main
+main: me.hub.Main

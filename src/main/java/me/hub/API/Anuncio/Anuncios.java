@@ -54,7 +54,6 @@ public class Anuncios extends MiniPlugin {
 	      }
 	      for (Player cur : UtilServer.Jogadores())
 	        {
-	          cur.playSound(cur.getLocation(), Sound.NOTE_BASS, 2.0F, 0.0F);
 	          cur.sendMessage(Anuncio().replace("&", "§").replace("{Player}", cur.getName()).replace("{Linha}", "\n").replace("{ServerName}", Bukkit.getServerName()));
 	        }
 	   }

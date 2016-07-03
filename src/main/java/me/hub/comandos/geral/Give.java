@@ -5,14 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import me.acf.FormatText.Format;
-import me.hub.API.ModoDeJogo;
-import me.hub.API.Util.UtilServer;
-import me.hub.comandos.ComandosAPI;
-import me.site.account.Account;
-import me.site.account.rank.Rank;
-import net.minecraft.server.v1_8_R3.MojangsonParser;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,14 +12,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+
+import me.acf.FormatText.Format;
+import me.hub.API.Util.UtilServer;
+import me.hub.comandos.ComandosAPI;
+import me.site.account.Account;
+import me.site.account.rank.Rank;
 
 public class Give implements CommandExecutor, TabCompleter{
 

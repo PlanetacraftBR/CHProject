@@ -15,22 +15,20 @@ import net.citizensnpcs.api.astar.pathfinder.VectorGoal;
 import net.citizensnpcs.api.astar.pathfinder.VectorNode;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.util.NMS;
-import net.citizensnpcs.util.Util;
 
 public class AStarNavigationStrategy extends AbstractPathStrategy {
     private final Location destination;
     private final NPC npc;
     private final NavigatorParameters params;
     private Path plan;
-
     private Vector vector;
 
-    AStarNavigationStrategy(NPC npc, Location dest, NavigatorParameters params) {
+    public AStarNavigationStrategy(NPC npc, Location dest, NavigatorParameters params) {
         super(TargetType.LOCATION);
         this.params = params;
         this.destination = dest;
         this.npc = npc;
-        Location location = Util.getEyeLocation(npc.getEntity());
+        Location location = npc.getEntity().getLocation();
         VectorGoal goal = new VectorGoal(dest, (float) params.pathDistanceMargin());
         plan = ASTAR.runFully(goal,
                 new VectorNode(goal, location, new ChunkBlockSource(location, params.range()), params.examiners()),
@@ -70,7 +68,7 @@ public class AStarNavigationStrategy extends AbstractPathStrategy {
             }
             vector = plan.getCurrentVector();
         }
-        net.minecraft.server.v1_8_R3.Entity handle = NMS.getHandle(npc.getEntity());
+        net.minecraft.server.v1_10_R1.Entity handle = NMS.getHandle(npc.getEntity());
         double dX = vector.getBlockX() - handle.locX;
         double dZ = vector.getBlockZ() - handle.locZ;
         double dY = vector.getY() - handle.locY;
@@ -80,7 +78,7 @@ public class AStarNavigationStrategy extends AbstractPathStrategy {
             npc.getEntity().getWorld().playEffect(vector.toLocation(npc.getEntity().getWorld()), Effect.ENDER_SIGNAL,
                     0);
         }
-        if (distance > 0 && dY > 0 && dY < 1 && xzDistance <= 2.75) {
+        if (distance > 0 && dY > NMS.getStepHeight(npc.getEntity()) && xzDistance <= 2.75) {
             NMS.setShouldJump(npc.getEntity());
         }
         double destX = vector.getX() + 0.5, destZ = vector.getZ() + 0.5;

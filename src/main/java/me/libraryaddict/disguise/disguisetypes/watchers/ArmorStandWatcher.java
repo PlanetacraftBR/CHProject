@@ -1,62 +1,166 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
+import org.bukkit.util.Vector;
+
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class ArmorStandWatcher extends LivingWatcher {
-
-    public ArmorStandWatcher(Disguise disguise) {
+public class ArmorStandWatcher extends LivingWatcher
+{
+    public ArmorStandWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    private boolean get10(int value) {
-        return ((Byte) getValue(10, 0) & value) != 0;
+    private boolean getArmorStandFlag(int value)
+    {
+        return (getValue(FlagType.ARMORSTAND_META) & value) != 0;
     }
 
-    public boolean isNoBasePlate() {
-        return get10(8);
+    public Vector getBody()
+    {
+        return getPose(FlagType.ARMORSTAND_BODY);
     }
 
-    public boolean isNoGravity() {
-        return get10(2);
+    public Vector getHead()
+    {
+        return getPose(FlagType.ARMORSTAND_HEAD);
     }
 
-    public boolean isShowArms() {
-        return get10(4);
+    public Vector getLeftArm()
+    {
+        return getPose(FlagType.ARMORSTAND_LEFT_ARM);
     }
 
-    public boolean isSmall() {
-        return get10(1);
+    public Vector getLeftLeg()
+    {
+        return getPose(FlagType.ARMORSTAND_LEFT_LEG);
     }
 
-    private void set10(int value, boolean isTrue) {
-        byte b1 = (Byte) getValue(10, (byte) 0);
-        if (isTrue) {
+    private Vector getPose(FlagType<Vector> type)
+    {
+        if (!hasValue(type))
+            setValue(type, new Vector());
+
+        return getValue(type);
+    }
+
+    public Vector getRightArm()
+    {
+        return getPose(FlagType.ARMORSTAND_RIGHT_ARM);
+    }
+
+    public Vector getRightLeg()
+    {
+        return getPose(FlagType.ARMORSTAND_RIGHT_LEG);
+    }
+
+    public boolean isMarker()
+    {
+        return getArmorStandFlag(10);
+    }
+
+    public boolean isNoBasePlate()
+    {
+        return getArmorStandFlag(8);
+    }
+
+    public boolean isNoGravity()
+    {
+        return getArmorStandFlag(2);
+    }
+
+    public boolean isShowArms()
+    {
+        return getArmorStandFlag(4);
+    }
+
+    public boolean isSmall()
+    {
+        return getArmorStandFlag(1);
+    }
+
+    private void setArmorStandFlag(int value, boolean isTrue)
+    {
+        byte b1 = (byte) getValue(FlagType.ARMORSTAND_META);
+
+        if (isTrue)
+        {
             b1 = (byte) (b1 | value);
-        } else {
+        }
+        else
+        {
             b1 = (byte) (b1 & value);
         }
-        setValue(10, b1);
-        sendData(10);
+
+        setValue(FlagType.ARMORSTAND_META, b1);
+        sendData(FlagType.ARMORSTAND_META);
     }
 
-    public void setNoBasePlate(boolean noBasePlate) {
-        set10(8, noBasePlate);
-        sendData(10);
+    public void setBody(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_BODY, vector);
     }
 
-    public void setNoGravity(boolean noGravity) {
-        set10(2, noGravity);
-        sendData(10);
+    public void setHead(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_HEAD, vector);
     }
 
-    public void setShowArms(boolean showArms) {
-        set10(4, showArms);
-        sendData(10);
+    public void setLeftArm(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_LEFT_ARM, vector);
     }
 
-    public void setSmall(boolean isSmall) {
-        set10(1, isSmall);
-        sendData(10);
+    public void setLeftLeg(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_LEFT_LEG, vector);
+    }
+
+    public void setMarker(boolean isMarker)
+    {
+        setArmorStandFlag(10, isMarker);
+        sendData(FlagType.ARMORSTAND_META);
+    }
+
+    public void setNoBasePlate(boolean noBasePlate)
+    {
+        setArmorStandFlag(8, noBasePlate);
+        sendData(FlagType.ARMORSTAND_META);
+    }
+
+    public void setNoGravity(boolean noGravity)
+    {
+        setArmorStandFlag(2, noGravity);
+        sendData(FlagType.ARMORSTAND_META);
+    }
+
+    private void setPose(FlagType type, Vector vector)
+    {
+        setValue(type, vector);
+        sendData(type);
+    }
+
+    public void setRightArm(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_RIGHT_ARM, vector);
+    }
+
+    public void setRightLeg(Vector vector)
+    {
+        setPose(FlagType.ARMORSTAND_RIGHT_LEG, vector);
+    }
+
+    public void setShowArms(boolean showArms)
+    {
+        setArmorStandFlag(4, showArms);
+        sendData(FlagType.ARMORSTAND_META);
+    }
+
+    public void setSmall(boolean isSmall)
+    {
+        setArmorStandFlag(1, isSmall);
+        sendData(FlagType.ARMORSTAND_META);
     }
 
 }

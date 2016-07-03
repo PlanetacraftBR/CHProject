@@ -32,7 +32,7 @@ public class Premio {
 		{
 		
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.ENDERMAN_DEATH);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_ENDERMEN_HURT);
 	        Config.add(p, "Armor." + premio.replace("§f§lArmadura ", ""), "Sim");
 		 return;
 		}
@@ -40,7 +40,6 @@ public class Premio {
 		{
 		
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.WITHER_SPAWN);
 	        Config.add(p, "Music." + premio, "Sim");
 		 return;
 		}
@@ -48,7 +47,7 @@ public class Premio {
 		{
 		
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.WITHER_SPAWN);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SPAWN);
 	        Config.add(p, "Morph." + premio.replace("§f§lMorph ", ""), "Sim");
 		 return;
 		}
@@ -56,7 +55,7 @@ public class Premio {
 		{
 		
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.WITHER_SPAWN);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SPAWN);
 	        Config.add(p, "Pet." + premio.replace("§f§lPets ", ""), "Sim");
 		 return;
 		}
@@ -65,7 +64,7 @@ public class Premio {
 			int valor = Integer.parseInt(premio.replace("x §5Cash", ""));
 			 Account.AddCash(p, valor);
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.WITHER_SPAWN);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SPAWN);
 			ScoreboardAPI.remover(p, "Cash");
 		    Account.UpdateAccount(p);
 		 return;
@@ -73,7 +72,7 @@ public class Premio {
 		if (premio.contains("§e§lPatente §6§lUP"))
 		{
 			UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.WITHER_SPAWN);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_WITHER_SPAWN);
 			Patente.UpPatende(p);
 		    Account.UpdateAccount(p);
 			ScoreboardAPI.remover(p, "Patente:");
@@ -84,7 +83,7 @@ public class Premio {
 			  int numero = Integer.parseInt("" + premio.charAt(0));
 			   Account.AddChave(p, numero); 
 			   UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-		    Sound(p.getLocation(), org.bukkit.Sound.ENDERDRAGON_DEATH);
+		    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_ENDERDRAGON_DEATH);
 			ScoreboardAPI.remover(p, "Chaves");
 		    Account.UpdateAccount(p); 
 		 return;
@@ -118,7 +117,7 @@ public class Premio {
 	       if (premio.contains("PlanetsBomb"))
 			{
 	    	   UtilServer.AnuncioServidor("§5§lMagic §6§l" + p.getCustomName() + " §7ganhou§a§l " + premio);
-			    Sound(p.getLocation(), org.bukkit.Sound.BLAZE_DEATH);
+			    Sound(p.getLocation(), org.bukkit.Sound.ENTITY_BLAZE_DEATH);
 			}
 		}
 		p.sendMessage("§f§lMagic §7Você ganhou§a§l " + premio);

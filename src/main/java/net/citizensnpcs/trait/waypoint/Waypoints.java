@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import com.google.common.collect.Maps;
 
-
+import net.citizensnpcs.api.command.CommandContext;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.persistence.PersistenceLoader;
 import net.citizensnpcs.api.trait.Trait;
@@ -59,7 +59,9 @@ public class Waypoints extends Trait {
         return providerName;
     }
 
-
+    public Editor getEditor(CommandSender player, CommandContext args) {
+        return provider.createEditor(player, args);
+    }
 
     @Override
     public void load(DataKey key) throws NPCLoadException {

@@ -58,7 +58,7 @@ public class RechargeData
 
 
             if (this.Recharge > 4000L) {
-              this.Player.playSound(this.Player.getLocation(), Sound.NOTE_PLING, 0.4F, 3.0F);
+              this.Player.playSound(this.Player.getLocation(), Sound.BLOCK_NOTE_PLING, 0.4F, 3.0F);
             }
           }
         }

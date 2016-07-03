@@ -23,7 +23,6 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.comphenix.protocol.compat.guava.Guava;
 import com.google.common.base.Objects;
 import com.google.common.collect.Range;
 
@@ -68,7 +67,7 @@ public abstract class AbstractIntervalTree<TKey extends Comparable<TKey>, TValue
 
 		@Override
 		public Range<TKey> getKey() {
-			return Guava.closedRange(left.key, right.key);
+			return Range.closed(left.key, right.key);
 		}
 
 		@Override

@@ -35,7 +35,6 @@ import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
-import com.comphenix.protocol.injector.PacketFilterManager;
 import com.comphenix.protocol.injector.PrioritizedListener;
 import com.comphenix.protocol.injector.SortedPacketListenerList;
 import com.comphenix.protocol.injector.packet.PacketRegistry;
@@ -181,11 +180,11 @@ public class AsyncFilterManager implements AsynchronousManager {
 		
 		// Add listener to either or both processing queue
 		if (hasValidWhitelist(sendingWhitelist)) {
-			PacketFilterManager.verifyWhitelist(listener, sendingWhitelist);
+			manager.verifyWhitelist(listener, sendingWhitelist);
 			serverProcessingQueue.addListener(handler, sendingWhitelist);
 		}
 		if (hasValidWhitelist(receivingWhitelist)) {
-			PacketFilterManager.verifyWhitelist(listener, receivingWhitelist);
+			manager.verifyWhitelist(listener, receivingWhitelist);
 			clientProcessingQueue.addListener(handler, receivingWhitelist);
 		}
 		

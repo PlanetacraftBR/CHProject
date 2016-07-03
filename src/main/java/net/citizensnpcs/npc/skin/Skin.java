@@ -9,13 +9,13 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitTask;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
 
 import net.citizensnpcs.Settings.Setting;
 import net.citizensnpcs.api.CitizensAPI;
@@ -30,6 +30,7 @@ import net.citizensnpcs.npc.profile.ProfileRequest;
  * Stores data for a single skin.
  */
 public class Skin {
+    private int fetchRetries = -1;
     private boolean hasFetched;
     private volatile boolean isValid = true;
     private final Map<SkinnableEntity, Void> pending = new WeakHashMap<SkinnableEntity, Void>(15);
@@ -37,13 +38,13 @@ public class Skin {
     private volatile Property skinData;
     private volatile UUID skinId;
     private final String skinName;
-    private int fetchRetries = -1;
 
     /**
      * Constructor.
      *
      * @param skinName
      *            The name of the player the skin belongs to.
+     * @param forceUpdate
      */
     Skin(String skinName) {
         this.skinName = skinName.toLowerCase();
@@ -87,8 +88,7 @@ public class Skin {
             setNPCTexture(entity, localData);
 
             // check if NPC prefers to use cached skin over the latest skin.
-            if (!entity.getNPC().data().get(NPC.PLAYER_SKIN_USE_LATEST,
-                    Setting.NPC_SKIN_USE_LATEST.asBoolean())) {
+            if (!entity.getNPC().data().get(NPC.PLAYER_SKIN_USE_LATEST, Setting.NPC_SKIN_USE_LATEST.asBoolean())) {
                 // cache preferred
                 return true;
             }
@@ -97,8 +97,7 @@ public class Skin {
         if (!hasSkinData()) {
             if (hasFetched) {
                 return true;
-            }
-            else {
+            } else {
                 pending.put(entity, null);
                 return false;
             }
@@ -127,6 +126,52 @@ public class Skin {
             npc.despawn(DespawnReason.PENDING_RESPAWN);
             npc.spawn(npc.getStoredLocation());
         }
+    }
+
+    private void fetch() {
+        final int maxRetries = Setting.MAX_NPC_SKIN_RETRIES.asInt();
+        if (maxRetries > -1 && fetchRetries >= maxRetries) {
+            if (Messaging.isDebugging()) {
+                Messaging.debug("Reached max skin fetch retries for '" + skinName + "'");
+            }
+            return;
+        }
+
+        ProfileFetcher.fetch(this.skinName, new ProfileFetchHandler() {
+            @Override
+            public void onResult(ProfileRequest request) {
+                hasFetched = true;
+
+                switch (request.getResult()) {
+                    case NOT_FOUND:
+                        isValid = false;
+                        break;
+                    case TOO_MANY_REQUESTS:
+                        if (maxRetries == 0) {
+                            break;
+                        }
+                        fetchRetries++;
+                        long delay = Setting.NPC_SKIN_RETRY_DELAY.asLong();
+                        retryTask = Bukkit.getScheduler().runTaskLater(CitizensAPI.getPlugin(), new Runnable() {
+                            @Override
+                            public void run() {
+                                fetch();
+                            }
+                        }, delay);
+
+                        if (Messaging.isDebugging()) {
+                            Messaging.debug("Retrying skin fetch for '" + skinName + "' in " + delay + " ticks.");
+                        }
+                        break;
+                    case SUCCESS:
+                        GameProfile profile = request.getProfile();
+                        setData(profile);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
     }
 
     /**
@@ -181,95 +226,6 @@ public class Skin {
         pending.clear();
     }
 
-    private void fetch() {
-        final int maxRetries = Setting.MAX_NPC_SKIN_RETRIES.asInt();
-        if (maxRetries > -1 && fetchRetries >= maxRetries) {
-            if (Messaging.isDebugging()) {
-                Messaging.debug("Reached max skin fetch retries for '" + skinName + "'");
-            }
-            return;
-        }
-
-        ProfileFetcher.fetch(this.skinName, new ProfileFetchHandler() {
-            @Override
-            public void onResult(ProfileRequest request) {
-
-                hasFetched = true;
-
-                switch (request.getResult()) {
-                    case NOT_FOUND:
-                        isValid = false;
-                        break;
-                    case TOO_MANY_REQUESTS:
-                        if (maxRetries == 0) {
-                            break;
-                        }
-                        fetchRetries++;
-                        long delay = Setting.NPC_SKIN_RETRY_DELAY.asLong();
-                        retryTask = Bukkit.getScheduler().runTaskLater(CitizensAPI.getPlugin(), new Runnable() {
-                            @Override
-                            public void run() {
-                                fetch();
-                            }
-                        }, delay);
-
-                        if (Messaging.isDebugging()) {
-                            Messaging.debug("Retrying skin fetch for '" + skinName + "' in " + delay + " ticks.");
-                        }
-                        break;
-                    case SUCCESS:
-                        GameProfile profile = request.getProfile();
-                        setData(profile);
-                        break;
-                }
-            }
-        });
-    }
-
-    /**
-     * Get a player skin.
-     *
-     * <p>
-     * If a Skin instance does not exist, a new one is created and the skin data is automatically fetched.
-     * </p>
-     *
-     * @param skinName
-     *            The name of the skin.
-     */
-    public static Skin get(String skinName) {
-        Preconditions.checkNotNull(skinName);
-
-        skinName = skinName.toLowerCase();
-
-        Skin skin;
-        synchronized (CACHE) {
-            skin = CACHE.get(skinName);
-        }
-
-        if (skin == null) {
-            skin = new Skin(skinName);
-        }
-
-        return skin;
-    }
-
-    /**
-     * Get a skin for a skinnable entity.
-     *
-     * <p>
-     * If a Skin instance does not exist, a new one is created and the skin data is automatically fetched.
-     * </p>
-     *
-     * @param entity
-     *            The skinnable entity.
-     */
-    public static Skin get(SkinnableEntity entity) {
-        Preconditions.checkNotNull(entity);
-
-        String skinName = entity.getSkinName().toLowerCase();
-        return get(skinName);
-    }
-
     /**
      * Clear all cached skins.
      */
@@ -283,6 +239,68 @@ public class Skin {
             }
             CACHE.clear();
         }
+    }
+
+    /**
+     * Get a skin for a skinnable entity.
+     *
+     * <p>
+     * If a Skin instance does not exist, a new one is created and the skin data is automatically fetched.
+     * </p>
+     *
+     * @param entity
+     *            The skinnable entity.
+     */
+    public static Skin get(SkinnableEntity entity) {
+        return get(entity, false);
+    }
+
+    /**
+     * Get a skin for a skinnable entity.
+     *
+     * <p>
+     * If a Skin instance does not exist, a new one is created and the skin data is automatically fetched.
+     * </p>
+     *
+     * @param entity
+     *            The skinnable entity.
+     * @param forceUpdate
+     *            if the skin should be checked via the cache
+     */
+    public static Skin get(SkinnableEntity entity, boolean forceUpdate) {
+        Preconditions.checkNotNull(entity);
+
+        String skinName = entity.getSkinName().toLowerCase();
+        return get(skinName, forceUpdate);
+    }
+
+    /**
+     * Get a player skin.
+     *
+     * <p>
+     * If a Skin instance does not exist, a new one is created and the skin data is automatically fetched.
+     * </p>
+     *
+     * @param skinName
+     *            The name of the skin.
+     */
+    public static Skin get(String skinName, boolean forceUpdate) {
+        Preconditions.checkNotNull(skinName);
+
+        skinName = skinName.toLowerCase();
+
+        Skin skin;
+        synchronized (CACHE) {
+            skin = CACHE.get(skinName);
+        }
+
+        if (skin == null) {
+            skin = new Skin(skinName);
+        } else if (forceUpdate) {
+            skin.fetch();
+        }
+
+        return skin;
     }
 
     private static void setNPCSkinData(SkinnableEntity entity, String skinName, UUID skinId, Property skinProperty) {
@@ -308,8 +326,7 @@ public class Skin {
         // don't set property if already set since this sometimes causes
         // packet errors that disconnect the client.
         Property current = Iterables.getFirst(profile.getProperties().get("textures"), null);
-        if (current != null
-                && current.getValue().equals(skinProperty.getValue())
+        if (current != null && current.getValue().equals(skinProperty.getValue())
                 && current.getSignature().equals(skinProperty.getSignature())) {
             return;
         }

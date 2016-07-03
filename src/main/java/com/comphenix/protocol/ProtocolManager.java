@@ -29,6 +29,7 @@ import org.bukkit.plugin.Plugin;
 
 import com.comphenix.protocol.async.AsyncMarker;
 import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.PacketConstructor;
@@ -279,4 +280,6 @@ public interface ProtocolManager extends PacketStream {
 	 * @return Asynchronous packet manager.
 	 */
 	public AsynchronousManager getAsynchronousManager();
+
+	public void verifyWhitelist(PacketListener listener, ListeningWhitelist whitelist);
 }

@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.SocketAddress;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -20,12 +21,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.CraftSound;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.CraftSound;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.boss.CraftBossBar;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.event.CraftEventFactory;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -44,41 +51,54 @@ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.response.MinecraftProfilePropertiesResponse;
 import com.mojang.util.UUIDTypeAdapter;
 
-
+import net.citizensnpcs.api.command.exception.CommandException;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.api.util.Messaging;
 import net.citizensnpcs.npc.ai.NPCHolder;
 import net.citizensnpcs.npc.entity.EntityHumanNPC;
 import net.citizensnpcs.npc.network.EmptyChannel;
 import net.citizensnpcs.npc.skin.SkinnableEntity;
 import net.citizensnpcs.util.nms.PlayerlistTrackerEntry;
-import net.minecraft.server.v1_8_R3.AttributeInstance;
-import net.minecraft.server.v1_8_R3.AxisAlignedBB;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.ControllerJump;
-import net.minecraft.server.v1_8_R3.DamageSource;
-import net.minecraft.server.v1_8_R3.EnchantmentManager;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityHorse;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityInsentient;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityMinecartAbstract;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.EntityTameableAnimal;
-import net.minecraft.server.v1_8_R3.EntityTracker;
-import net.minecraft.server.v1_8_R3.EntityTrackerEntry;
-import net.minecraft.server.v1_8_R3.EntityTypes;
-import net.minecraft.server.v1_8_R3.GenericAttributes;
-import net.minecraft.server.v1_8_R3.MathHelper;
-import net.minecraft.server.v1_8_R3.NavigationAbstract;
-import net.minecraft.server.v1_8_R3.NetworkManager;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PathfinderGoalSelector;
-import net.minecraft.server.v1_8_R3.World;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_10_R1.AttributeInstance;
+import net.minecraft.server.v1_10_R1.AxisAlignedBB;
+import net.minecraft.server.v1_10_R1.Block;
+import net.minecraft.server.v1_10_R1.BlockPosition;
+import net.minecraft.server.v1_10_R1.BossBattleServer;
+import net.minecraft.server.v1_10_R1.ControllerJump;
+import net.minecraft.server.v1_10_R1.DamageSource;
+import net.minecraft.server.v1_10_R1.DataWatcherObject;
+import net.minecraft.server.v1_10_R1.EnchantmentManager;
+import net.minecraft.server.v1_10_R1.EnderDragonBattle;
+import net.minecraft.server.v1_10_R1.Entity;
+import net.minecraft.server.v1_10_R1.EntityEnderDragon;
+import net.minecraft.server.v1_10_R1.EntityFishingHook;
+import net.minecraft.server.v1_10_R1.EntityHorse;
+import net.minecraft.server.v1_10_R1.EntityHuman;
+import net.minecraft.server.v1_10_R1.EntityInsentient;
+import net.minecraft.server.v1_10_R1.EntityLiving;
+import net.minecraft.server.v1_10_R1.EntityMinecartAbstract;
+import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.EntityPolarBear;
+import net.minecraft.server.v1_10_R1.EntityRabbit;
+import net.minecraft.server.v1_10_R1.EntityTameableAnimal;
+import net.minecraft.server.v1_10_R1.EntityTracker;
+import net.minecraft.server.v1_10_R1.EntityTrackerEntry;
+import net.minecraft.server.v1_10_R1.EntityTypes;
+import net.minecraft.server.v1_10_R1.EntityWither;
+import net.minecraft.server.v1_10_R1.GenericAttributes;
+import net.minecraft.server.v1_10_R1.MathHelper;
+import net.minecraft.server.v1_10_R1.MinecraftKey;
+import net.minecraft.server.v1_10_R1.MobEffects;
+import net.minecraft.server.v1_10_R1.NavigationAbstract;
+import net.minecraft.server.v1_10_R1.NetworkManager;
+import net.minecraft.server.v1_10_R1.Packet;
+import net.minecraft.server.v1_10_R1.PacketPlayOutPlayerInfo;
+import net.minecraft.server.v1_10_R1.PathfinderGoalSelector;
+import net.minecraft.server.v1_10_R1.SoundEffect;
+import net.minecraft.server.v1_10_R1.Vec3D;
+import net.minecraft.server.v1_10_R1.World;
+import net.minecraft.server.v1_10_R1.WorldServer;
 
 @SuppressWarnings("unchecked")
 public class NMS {
@@ -98,6 +118,7 @@ public class NMS {
         } else if (!handle.world.players.contains(handle)) {
             handle.world.players.add(handle);
         }
+        PlayerUpdateTask.addOrRemove(entity, remove);
     }
 
     public static boolean addToWorld(org.bukkit.World world, org.bukkit.entity.Entity entity,
@@ -116,7 +137,7 @@ public class NMS {
         int i = 0;
 
         if (target instanceof EntityLiving) {
-            f += EnchantmentManager.a(handle.bA(), ((EntityLiving) target).getMonsterType());
+            f += EnchantmentManager.a(handle.getItemInMainHand(), ((EntityLiving) target).getMonsterType());
             i += EnchantmentManager.a(handle);
         }
 
@@ -158,7 +179,7 @@ public class NMS {
             return;
         for (PathfinderGoalSelector selector : goalSelectors) {
             try {
-                List<?> list = (List<?>) NMS.GOAL_FIELD.get(selector);
+                Collection<?> list = (Collection<?>) NMS.GOAL_FIELD.get(selector);
                 list.clear();
             } catch (Exception e) {
                 Messaging.logTr(Messages.ERROR_CLEARING_GOALS, e.getLocalizedMessage());
@@ -171,11 +192,10 @@ public class NMS {
      * an Exception like it should.
      */
     public static GameProfile fillProfileProperties(GameProfile profile, boolean requireSecure) throws Exception {
-
         if (Bukkit.isPrimaryThread())
             throw new IllegalStateException("NMS.fillProfileProperties cannot be invoked from the main thread.");
 
-        MinecraftSessionService sessionService = ((CraftServer) Bukkit.getServer()).getServer().aD();
+        MinecraftSessionService sessionService = ((CraftServer) Bukkit.getServer()).getServer().ay();
 
         YggdrasilAuthenticationService auth = ((YggdrasilMinecraftSessionService) sessionService)
                 .getAuthenticationService();
@@ -198,123 +218,191 @@ public class NMS {
     }
 
     public static void flyingMoveLogic(EntityLiving entity, float f, float f1) {
-        if (entity.bM()) {
-            if (entity.V()) {
-                double d0 = entity.locY;
-                float f3 = 0.8F;
-                float f4 = 0.02F;
-                float f2 = EnchantmentManager.b(entity);
+        if ((entity.ct()) || (entity.bA())) {
+            if ((entity.isInWater())
+                    && ((!(entity instanceof EntityHuman)) || (!((EntityHuman) entity).abilities.isFlying))) {
+                double d1 = entity.locY;
+                float f4 = entity instanceof EntityPolarBear ? 0.98F : 0.8F;
+                float f3 = 0.02F;
+                float f2 = EnchantmentManager.d(entity);
                 if (f2 > 3.0F) {
                     f2 = 3.0F;
                 }
-
                 if (!entity.onGround) {
                     f2 *= 0.5F;
                 }
-
                 if (f2 > 0.0F) {
-                    f3 += (0.5460001F - f3) * f2 / 3.0F;
-                    f4 += (entity.bI() * 1.0F - f4) * f2 / 3.0F;
+                    f4 += (0.54600006F - f4) * f2 / 3.0F;
+                    f3 += (entity.cp() - f3) * f2 / 3.0F;
                 }
-
-                entity.a(f, f1, f4);
+                entity.a(f, f1, f3);
                 entity.move(entity.motX, entity.motY, entity.motZ);
-                entity.motX *= f3;
+                entity.motX *= f4;
                 entity.motY *= 0.800000011920929D;
-                entity.motZ *= f3;
-                entity.motY -= 0.02D;
+                entity.motZ *= f4;
+                if (!entity.isNoGravity()) {
+                    entity.motY -= 0.02D;
+                }
                 if ((entity.positionChanged)
-                        && (entity.c(entity.motX, entity.motY + 0.6000000238418579D - entity.locY + d0, entity.motZ)))
-                    entity.motY = 0.300000011920929D;
-            } else if (entity.ab()) {
-                double d0 = entity.locY;
+                        && (entity.c(entity.motX, entity.motY + 0.6000000238418579D - entity.locY + d1, entity.motZ))) {
+                    entity.motY = 0.30000001192092896D;
+                }
+            } else if ((entity.ao())
+                    && ((!(entity instanceof EntityHuman)) || (!((EntityHuman) entity).abilities.isFlying))) {
+                double d1 = entity.locY;
                 entity.a(f, f1, 0.02F);
                 entity.move(entity.motX, entity.motY, entity.motZ);
                 entity.motX *= 0.5D;
                 entity.motY *= 0.5D;
                 entity.motZ *= 0.5D;
-                entity.motY -= 0.02D;
+                if (!entity.isNoGravity()) {
+                    entity.motY -= 0.02D;
+                }
                 if ((entity.positionChanged)
-                        && (entity.c(entity.motX, entity.motY + 0.6000000238418579D - entity.locY + d0, entity.motZ)))
-                    entity.motY = 0.300000011920929D;
+                        && (entity.c(entity.motX, entity.motY + 0.6000000238418579D - entity.locY + d1, entity.motZ))) {
+                    entity.motY = 0.30000001192092896D;
+                }
+            } else if (entity.cG()) {
+                if (entity.motY > -0.5D) {
+                    entity.fallDistance = 1.0F;
+                }
+                Vec3D vec3d = entity.aB();
+                float f5 = entity.pitch * 0.017453292F;
+
+                double d0 = Math.sqrt(vec3d.x * vec3d.x + vec3d.z * vec3d.z);
+                double d2 = Math.sqrt(entity.motX * entity.motX + entity.motZ * entity.motZ);
+                double d3 = vec3d.b();
+                float f6 = MathHelper.cos(f5);
+
+                f6 = (float) (f6 * f6 * Math.min(1.0D, d3 / 0.4D));
+                entity.motY += -0.08D + f6 * 0.06D;
+                if ((entity.motY < 0.0D) && (d0 > 0.0D)) {
+                    double d4 = entity.motY * -0.1D * f6;
+                    entity.motY += d4;
+                    entity.motX += vec3d.x * d4 / d0;
+                    entity.motZ += vec3d.z * d4 / d0;
+                }
+                if (f5 < 0.0F) {
+                    double d4 = d2 * -MathHelper.sin(f5) * 0.04D;
+                    entity.motY += d4 * 3.2D;
+                    entity.motX -= vec3d.x * d4 / d0;
+                    entity.motZ -= vec3d.z * d4 / d0;
+                }
+                if (d0 > 0.0D) {
+                    entity.motX += (vec3d.x / d0 * d2 - entity.motX) * 0.1D;
+                    entity.motZ += (vec3d.z / d0 * d2 - entity.motZ) * 0.1D;
+                }
+                entity.motX *= 0.9900000095367432D;
+                entity.motY *= 0.9800000190734863D;
+                entity.motZ *= 0.9900000095367432D;
+                entity.move(entity.motX, entity.motY, entity.motZ);
+                if ((entity.positionChanged) && (!entity.world.isClientSide)) {
+                    double d4 = Math.sqrt(entity.motX * entity.motX + entity.motZ * entity.motZ);
+                    double d5 = d2 - d4;
+                    float f7 = (float) (d5 * 10.0D - 3.0D);
+                    if (f7 > 0.0F) {
+                        entity.a(entity.e((int) f7), 1.0F, 1.0F);
+                        entity.damageEntity(DamageSource.FLY_INTO_WALL, f7);
+                    }
+                }
+                if ((entity.onGround) && (!entity.world.isClientSide) && (entity.getFlag(7))
+                        && (!CraftEventFactory.callToggleGlideEvent(entity, false).isCancelled())) {
+                    entity.setFlag(7, false);
+                }
             } else {
-                float f5 = 0.91F;
-
+                float f8 = 0.91F;
+                BlockPosition.PooledBlockPosition blockposition_pooledblockposition = BlockPosition.PooledBlockPosition
+                        .d(entity.locX, entity.getBoundingBox().b - 1.0D, entity.locZ);
                 if (entity.onGround) {
-                    f5 = entity.world
-                            .getType(new BlockPosition(MathHelper.floor(entity.locX),
-                                    MathHelper.floor(entity.getBoundingBox().b) - 1, MathHelper.floor(entity.locZ)))
-                            .getBlock().frictionFactor * 0.91F;
+                    f8 = entity.world.getType(blockposition_pooledblockposition).getBlock().frictionFactor * 0.91F;
                 }
-
-                float f6 = 0.1627714F / (f5 * f5 * f5);
+                float f4 = 0.16277136F / (f8 * f8 * f8);
                 float f3;
-                if (entity.onGround)
-                    f3 = entity.bI() * f6;
-                else {
-                    f3 = entity.aM;
-                }
-
-                entity.a(f, f1, f3);
-                f5 = 0.91F;
                 if (entity.onGround) {
-                    f5 = entity.world
-                            .getType(new BlockPosition(MathHelper.floor(entity.locX),
-                                    MathHelper.floor(entity.getBoundingBox().b) - 1, MathHelper.floor(entity.locZ)))
-                            .getBlock().frictionFactor * 0.91F;
+                    f3 = entity.cp() * f4;
+                } else {
+                    f3 = entity.aS;
                 }
-
-                if (entity.k_()) {
-                    float f4 = 0.15F;
-                    entity.motX = MathHelper.a(entity.motX, -f4, f4);
-                    entity.motZ = MathHelper.a(entity.motZ, -f4, f4);
+                entity.a(f, f1, f3);
+                f8 = 0.91F;
+                if (entity.onGround) {
+                    f8 = entity.world.getType(blockposition_pooledblockposition.e(entity.locX,
+                            entity.getBoundingBox().b - 1.0D, entity.locZ)).getBlock().frictionFactor * 0.91F;
+                }
+                if (entity.m_()) {
+                    entity.motX = MathHelper.a(entity.motX, -0.15000000596046448D, 0.15000000596046448D);
+                    entity.motZ = MathHelper.a(entity.motZ, -0.15000000596046448D, 0.15000000596046448D);
                     entity.fallDistance = 0.0F;
                     if (entity.motY < -0.15D) {
                         entity.motY = -0.15D;
                     }
-
                     boolean flag = (entity.isSneaking()) && ((entity instanceof EntityHuman));
-
                     if ((flag) && (entity.motY < 0.0D)) {
                         entity.motY = 0.0D;
                     }
                 }
-
                 entity.move(entity.motX, entity.motY, entity.motZ);
-                if ((entity.positionChanged) && (entity.k_())) {
+                if ((entity.positionChanged) && (entity.m_())) {
                     entity.motY = 0.2D;
                 }
-
-                if ((entity.world.isClientSide) && ((!entity.world
-                        .isLoaded(new BlockPosition((int) entity.locX, 0, (int) entity.locZ)))
-                        || (!entity.world
-                                .getChunkAtWorldCoords(new BlockPosition((int) entity.locX, 0, (int) entity.locZ))
-                                .o()))) {
-                    if (entity.locY > 0.0D)
-                        entity.motY = -0.1D;
-                    else
-                        entity.motY = 0.0D;
+                if (entity.hasEffect(MobEffects.LEVITATION)) {
+                    entity.motY += (0.05D * (entity.getEffect(MobEffects.LEVITATION).getAmplifier() + 1) - entity.motY)
+                            * 0.2D;
                 } else {
-                    entity.motY -= 0.08D;
+                    blockposition_pooledblockposition.e(entity.locX, 0.0D, entity.locZ);
+                    if ((entity.world.isClientSide) && ((!entity.world.isLoaded(blockposition_pooledblockposition))
+                            || (!entity.world.getChunkAtWorldCoords(blockposition_pooledblockposition).p()))) {
+                        if (entity.locY > 0.0D) {
+                            entity.motY = -0.1D;
+                        } else {
+                            entity.motY = 0.0D;
+                        }
+                    } else if (!entity.isNoGravity()) {
+                        entity.motY -= 0.08D;
+                    }
                 }
-
                 entity.motY *= 0.9800000190734863D;
-                entity.motX *= f5;
-                entity.motZ *= f5;
+                entity.motX *= f8;
+                entity.motZ *= f8;
+                blockposition_pooledblockposition.t();
             }
         }
-
-        entity.aA = entity.aB;
-        double d0 = entity.locX - entity.lastX;
-        double d1 = entity.locZ - entity.lastZ;
-
-        float f2 = MathHelper.sqrt(d0 * d0 + d1 * d1) * 4.0F;
+        entity.aG = entity.aH;
+        double d1 = entity.locX - entity.lastX;
+        double d0 = entity.locZ - entity.lastZ;
+        float f2 = MathHelper.sqrt(d1 * d1 + d0 * d0) * 4.0F;
         if (f2 > 1.0F) {
             f2 = 1.0F;
         }
+        entity.aH += (f2 - entity.aH) * 0.4F;
+        entity.aI += entity.aH;
+    }
 
-        entity.aB += (f2 - entity.aB) * 0.4F;
-        entity.aC += entity.aB;
+    public static BossBar getBossBar(org.bukkit.entity.Entity entity) {
+        BossBattleServer bserver = null;
+        try {
+            if (entity.getType() == EntityType.WITHER) {
+                bserver = (BossBattleServer) WITHER_BOSS_BAR_FIELD.get(NMS.getHandle(entity));
+            } else if (entity.getType() == EntityType.ENDER_DRAGON) {
+                bserver = (BossBattleServer) ENDERDRAGON_BATTLE_BAR_FIELD
+                        .get(ENDERDRAGON_BATTLE_FIELD.get(NMS.getHandle(entity)));
+            }
+        } catch (Exception e) {
+        }
+        if (bserver == null) {
+            return null;
+        }
+        BossBar ret = Bukkit.createBossBar("", BarColor.BLUE, BarStyle.SEGMENTED_10);
+        try {
+            CRAFT_BOSSBAR_HANDLE_FIELD.set(ret, bserver);
+        } catch (Exception e) {
+        }
+        return ret;
+    }
+
+    public static org.bukkit.entity.Entity getBukkitVehicle(org.bukkit.entity.Entity entity) {
+        Entity vehicle = getVehicle(entity);
+        return vehicle == null ? null : vehicle.getBukkitEntity();
     }
 
     @SuppressWarnings("deprecation")
@@ -358,7 +446,7 @@ public class NMS {
     }
 
     public static float getHeadYaw(EntityLiving handle) {
-        return handle.aK;
+        return handle.aP;
     }
 
     public static NavigationAbstract getNavigation(Entity handle) {
@@ -382,6 +470,19 @@ public class NMS {
         }
     }
 
+    public static DataWatcherObject<Integer> getRabbitTypeField() {
+        if (RABBIT_FIELD == null)
+            return null;
+        try {
+            return (DataWatcherObject<Integer>) RABBIT_FIELD.get(null);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Nullable
     public static SkinnableEntity getSkinnable(org.bukkit.entity.Entity entity) {
         Preconditions.checkNotNull(entity);
@@ -393,7 +494,21 @@ public class NMS {
         return null;
     }
 
+    public static String getSound(String flag) throws CommandException {
+        try {
+            String ret = CraftSound.getSound(Sound.valueOf(flag.toUpperCase()));
+            if (ret == null)
+                throw new CommandException(Messages.INVALID_SOUND);
+            return ret;
+        } catch (Exception e) {
+            throw new CommandException(Messages.INVALID_SOUND);
+        }
+    }
 
+    public static SoundEffect getSoundEffect(NPC npc, SoundEffect snd, String meta) {
+        return npc == null || !npc.data().has(meta) ? snd
+                : SoundEffect.a.get(new MinecraftKey(npc.data().get(meta, snd == null ? "" : snd.toString())));
+    }
 
     public static float getSpeedFor(NPC npc) {
         if (!npc.isSpawned() || !(npc.getEntity() instanceof LivingEntity))
@@ -406,15 +521,20 @@ public class NMS {
         // handle.getAttributeInstance(GenericAttributes.d).getValue();
     }
 
-    public static float getStepHeight(LivingEntity entity) {
-        return NMS.getHandle(entity).S;
+    public static float getStepHeight(org.bukkit.entity.Entity entity) {
+        return NMS.getHandle(entity).P;
+    }
+
+    public static Entity getVehicle(org.bukkit.entity.Entity entity) {
+        Entity e = getHandle(entity).getVehicle();
+        return e == getHandle(entity) ? null : e;
     }
 
     public static void initNetworkManager(NetworkManager network) {
-        if (NETWORK_CHANNEL == null || NETWORK_ADDRESS == null)
+        if (NETWORK_ADDRESS == null)
             return;
         try {
-            NETWORK_CHANNEL.set(network, new EmptyChannel(null));
+            network.channel = new EmptyChannel(null);
             NETWORK_ADDRESS.set(network, new SocketAddress() {
                 private static final long serialVersionUID = 8207338859896320185L;
             });
@@ -429,11 +549,15 @@ public class NMS {
         Entity mcEntity = getHandle(entity);
         if (mcEntity == null)
             return false;
-        return mcEntity.W() || mcEntity.ab();
+        return mcEntity.ak() || mcEntity.ao();
     }
 
     public static boolean isNavigationFinished(NavigationAbstract navigation) {
-        return navigation.m();
+        return navigation.n();
+    }
+
+    public static boolean isPassenger(org.bukkit.entity.Entity entity) {
+        return NMS.getHandle(entity).isPassenger();
     }
 
     public static void loadPlugins() {
@@ -442,7 +566,7 @@ public class NMS {
 
     public static void look(Entity handle, Entity target) {
         if (handle instanceof EntityInsentient) {
-            ((EntityInsentient) handle).getControllerLook().a(target, 10.0F, ((EntityInsentient) handle).bQ());
+            ((EntityInsentient) handle).getControllerLook().a(target, 10.0F, ((EntityInsentient) handle).N());
         } else if (handle instanceof EntityHumanNPC) {
             ((EntityHumanNPC) handle).setTargetLook(target, 10F, 40F);
         }
@@ -470,7 +594,7 @@ public class NMS {
         if (mat != null) {
             minecart.setDisplayBlock(Block.getById(mat.getId()).fromLegacyData(data));
         }
-        minecart.SetDisplayBlockOffset(offset);
+        minecart.setDisplayBlockOffset(offset);
     }
 
     public static float modifiedSpeed(float baseSpeed, NPC npc) {
@@ -480,7 +604,7 @@ public class NMS {
     public static void mount(org.bukkit.entity.Entity entity, org.bukkit.entity.Entity passenger) {
         if (NMS.getHandle(passenger) == null)
             return;
-        NMS.getHandle(passenger).mount(NMS.getHandle(entity));
+        NMS.getHandle(passenger).startRiding(NMS.getHandle(entity));
     }
 
     public static void openHorseScreen(Horse horse, Player equipper) {
@@ -521,6 +645,19 @@ public class NMS {
         nmsEntity.world.removeEntity(nmsEntity);
     }
 
+    public static void removeHookIfNecessary(NPCRegistry npcRegistry, FishHook entity) {
+        EntityFishingHook hook = (EntityFishingHook) NMS.getHandle(entity);
+        if (hook.hooked == null)
+            return;
+        NPC npc = npcRegistry.getNPC(hook.hooked.getBukkitEntity());
+        if (npc == null)
+            return;
+        if (npc.isProtected()) {
+            hook.hooked = null;
+            hook.die();
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     public static void replaceTrackerEntry(Player player) {
         WorldServer server = (WorldServer) NMS.getHandle(player).getWorld();
@@ -542,21 +679,27 @@ public class NMS {
         }
     }
 
-    public static void sendPacket(Player player, Packet packet) {
+    public static void sendPacket(Player player, Packet<?> packet) {
         if (packet == null)
             return;
         ((EntityPlayer) NMS.getHandle(player)).playerConnection.sendPacket(packet);
     }
 
-    public static void sendPacketNearby(Player from, Location location, Packet packet) {
-        NMS.sendPacketsNearby(from, location, Arrays.asList(packet), 64);
+    public static void sendPacketNearby(Player from, Location location, Packet<?> packet) {
+        NMS.sendPacketNearby(from, location, packet, 64);
     }
 
-    public static void sendPacketsNearby(Player from, Location location, Collection<Packet> packets) {
+    public static void sendPacketNearby(Player from, Location location, Packet<?> packet, double radius) {
+        List<Packet<?>> list = new ArrayList<Packet<?>>();
+        list.add(packet);
+        NMS.sendPacketsNearby(from, location, list, radius);
+    }
+
+    public static void sendPacketsNearby(Player from, Location location, Collection<Packet<?>> packets) {
         NMS.sendPacketsNearby(from, location, packets, 64);
     }
 
-    public static void sendPacketsNearby(Player from, Location location, Collection<Packet> packets, double radius) {
+    public static void sendPacketsNearby(Player from, Location location, Collection<Packet<?>> packets, double radius) {
         radius *= radius;
         final org.bukkit.World world = location.getWorld();
         for (Player ply : Bukkit.getServer().getOnlinePlayers()) {
@@ -566,13 +709,13 @@ public class NMS {
             if (location.distanceSquared(ply.getLocation(PACKET_CACHE_LOCATION)) > radius) {
                 continue;
             }
-            for (Packet packet : packets) {
+            for (Packet<?> packet : packets) {
                 sendPacket(ply, packet);
             }
         }
     }
 
-    public static void sendPacketsNearby(Player from, Location location, Packet... packets) {
+    public static void sendPacketsNearby(Player from, Location location, Packet<?>... packets) {
         NMS.sendPacketsNearby(from, location, Arrays.asList(packets), 64);
     }
 
@@ -611,12 +754,12 @@ public class NMS {
                 new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, entity));
     }
 
-    public static void sendToOnline(Packet... packets) {
+    public static void sendToOnline(Packet<?>... packets) {
         Validate.notNull(packets, "packets cannot be null");
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player == null || !player.isOnline())
                 continue;
-            for (Packet packet : packets) {
+            for (Packet<?> packet : packets) {
                 sendPacket(player, packet);
             }
         }
@@ -638,10 +781,15 @@ public class NMS {
             return;
         EntityLiving handle = (EntityLiving) en;
         yaw = clampYaw(yaw);
-        handle.aK = yaw;
+        handle.aP = yaw;
         if (!(handle instanceof EntityHuman))
-            handle.aI = yaw;
-        handle.aL = yaw;
+            handle.aO = yaw;
+        handle.aQ = yaw;
+    }
+
+    public static void setKnockbackResistance(org.bukkit.entity.LivingEntity entity, double d) {
+        EntityLiving handle = NMS.getHandle(entity);
+        handle.getAttributeInstance(GenericAttributes.c).setValue(d);
     }
 
     public static void setProfile(SkullMeta meta, GameProfile profile) {
@@ -690,17 +838,17 @@ public class NMS {
     }
 
     public static void setStepHeight(EntityLiving entity, float height) {
-        entity.S = height;
+        entity.P = height;
     }
 
     public static void setVerticalMovement(org.bukkit.entity.Entity bukkitEntity, double d) {
         if (!bukkitEntity.getType().isAlive())
             return;
         EntityLiving handle = NMS.getHandle((LivingEntity) bukkitEntity);
-        handle.ba = (float) d;
+        handle.bf = (float) d;
     }
 
-    public static boolean shouldJump(net.minecraft.server.v1_8_R3.Entity entity) {
+    public static boolean shouldJump(net.minecraft.server.v1_10_R1.Entity entity) {
         if (JUMP_FIELD == null || !(entity instanceof EntityLiving))
             return false;
         try {
@@ -759,7 +907,7 @@ public class NMS {
     }
 
     public static void updateNavigation(NavigationAbstract navigation) {
-        navigation.k();
+        navigation.l();
     }
 
     public static void updateNavigationWorld(org.bukkit.entity.Entity entity, org.bukkit.World world) {
@@ -801,22 +949,25 @@ public class NMS {
         }
     }
 
+    private static final Field CRAFT_BOSSBAR_HANDLE_FIELD = getField(CraftBossBar.class, "handle");
     private static final float DEFAULT_SPEED = 1F;
+    private static final Field ENDERDRAGON_BATTLE_BAR_FIELD = getField(EnderDragonBattle.class, "c");
+    private static final Field ENDERDRAGON_BATTLE_FIELD = getField(EntityEnderDragon.class, "bK");
     private static Map<Class<?>, Integer> ENTITY_CLASS_TO_INT;
     private static Map<Class<?>, String> ENTITY_CLASS_TO_NAME;
     private static final Map<Class<?>, Constructor<?>> ENTITY_CONSTRUCTOR_CACHE = new WeakHashMap<Class<?>, Constructor<?>>();
     private static Field GOAL_FIELD = getField(PathfinderGoalSelector.class, "b");
-    private static final Field JUMP_FIELD = getField(EntityLiving.class, "aY");
+    private static final Field JUMP_FIELD = getField(EntityLiving.class, "be");
     private static Method MAKE_REQUEST;
-    private static Field NAVIGATION_WORLD_FIELD = getField(NavigationAbstract.class, "c");
+    private static Field NAVIGATION_WORLD_FIELD = getField(NavigationAbstract.class, "b");
     private static Field NETWORK_ADDRESS = getField(NetworkManager.class, "l");
-    private static Field NETWORK_CHANNEL = getField(NetworkManager.class, "channel");
     private static final Location PACKET_CACHE_LOCATION = new Location(null, 0, 0, 0);
-    private static Field PATHFINDING_RANGE = getField(NavigationAbstract.class, "a");
+    private static Field PATHFINDING_RANGE = getField(NavigationAbstract.class, "f");
+    private static final Field RABBIT_FIELD = getField(EntityRabbit.class, "bx");
     private static final Random RANDOM = Util.getFastRandom();
     private static Field SKULL_PROFILE_FIELD;
-
     private static Field TRACKED_ENTITY_SET = NMS.getField(EntityTracker.class, "c");
+    private static final Field WITHER_BOSS_BAR_FIELD = getField(EntityWither.class, "bG");
 
     static {
         try {

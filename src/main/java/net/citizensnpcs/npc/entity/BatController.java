@@ -1,12 +1,13 @@
 package net.citizensnpcs.npc.entity;
 
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftBat;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftBat;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.entity.Bat;
 import org.bukkit.util.Vector;
 
+import net.citizensnpcs.api.event.NPCEnderTeleportEvent;
 import net.citizensnpcs.api.event.NPCPushEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.npc.CitizensNPC;
@@ -14,9 +15,10 @@ import net.citizensnpcs.npc.MobEntityController;
 import net.citizensnpcs.npc.ai.NPCHolder;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
-import net.minecraft.server.v1_8_R3.EntityBat;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.World;
+import net.minecraft.server.v1_10_R1.EntityBat;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.SoundEffect;
+import net.minecraft.server.v1_10_R1.World;
 
 public class BatController extends MobEntityController {
     public BatController() {
@@ -59,33 +61,17 @@ public class BatController extends MobEntityController {
         }
 
         @Override
-        protected String bo() {
-            return npc == null || !npc.data().has(NPC.HURT_SOUND_METADATA) ? super.bo()
-                    : npc.data().get(NPC.HURT_SOUND_METADATA, super.bo());
+        protected SoundEffect bV() {
+            return NMS.getSoundEffect(npc, super.bV(), NPC.DEATH_SOUND_METADATA);
         }
 
         @Override
-        protected String bp() {
-            return npc == null || !npc.data().has(NPC.DEATH_SOUND_METADATA) ? super.bp()
-                    : npc.data().get(NPC.DEATH_SOUND_METADATA, super.bp());
+        protected SoundEffect bW() {
+            return NMS.getSoundEffect(npc, super.bW(), NPC.HURT_SOUND_METADATA);
         }
 
         @Override
-        public boolean cc() {
-            if (npc == null) {
-                return super.cc();
-            }
-            boolean protectedDefault = npc.data().get(NPC.DEFAULT_PROTECTED_METADATA, true);
-            if (!protectedDefault || !npc.data().get(NPC.LEASH_PROTECTED_METADATA, protectedDefault))
-                return super.cc();
-            if (super.cc()) {
-                unleash(true, false); // clearLeash with client update
-            }
-            return false; // shouldLeash
-        }
-
-        @Override
-        public void collide(net.minecraft.server.v1_8_R3.Entity entity) {
+        public void collide(net.minecraft.server.v1_10_R1.Entity entity) {
             // this method is called by both the entities involved - cancelling
             // it will not stop the NPC from moving.
             super.collide(entity);
@@ -100,19 +86,13 @@ public class BatController extends MobEntityController {
         }
 
         @Override
-        protected void D() {
-            if (npc == null) {
-                super.D();
-            }
-        }
-
-        @Override
-        public void E() {
-            if (npc == null) {
-                super.E();
-            } else {
-                NMS.updateAI(this);
-                npc.update();
+        public void enderTeleportTo(double d0, double d1, double d2) {
+            if (npc == null)
+                super.enderTeleportTo(d0, d1, d2);
+            NPCEnderTeleportEvent event = new NPCEnderTeleportEvent(npc);
+            Bukkit.getPluginManager().callEvent(event);
+            if (!event.isCancelled()) {
+                super.enderTeleportTo(d0, d1, d2);
             }
         }
 
@@ -139,6 +119,11 @@ public class BatController extends MobEntityController {
         }
 
         @Override
+        protected SoundEffect G() {
+            return NMS.getSoundEffect(npc, super.G(), NPC.AMBIENT_SOUND_METADATA);
+        }
+
+        @Override
         public CraftEntity getBukkitEntity() {
             if (bukkitEntity == null && npc != null)
                 bukkitEntity = new BatNPC(this);
@@ -150,14 +135,39 @@ public class BatController extends MobEntityController {
             return npc;
         }
 
-        public void setFlying(boolean flying) {
-            setAsleep(flying);
+        @Override
+        public boolean isLeashed() {
+            if (npc == null) {
+                return super.isLeashed();
+            }
+            boolean protectedDefault = npc.data().get(NPC.DEFAULT_PROTECTED_METADATA, true);
+            if (!protectedDefault || !npc.data().get(NPC.LEASH_PROTECTED_METADATA, protectedDefault))
+                return super.isLeashed();
+            if (super.isLeashed()) {
+                unleash(true, false); // clearLeash with client update
+            }
+            return false; // shouldLeash
         }
 
         @Override
-        protected String z() {
-            return npc == null || !npc.data().has(NPC.AMBIENT_SOUND_METADATA) ? super.z()
-                    : npc.data().get(NPC.AMBIENT_SOUND_METADATA, super.z());
+        protected void L() {
+            if (npc == null) {
+                super.L();
+            }
+        }
+
+        @Override
+        public void M() {
+            if (npc == null) {
+                super.M();
+            } else {
+                NMS.updateAI(this);
+                npc.update();
+            }
+        }
+
+        public void setFlying(boolean flying) {
+            setAsleep(flying);
         }
     }
 }

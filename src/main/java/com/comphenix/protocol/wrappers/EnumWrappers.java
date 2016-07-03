@@ -149,7 +149,8 @@ public abstract class EnumWrappers {
 		STOP_DESTROY_BLOCK,
 		DROP_ALL_ITEMS,
 		DROP_ITEM,
-		RELEASE_USE_ITEM;
+		RELEASE_USE_ITEM,
+		SWAP_HELD_ITEMS;
 	}
 
 	public enum PlayerAction {
@@ -158,8 +159,10 @@ public abstract class EnumWrappers {
 		STOP_SLEEPING,
 		START_SPRINTING,
 		STOP_SPRINTING,
-		RIDING_JUMP,
-		OPEN_INVENTORY;
+		START_RIDING_JUMP,
+		STOP_RIDING_JUMP,
+		OPEN_INVENTORY,
+		START_FALL_FLYING;
 	}
 
 	public enum ScoreboardAction {
@@ -204,12 +207,16 @@ public abstract class EnumWrappers {
 		SLIME("slime", 33, false),
 		HEART("heart", 34, false),
 		BARRIER("barrier", 35, false),
-		ITEM_CRACK("iconcrack_", 36, false, 2),
-		BLOCK_CRACK("blockcrack_", 37, false, 1),
-		BLOCK_DUST("blockdust_", 38, false, 1),
+		ITEM_CRACK("iconcrack", 36, false, 2),
+		BLOCK_CRACK("blockcrack", 37, false, 1),
+		BLOCK_DUST("blockdust", 38, false, 1),
 		WATER_DROP("droplet", 39, false),
 		ITEM_TAKE("take", 40, false),
-		MOB_APPEARANCE("mobappearance", 41, true);
+		MOB_APPEARANCE("mobappearance", 41, true),
+		DRAGON_BREATH("dragonbreath", 42, false),
+		END_ROD("endRod", 43, false),
+		DAMAGE_INDICATOR("damageIndicator", 44, true),
+		SWEEP_ATTACK("sweepAttack", 45, true);
 
 		private static final Map<String, Particle> BY_NAME;
 		private static final Map<Integer, Particle> BY_ID;
@@ -265,6 +272,54 @@ public abstract class EnumWrappers {
 		}
 	}
 
+	public enum SoundCategory {
+		MASTER("master"),
+		MUSIC("music"),
+		RECORDS("record"),
+		WEATHER("weather"),
+		BLOCKS("block"),
+		HOSTILE("hostile"),
+		NEUTRAL("neutral"),
+		PLAYERS("player"),
+		AMBIENT("ambient"),
+		VOICE("voice");
+
+		private static final Map<String, SoundCategory> LOOKUP;
+		static {
+			LOOKUP = new HashMap<>();
+			for (SoundCategory category : values()) {
+				LOOKUP.put(category.key, category);
+			}
+		}
+
+		private final String key;
+		private SoundCategory(String key) {
+			this.key = key;
+		}
+
+		public String getKey() {
+			return key;
+		}
+
+		public static SoundCategory getByKey(String key) {
+			return LOOKUP.get(key.toLowerCase());
+		}
+	}
+
+	public enum ItemSlot {
+		MAINHAND,
+		OFFHAND,
+		FEET,
+		LEGS,
+		CHEST,
+		HEAD;
+	}
+
+	public enum Hand {
+		MAIN_HAND,
+		OFF_HAND;
+	}
+
 	private static Class<?> PROTOCOL_CLASS = null;
 	private static Class<?> CLIENT_COMMAND_CLASS = null;
 	private static Class<?> CHAT_VISIBILITY_CLASS = null;
@@ -280,6 +335,9 @@ public abstract class EnumWrappers {
 	private static Class<?> PLAYER_ACTION_CLASS = null;
 	private static Class<?> SCOREBOARD_ACTION_CLASS = null;
 	private static Class<?> PARTICLE_CLASS = null;
+	private static Class<?> SOUND_CATEGORY_CLASS = null;
+	private static Class<?> ITEM_SLOT_CLASS = null;
+	private static Class<?> HAND_CLASS = null;
 
 	private static boolean INITIALIZED = false;
 	private static Map<Class<?>, EquivalentConverter<?>> FROM_NATIVE = Maps.newHashMap();
@@ -312,6 +370,9 @@ public abstract class EnumWrappers {
 		PLAYER_ACTION_CLASS = getEnum(PacketType.Play.Client.ENTITY_ACTION.getPacketClass(), 0);
 		SCOREBOARD_ACTION_CLASS = getEnum(PacketType.Play.Server.SCOREBOARD_SCORE.getPacketClass(), 0);
 		PARTICLE_CLASS = getEnum(PacketType.Play.Server.WORLD_PARTICLES.getPacketClass(), 0);
+		SOUND_CATEGORY_CLASS = getEnum(PacketType.Play.Server.CUSTOM_SOUND_EFFECT.getPacketClass(), 0);
+		ITEM_SLOT_CLASS = getEnum(PacketType.Play.Server.ENTITY_EQUIPMENT.getPacketClass(), 0);
+		HAND_CLASS = getEnum(PacketType.Play.Client.USE_ENTITY.getPacketClass(), 1);
 
 		associate(PROTOCOL_CLASS, Protocol.class, getClientCommandConverter());
 		associate(CLIENT_COMMAND_CLASS, ClientCommand.class, getClientCommandConverter());
@@ -328,6 +389,9 @@ public abstract class EnumWrappers {
 		associate(PLAYER_ACTION_CLASS, PlayerAction.class, getEntityActionConverter());
 		associate(SCOREBOARD_ACTION_CLASS, ScoreboardAction.class, getUpdateScoreActionConverter());
 		associate(PARTICLE_CLASS, Particle.class, getParticleConverter());
+		associate(SOUND_CATEGORY_CLASS, SoundCategory.class, getSoundCategoryConverter());
+		associate(ITEM_SLOT_CLASS, ItemSlot.class, getItemSlotConverter());
+		associate(HAND_CLASS, Hand.class, getHandConverter());
 		INITIALIZED = true;
 	}
 
@@ -436,6 +500,21 @@ public abstract class EnumWrappers {
 		return PARTICLE_CLASS;
 	}
 
+	public static Class<?> getSoundCategoryClass() {
+		initialize();
+		return SOUND_CATEGORY_CLASS;
+	}
+
+	public static Class<?> getItemSlotClass() {
+		initialize();
+		return ITEM_SLOT_CLASS;
+	}
+
+	public static Class<?> getHandClass() {
+		initialize();
+		return HAND_CLASS;
+	}
+
 	// Get the converters
 	public static EquivalentConverter<Protocol> getProtocolConverter() {
 		return new EnumConverter<Protocol>(Protocol.class);
@@ -497,6 +576,18 @@ public abstract class EnumWrappers {
 		return new EnumConverter<Particle>(Particle.class);
 	}
 
+	public static EquivalentConverter<SoundCategory> getSoundCategoryConverter() {
+		return new EnumConverter<SoundCategory>(SoundCategory.class);
+	}
+
+	public static EquivalentConverter<ItemSlot> getItemSlotConverter() {
+		return new EnumConverter<ItemSlot>(ItemSlot.class);
+	}
+
+	public static EquivalentConverter<Hand> getHandConverter() {
+		return new EnumConverter<Hand>(Hand.class);
+	}
+
 	/**
 	 * Retrieve a generic enum converter for use with StructureModifiers.
 	 * @param enumClass - Enum class
@@ -508,7 +599,7 @@ public abstract class EnumWrappers {
 
 	// The common enum converter
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static class EnumConverter<T extends Enum<T>> implements EquivalentConverter<T> {
+	public static class EnumConverter<T extends Enum<T>> implements EquivalentConverter<T> {
 		private Class<T> specificType;
 
 		public EnumConverter(Class<T> specificType) {

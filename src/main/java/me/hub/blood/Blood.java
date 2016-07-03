@@ -35,7 +35,7 @@ public class Blood extends MiniPlugin
 	@EventHandler
 	public void Death(PlayerDeathEvent event)
 	{
-		Effects(event.getEntity(), event.getEntity().getEyeLocation(), 10, 0.5, Sound.HURT_FLESH, 1f, 1f, Material.INK_SACK, (byte)1, true);
+		Effects(event.getEntity(), event.getEntity().getEyeLocation(), 10, 0.5, Sound.ENTITY_CAT_HURT, 1f, 1f, Material.INK_SACK, (byte)1, true);
 	}
 	
 	public void Effects(Player player, Location loc, int particles, double velMult, Sound sound,

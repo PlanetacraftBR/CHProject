@@ -56,7 +56,7 @@ public class WrappedBlockData extends AbstractWrapper {
 				.parameterExactArray(IBLOCK_DATA)
 				.returnTypeExact(int.class)
 				.build();
-		TO_LEGACY_DATA = Accessors.getMethodAccessor(fuzzy.getMethod(contract));
+		TO_LEGACY_DATA = Accessors.getMethodAccessor(fuzzy.getMethod(contract, "toLegacyData"));
 
 		fuzzy = FuzzyReflection.fromClass(MAGIC_NUMBERS);
 		GET_NMS_BLOCK = Accessors.getMethodAccessor(fuzzy.getMethodByParameters("getBlock", BLOCK,
@@ -147,6 +147,14 @@ public class WrappedBlockData extends AbstractWrapper {
 		Object nmsBlock = GET_NMS_BLOCK.invoke(null, type);
 		Object blockData = FROM_LEGACY_DATA.invoke(nmsBlock, data);
 		return new WrappedBlockData(blockData);
+	}
+
+	/**
+	 * Retrieve a deep copy of the current wrapper object.
+	 * @return The cloned object.
+	 */
+	public WrappedBlockData deepClone() {
+		return WrappedBlockData.createData(getType(), getData());
 	}
 
 	@Override

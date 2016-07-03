@@ -17,6 +17,8 @@
 
 package com.comphenix.protocol.injector.player;
 
+import io.netty.channel.Channel;
+
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -37,7 +39,6 @@ import org.bukkit.entity.Player;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Sender;
 import com.comphenix.protocol.Packets;
-import com.comphenix.protocol.compat.netty.WrappedChannel;
 import com.comphenix.protocol.concurrency.BlockingHashMap;
 import com.comphenix.protocol.concurrency.IntegerSet;
 import com.comphenix.protocol.error.ErrorReporter;
@@ -51,7 +52,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
 import com.comphenix.protocol.injector.ListenerInvoker;
-import com.comphenix.protocol.injector.PacketFilterManager.PlayerInjectHooks;
+import com.comphenix.protocol.injector.PlayerInjectHooks;
 import com.comphenix.protocol.injector.PlayerLoggedOutException;
 import com.comphenix.protocol.injector.packet.PacketRegistry;
 import com.comphenix.protocol.injector.server.AbstractInputStreamLookup;
@@ -756,7 +757,7 @@ class ProxyPlayerInjectionHandler implements PlayerInjectionHandler {
 	}
 
 	@Override
-	public WrappedChannel getChannel(Player player) {
+	public Channel getChannel(Player player) {
 		throw new UnsupportedOperationException();
 	}
 }

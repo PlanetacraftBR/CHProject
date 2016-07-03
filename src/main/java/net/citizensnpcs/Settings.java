@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.Messaging;
 import net.citizensnpcs.api.util.Storage;
@@ -16,7 +17,7 @@ public class Settings {
     private final DataKey root;
 
     public Settings(File folder) {
-        config = new YamlStorage(new File(folder, "citiziens.yml"), "Citizens Configuration");
+        config = new YamlStorage(new File(folder, "config.yml"), "Citizens Configuration");
         root = config.getKey("");
 
         config.load();
@@ -47,7 +48,11 @@ public class Settings {
     }
 
     private void updateMessagingSettings() {
-        Messaging.configure(Setting.DEBUG_MODE.asBoolean(), Setting.MESSAGE_COLOUR.asString(),
+        File file = null;
+        if (!Setting.DEBUG_FILE.asString().isEmpty()) {
+            file = new File(CitizensAPI.getPlugin().getDataFolder(), Setting.DEBUG_FILE.asString());
+        }
+        Messaging.configure(file, Setting.DEBUG_MODE.asBoolean(), Setting.MESSAGE_COLOUR.asString(),
                 Setting.HIGHLIGHT_COLOUR.asString());
     }
 
@@ -63,6 +68,7 @@ public class Settings {
                 "<target>|, <target>| & <target>| & others"),
         CHAT_RANGE("npc.chat.options.range", 5),
         CHECK_MINECRAFT_VERSION("advanced.check-minecraft-version", true),
+        DEBUG_FILE("general.debug-file", ""),
         DEBUG_MODE("general.debug-mode", false),
         DEBUG_PATHFINDING("general.debug-pathfinding", false),
         DEFAULT_DISTANCE_MARGIN("npc.pathfinding.default-distance-margin", 2),
@@ -115,8 +121,10 @@ public class Settings {
         TALK_CLOSE_MAXIMUM_COOLDOWN("npc.text.max-talk-cooldown", 5),
         TALK_CLOSE_MINIMUM_COOLDOWN("npc.text.min-talk-cooldown", 10),
         TALK_ITEM("npc.text.talk-item", "340"),
+        TELEPORT_DELAY("npc.teleport-delay", -1),
         USE_BOAT_CONTROLS("npc.controllable.use-boat-controls", true),
-        USE_NEW_PATHFINDER("npc.pathfinding.use-new-finder", false);
+        USE_NEW_PATHFINDER("npc.pathfinding.use-new-finder", false),
+        USE_SCOREBOARD_TEAMS("npc.player-scoreboard-teams.enable", true);
 
         protected String path;
         protected Object value;

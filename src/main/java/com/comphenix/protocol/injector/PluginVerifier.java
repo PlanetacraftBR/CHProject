@@ -11,8 +11,6 @@ import org.bukkit.plugin.PluginLoadOrder;
 
 import com.google.common.collect.Sets;
 
-import me.hub.Main;
-
 /**
  * Determine if a plugin using ProtocolLib is correct.
  * 
@@ -83,7 +81,7 @@ class PluginVerifier {
 				throw new IllegalArgumentException("dependency cannot have a load directives.");
 		} catch (LinkageError e) {
 			// They're probably using an ancient version of Bukkit
-			Main.log(Level.WARNING, "Failed to determine loadBefore: " + e);
+			dependency.getLogger().log(Level.WARNING, "Failed to determine loadBefore: " + e);
 		}
 
 		this.dependency = dependency;

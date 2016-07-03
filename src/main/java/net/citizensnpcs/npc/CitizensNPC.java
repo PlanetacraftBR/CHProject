@@ -1,21 +1,24 @@
 package net.citizensnpcs.npc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -44,7 +47,7 @@ import net.citizensnpcs.trait.CurrentLocation;
 import net.citizensnpcs.util.Messages;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
+import net.minecraft.server.v1_10_R1.PacketPlayOutEntityTeleport;
 
 public class CitizensNPC extends AbstractNPC {
     private EntityController entityController;
@@ -76,20 +79,22 @@ public class CitizensNPC extends AbstractNPC {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             getEntity().getLocation().getChunk();
-            Messaging.debug("Couldn't despawn", getId(), "due to despawn event cancellation. Force loaded chunk.");
+            Messaging.debug("Couldn't despawn", getId(), "due to despawn event cancellation. Force loaded chunk.",
+                    getEntity().isValid());
             return false;
         }
         boolean keepSelected = getTrait(Spawned.class).shouldSpawn();
         if (!keepSelected) {
             data().remove("selectors");
         }
-        for (Trait trait : traits.values()) {
-            trait.onDespawn();
-        }
         navigator.onDespawn();
         if (reason == DespawnReason.RELOAD) {
             unloadEvents();
         }
+        for (Trait trait : new ArrayList<Trait>(traits.values())) {
+            trait.onDespawn();
+        }
+        Messaging.debug("Despawned", getId(), "DespawnReason.", reason);
         entityController.remove();
 
         return true;
@@ -136,6 +141,9 @@ public class CitizensNPC extends AbstractNPC {
         CurrentLocation spawnLocation = getTrait(CurrentLocation.class);
         if (getTrait(Spawned.class).shouldSpawn() && spawnLocation.getLocation() != null) {
             spawn(spawnLocation.getLocation());
+        }
+        if (getTrait(Spawned.class).shouldSpawn() && spawnLocation.getLocation() == null) {
+            Messaging.debug("Tried to spawn", getId(), "on load but world was null");
         }
 
         navigator.load(root.getRelative("navigator"));
@@ -191,7 +199,7 @@ public class CitizensNPC extends AbstractNPC {
 
         entityController.spawn(at, this);
 
-        net.minecraft.server.v1_8_R3.Entity mcEntity = ((CraftEntity) getEntity()).getHandle();
+        net.minecraft.server.v1_10_R1.Entity mcEntity = ((CraftEntity) getEntity()).getHandle();
         boolean couldSpawn = !Util.isLoaded(at) ? false : mcEntity.world.addEntity(mcEntity, SpawnReason.CUSTOM);
 
         // send skin packets, if applicable, before other NMS packets are sent
@@ -258,6 +266,7 @@ public class CitizensNPC extends AbstractNPC {
                 NMS.replaceTrackerEntry(player);
             }
         }
+        Messaging.debug("Spawned", getId(), at, mcEntity.valid);
 
         return true;
     }
@@ -273,23 +282,36 @@ public class CitizensNPC extends AbstractNPC {
             }
             navigator.run();
 
+            getEntity().setGlowing(data().get(NPC.GLOWING_METADATA, false));
             if (!getNavigator().isNavigating() && updateCounter++ > Setting.PACKET_UPDATE_DELAY.asInt()) {
                 updateCounter = 0;
                 if (getEntity() instanceof LivingEntity) {
+                    OptionStatus nameVisibility = OptionStatus.NEVER;
                     if (!getEntity().isCustomNameVisible()) {
-                        if (getEntity() instanceof Player && data().has(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA)) {
-                            String teamName = data().get(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA);
-                            Bukkit.getScoreboardManager().getMainScoreboard().getTeam(teamName)
-                                    .setNameTagVisibility(NameTagVisibility.NEVER);
-                        }
                         getEntity().setCustomName("");
                     } else {
-                        if (getEntity() instanceof Player && data().has(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA)) {
-                            String teamName = data().get(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA);
-                            Bukkit.getScoreboardManager().getMainScoreboard().getTeam(teamName)
-                                    .setNameTagVisibility(NameTagVisibility.ALWAYS);
-                        }
+                        nameVisibility = OptionStatus.ALWAYS;
                         getEntity().setCustomName(getFullName());
+                    }
+                    String teamName = data().get(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA, "");
+                    if (getEntity() instanceof Player
+                            && Bukkit.getScoreboardManager().getMainScoreboard().getTeam(teamName) != null) {
+                        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getTeam(teamName);
+                        if (!Setting.USE_SCOREBOARD_TEAMS.asBoolean()) {
+                            team.unregister();
+                            data().remove(NPC.SCOREBOARD_FAKE_TEAM_NAME_METADATA);
+                        } else {
+                            team.setOption(Option.NAME_TAG_VISIBILITY, nameVisibility);
+                            if (data().has(NPC.GLOWING_COLOR_METADATA)) {
+                                if (team.getPrefix() == null || team.getPrefix().length() == 0
+                                        || (data().has("previous-glowing-color")
+                                                && !team.getPrefix().equals(data().get("previous-glowing-color")))) {
+                                    team.setPrefix(ChatColor.valueOf(data().<String> get(NPC.GLOWING_COLOR_METADATA))
+                                            .toString());
+                                    data().set("previous-glowing-color", team.getPrefix());
+                                }
+                            }
+                        }
                     }
                 }
                 Player player = getEntity() instanceof Player ? (Player) getEntity() : null;
@@ -300,11 +322,11 @@ public class CitizensNPC extends AbstractNPC {
             if (getEntity() instanceof LivingEntity) {
                 boolean nameplateVisible = data().get(NPC.NAMEPLATE_VISIBLE_METADATA, true);
                 ((LivingEntity) getEntity()).setCustomNameVisible(nameplateVisible);
-                Byte toByte = Byte.valueOf((byte) (nameplateVisible ? 1 : 0));
-                try {
-                    ((CraftLivingEntity) getEntity()).getHandle().getDataWatcher().watch(3, toByte);
-                } catch (NullPointerException e) {
-                    ((CraftLivingEntity) getEntity()).getHandle().getDataWatcher().a(3, toByte);
+
+                if (data().get(NPC.DEFAULT_PROTECTED_METADATA, true)) {
+                    NMS.setKnockbackResistance((LivingEntity) getEntity(), 1D);
+                } else {
+                    NMS.setKnockbackResistance((LivingEntity) getEntity(), 0D);
                 }
             }
         } catch (Exception ex) {

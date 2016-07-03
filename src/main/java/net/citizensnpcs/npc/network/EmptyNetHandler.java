@@ -1,10 +1,10 @@
 package net.citizensnpcs.npc.network;
 
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.NetworkManager;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PlayerConnection;
+import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.MinecraftServer;
+import net.minecraft.server.v1_10_R1.NetworkManager;
+import net.minecraft.server.v1_10_R1.Packet;
+import net.minecraft.server.v1_10_R1.PlayerConnection;
 
 public class EmptyNetHandler extends PlayerConnection {
     public EmptyNetHandler(MinecraftServer minecraftServer, NetworkManager networkManager, EntityPlayer entityPlayer) {
@@ -12,6 +12,6 @@ public class EmptyNetHandler extends PlayerConnection {
     }
 
     @Override
-    public void sendPacket(Packet packet) {
+    public void sendPacket(Packet<?> packet) {
     }
 }

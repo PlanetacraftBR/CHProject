@@ -4,7 +4,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.injector.PacketFilterManager.PlayerInjectHooks;
 
 /**
  * Yields access to the internal hook configuration.

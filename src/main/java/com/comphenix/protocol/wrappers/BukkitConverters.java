@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldType;
 import org.bukkit.entity.Entity;
@@ -40,7 +41,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.injector.BukkitUnwrapper;
 import com.comphenix.protocol.injector.PacketConstructor;
@@ -63,8 +64,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import me.hub.Main;
 
 /**
  * Contains several useful equivalent converters for normal Bukkit types.
@@ -675,7 +674,7 @@ public class BukkitConverters {
 	 */
 	public static EquivalentConverter<Entity> getEntityConverter(World world) {
 		final WeakReference<ProtocolManager> managerRef =
-				new WeakReference<ProtocolManager>(Main.getProtocolManager());
+				new WeakReference<ProtocolManager>(ProtocolLibrary.getProtocolManager());
 
 		return new WorldSpecificConverter<Entity>(world) {
 			@Override
@@ -964,7 +963,44 @@ public class BukkitConverters {
 
 		};
 	}
-	
+
+	private static MethodAccessor soundGetter = null;
+	private static FieldAccessor soundKey = null;
+
+	public static EquivalentConverter<Sound> getSoundConverter() {
+		return new IgnoreNullConverter<Sound>() {
+
+			@Override
+			public Class<Sound> getSpecificType() {
+				return Sound.class;
+			}
+
+			@Override
+			protected Object getGenericValue(Class<?> genericType, Sound specific) {
+				if (soundGetter == null) {
+					Class<?> soundEffects = MinecraftReflection.getMinecraftClass("SoundEffects");
+					FuzzyReflection fuzzy = FuzzyReflection.fromClass(soundEffects, true);
+					soundGetter = Accessors.getMethodAccessor(fuzzy.getMethodByParameters("getSound", MinecraftReflection.getSoundEffectClass(), new Class<?>[] { String.class }));
+				}
+
+				MinecraftKey key = MinecraftKey.fromEnum(specific);
+				return soundGetter.invoke(null, key.getFullKey());
+			}
+
+			@Override
+			protected Sound getSpecificValue(Object generic) {
+				if (soundKey == null) {
+					Class<?> soundEffect = generic.getClass();
+					FuzzyReflection fuzzy = FuzzyReflection.fromClass(soundEffect, true);
+					soundKey = Accessors.getFieldAccessor(fuzzy.getFieldByType("key", MinecraftReflection.getMinecraftKeyClass()));
+				}
+
+				MinecraftKey key = MinecraftKey.fromHandle(soundKey.get(generic));
+				return Sound.valueOf(key.getEnumFormat());
+			}
+		};
+	}
+
  	/**
 	 * Wraps a given equivalent converter in NULL checks, ensuring that such values are ignored.
 	 * @param <TType> Type
@@ -1069,7 +1105,7 @@ public class BukkitConverters {
 				put(MinecraftReflection.getItemStackClass(), (EquivalentConverter) getItemStackConverter()).
 				put(MinecraftReflection.getNBTBaseClass(), (EquivalentConverter) getNbtConverter()).
 				put(MinecraftReflection.getNBTCompoundClass(), (EquivalentConverter) getNbtConverter()).
-				put(MinecraftReflection.getWatchableObjectClass(), (EquivalentConverter) getWatchableObjectConverter()).
+				put(MinecraftReflection.getDataWatcherItemClass(), (EquivalentConverter) getWatchableObjectConverter()).
 				put(MinecraftReflection.getMobEffectClass(), (EquivalentConverter) getPotionEffectConverter()).
 				put(MinecraftReflection.getNmsWorldClass(), (EquivalentConverter) getWorldConverter());
 				
@@ -1109,5 +1145,39 @@ public class BukkitConverters {
 			unwrappers = builder.build();
 		}
 		return unwrappers;
+	}
+
+	private static MethodAccessor getMobEffectId = null;
+	private static MethodAccessor getMobEffect = null;
+
+	public static EquivalentConverter<PotionEffectType> getEffectTypeConverter() {
+		return new IgnoreNullConverter<PotionEffectType>() {
+
+			@Override
+			public Class<PotionEffectType> getSpecificType() {
+				return PotionEffectType.class;
+			}
+
+			@Override
+			protected Object getGenericValue(Class<?> genericType, PotionEffectType specific) {
+				if (getMobEffect == null) {
+					getMobEffect = Accessors.getMethodAccessor(genericType, "fromId", int.class);
+				}
+
+				int id = specific.getId();
+				return getMobEffect.invoke(null, id);
+			}
+
+			@Override
+			protected PotionEffectType getSpecificValue(Object generic) {
+				Class<?> clazz = MinecraftReflection.getMobEffectListClass();
+				if (getMobEffectId == null) {
+					getMobEffectId = Accessors.getMethodAccessor(clazz, "getId", clazz);
+				}
+
+				int id = (int) getMobEffectId.invoke(null, generic);
+				return PotionEffectType.getById(id);
+			}
+		};
 	}
 }

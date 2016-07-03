@@ -45,7 +45,8 @@ import org.bukkit.Server;
 import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolLogger;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
@@ -63,13 +64,10 @@ import com.comphenix.protocol.reflect.fuzzy.FuzzyMatchers;
 import com.comphenix.protocol.reflect.fuzzy.FuzzyMethodContract;
 import com.comphenix.protocol.utility.RemappedClassSource.RemapperUnavaibleException;
 import com.comphenix.protocol.utility.RemappedClassSource.RemapperUnavaibleException.Reason;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.comphenix.protocol.wrappers.nbt.NbtType;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
-
-import me.hub.Main;
 
 /**
  * Methods and constants specifically used in conjuction with reflecting Minecraft object.
@@ -211,7 +209,7 @@ public class MinecraftReflection {
 					if (MinecraftVersion.SCARY_UPDATE.compareTo(version) <= 0) {
 						 // Just assume R1 - it's probably fine
 						packageVersion = "v" + version.getMajor() + "_" + version.getMinor() + "_R1";
-						Main.log(Level.WARNING, "Assuming package version: " + packageVersion);
+						ProtocolLogger.log(Level.WARNING, "Assuming package version: " + packageVersion);
 					}
 				}
 
@@ -810,7 +808,7 @@ public class MinecraftReflection {
 		try {
 			return getMinecraftClass("ServerPing");
 		} catch (RuntimeException e) {
-			Class<?> statusServerInfo = PacketType.Status.Server.OUT_SERVER_INFO.getPacketClass();
+			Class<?> statusServerInfo = PacketType.Status.Server.SERVER_INFO.getPacketClass();
 
 			// Find a server ping object
 			AbstractFuzzyMatcher<Class<?>> serverPingContract = FuzzyClassContract.newBuilder().
@@ -1249,10 +1247,11 @@ public class MinecraftReflection {
 	 * @return The ChunkPosition class.
 	 */
 	public static Class<?> getChunkCoordinatesClass() {
+		// TODO Figure out a fallback
 		try {
 			return getMinecraftClass("ChunkCoordinates");
 		} catch (RuntimeException e) {
-			return setMinecraftClass("ChunkCoordinates", WrappedDataWatcher.getTypeClass(6));
+			return null;
 		}
 	}
 
@@ -1288,10 +1287,20 @@ public class MinecraftReflection {
 	/**
 	 * Retrieve the WatchableObject class.
 	 * @return The WatchableObject class.
+	 * @deprecated Replaced by {@link #getDataWatcherItemClass()}
 	 */
+	@Deprecated
 	public static Class<?> getWatchableObjectClass() {
+		return getDataWatcherItemClass();
+	}
+
+	/**
+	 * Retrieve the DataWatcher Item class.
+	 * @return The class
+	 */
+	public static Class<?> getDataWatcherItemClass() {
 		try {
-			return getMinecraftClass("WatchableObject", "DataWatcher$WatchableObject");
+			return getMinecraftClass("DataWatcher$Item", "DataWatcher$WatchableObject", "WatchableObject");
 		} catch (RuntimeException e) {
 			Method selected = FuzzyReflection.fromClass(getDataWatcherClass(), true).
 					getMethod(FuzzyMethodContract.newBuilder().
@@ -1301,7 +1310,50 @@ public class MinecraftReflection {
 						    build());
 
 			// Use the second parameter
-			return setMinecraftClass("WatchableObject", selected.getParameterTypes()[1]);
+			return setMinecraftClass("DataWatcher$Item", selected.getParameterTypes()[1]);
+		}
+	}
+
+	public static Class<?> getDataWatcherObjectClass() {
+		// TODO Implement a fallback
+		return getMinecraftClass("DataWatcherObject");
+	}
+
+	public static boolean watcherObjectExists() {
+		try {
+			return getDataWatcherObjectClass() != null;
+		} catch (RuntimeException e) {
+			return false;
+		}
+	}
+
+	public static Class<?> getDataWatcherSerializerClass() {
+		// TODO Implement a fallback
+		return getMinecraftClass("DataWatcherSerializer");
+	}
+
+	public static Class<?> getDataWatcherRegistryClass() {
+		// TODO Implement a fallback
+		return getMinecraftClass("DataWatcherRegistry");
+	}
+
+	public static Class<?> getMinecraftKeyClass() {
+		// TODO Implement a fallback
+		return getMinecraftClass("MinecraftKey");
+	}
+
+	public static Class<?> getMobEffectListClass() {
+		// TODO Implement a fallback
+		return getMinecraftClass("MobEffectList");
+	}
+
+	public static Class<?> getSoundEffectClass() {
+		try {
+			return getMinecraftClass("SoundEffect");
+		} catch (RuntimeException ex) {
+			FuzzyReflection fuzzy = FuzzyReflection.fromClass(PacketType.Play.Server.NAMED_SOUND_EFFECT.getPacketClass(), true);
+			Field field = fuzzy.getFieldByType("(.*)(Sound)(.*)");
+			return setMinecraftClass("SoundEffect", field.getType());
 		}
 	}
 
@@ -1654,22 +1706,18 @@ public class MinecraftReflection {
 		return getMinecraftClass("TileEntity");
 	}
 
-	private static Class<?> gsonClass = null;
-
 	/**
 	 * Retrieve the Gson class used by Minecraft.
 	 * @return The Gson class.
 	 */
 	public static Class<?> getMinecraftGsonClass() {
-		if (gsonClass == null) {
-			try {
-				return gsonClass = getClass("org.bukkit.craftbukkit.libs.com.google.gson.Gson");
-			} catch (RuntimeException e) {
-				return gsonClass = getClass("com.google.gson.Gson");
-			}
+		try {
+			return getMinecraftLibraryClass("com.google.gson.Gson");
+		} catch (RuntimeException e) {
+			Class<?> match = FuzzyReflection.fromClass(PacketType.Status.Server.SERVER_INFO.getPacketClass(), true)
+					.getFieldByType("(.*)(google.gson.Gson)").getType();
+			return setMinecraftLibraryClass("com.google.gson.Gson", match);
 		}
-
-		return gsonClass;
 	}
 
 	/**
@@ -1944,7 +1992,7 @@ public class MinecraftReflection {
 	 * @return The class source.
 	 */
 	private static ClassSource getClassSource() {
-		ErrorReporter reporter = Main.getErrorReporter();
+		ErrorReporter reporter = ProtocolLibrary.getErrorReporter();
 
 		// Lazy pattern again
 		if (classSource == null) {
@@ -1998,6 +2046,31 @@ public class MinecraftReflection {
 				throw new RuntimeException(String.format("Unable to find %s (%s)", className, Joiner.on(", ").join(aliases)));
 			}
 		}
+	}
+
+	/**
+	 * Retrieve the class object of a specific Minecraft library class.
+	 * @param className - the specific library Minecraft class.
+	 * @return Class object.
+	 * @throws RuntimeException If we are unable to find the given class.
+	 */
+	public static Class<?> getMinecraftLibraryClass(String className) {
+		if (libraryPackage == null)
+			libraryPackage = new CachedPackage("", getClassSource());
+		return libraryPackage.getPackageClass(className);
+	}
+
+	/**
+	 * Set the class object for the specific library class.
+	 * @param className - name of the Minecraft library class.
+	 * @param clazz - the new class object.
+	 * @return The provided clazz object.
+	 */
+	private static Class<?> setMinecraftLibraryClass(String className, Class<?> clazz) {
+		if (libraryPackage == null)
+			libraryPackage = new CachedPackage("", getClassSource());
+		libraryPackage.setPackageClass(className, clazz);
+		return clazz;
 	}
 
 	/**

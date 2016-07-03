@@ -4,10 +4,7 @@ import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-
 import com.google.common.collect.Maps;
-
-import me.hub.Main;
 
 /**
  * A lookup of the associated protocol version of a given Minecraft server.
@@ -41,15 +38,19 @@ public class MinecraftProtocolVersion {
 		map.put(new MinecraftVersion(1, 7, 1), 4);
 		map.put(new MinecraftVersion(1, 7, 6), 5);
 		map.put(new MinecraftVersion(1, 8, 0), 47);
+		map.put(new MinecraftVersion(1, 9, 0), 107);
+		map.put(new MinecraftVersion(1, 9, 2), 109);
+		map.put(new MinecraftVersion(1, 9, 4), 110);
+		map.put(new MinecraftVersion(1, 10, 0), 210);
 		return map;
 	}
-	
+
 	/**
 	 * Retrieve the version of the Minecraft protocol for the current version of Minecraft.
 	 * @return The version number.
 	 */
 	public static int getCurrentVersion() {
-		return getVersion(Main.getProtocolManager().getMinecraftVersion());
+		return getVersion(MinecraftVersion.getCurrentVersion());
 	}
 	
 	/**

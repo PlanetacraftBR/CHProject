@@ -25,13 +25,11 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 
-import com.comphenix.protocol.injector.PacketFilterManager.PlayerInjectHooks;
+import com.comphenix.protocol.injector.PlayerInjectHooks;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
-
-import me.hub.Main;
 
 /**
  * Represents the configuration of ProtocolLib.
@@ -159,6 +157,9 @@ public class ProtocolConfig {
 		}
 		if (global != null) {
 			updater = global.getConfigurationSection(SECTION_AUTOUPDATER);
+			if (updater.getValues(true).isEmpty()) {
+				plugin.getLogger().warning("Updater section is missing, regenerate your config!");
+			}
 		}
 
 		// Automatically copy defaults
@@ -172,7 +173,7 @@ public class ProtocolConfig {
 			loadingSections = false;
 
 			// Inform the user
-			Main.log("Created default configuration.");
+			plugin.getLogger().info("Created default configuration.");
 		}
 	}
 
@@ -258,7 +259,7 @@ public class ProtocolConfig {
 	 * @return TRUE if it should, FALSE otherwise.
 	 */
 	public boolean isAutoDownload() {
-		return updater != null && getUpdaterValue(UPDATER_DOWNLAD, true);
+		return updater != null && getUpdaterValue(UPDATER_DOWNLAD, false);
 	}
 
 	/**

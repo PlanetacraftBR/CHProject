@@ -17,6 +17,8 @@
 
 package com.comphenix.protocol.injector;
 
+import io.netty.channel.Channel;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -53,9 +55,6 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Sender;
 import com.comphenix.protocol.async.AsyncFilterManager;
 import com.comphenix.protocol.async.AsyncMarker;
-import com.comphenix.protocol.compat.netty.Netty;
-import com.comphenix.protocol.compat.netty.ProtocolInjector;
-import com.comphenix.protocol.compat.netty.WrappedChannel;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
@@ -68,6 +67,7 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketListener;
+import com.comphenix.protocol.injector.netty.ProtocolInjector;
 import com.comphenix.protocol.injector.netty.WirePacket;
 import com.comphenix.protocol.injector.packet.InterceptWritePacket;
 import com.comphenix.protocol.injector.packet.PacketInjector;
@@ -114,36 +114,6 @@ public final class PacketFilterManager implements ListenerInvoker, InternalManag
 	 * The number of ticks in a second.
 	 */
 	public static final int TICKS_PER_SECOND = 20;
-
-	/**
-	 * Sets the inject hook type. Different types allow for maximum compatibility.
-	 * @author Kristian
-	 */
-	public enum PlayerInjectHooks {
-		/**
-		 * The injection hook that does nothing. Set when every other inject hook fails.
-		 */
-		NONE,
-
-		/**
-		 * Override the network handler object itself. Only works in 1.3.
-		 * <p>
-		 * Cannot intercept MapChunk packets.
-		 */
-		NETWORK_MANAGER_OBJECT,
-
-		/**
-		 * Override the packet queue lists in NetworkHandler.
-		 * <p>
-		 * Cannot intercept MapChunk packets.
-		 */
-		NETWORK_HANDLER_FIELDS,
-
-		/**
-		 * Override the server handler object. Versatile, but a tad slower.
-		 */
-		NETWORK_SERVER_OBJECT;
-	}
 
 	// The amount of time to wait until we actually unhook every player
 	private static final int UNHOOK_DELAY = 5 * TICKS_PER_SECOND;
@@ -272,7 +242,7 @@ public final class PacketFilterManager implements ListenerInvoker, InternalManag
 
 		// Use the correct injection type
 		if (MinecraftReflection.isUsingNetty()) {
-			this.nettyInjector = Netty.getProtocolInjector(builder.getLibrary(), this, reporter);
+			this.nettyInjector = new ProtocolInjector(builder.getLibrary(), this, reporter);
 			this.playerInjection = nettyInjector.getPlayerInjector();
 			this.packetInjector = nettyInjector.getPacketInjector();
 
@@ -543,7 +513,8 @@ public final class PacketFilterManager implements ListenerInvoker, InternalManag
 	 * @param whitelist - whitelist of packet IDs.
 	 * @throws IllegalArgumentException If the whitelist is illegal.
 	 */
-	public static void verifyWhitelist(PacketListener listener, ListeningWhitelist whitelist) {
+	@Override
+	public void verifyWhitelist(PacketListener listener, ListeningWhitelist whitelist) {
 		for (PacketType type : whitelist.getTypes()) {
 			if (type == null) {
 				throw new IllegalArgumentException(String.format("Packet type in in listener %s was NULL.",
@@ -844,7 +815,7 @@ public final class PacketFilterManager implements ListenerInvoker, InternalManag
 
 	@Override
 	public void sendWirePacket(Player receiver, WirePacket packet) throws InvocationTargetException {
-		WrappedChannel channel = playerInjection.getChannel(receiver);
+		Channel channel = playerInjection.getChannel(receiver);
 		if (channel == null) {
 			throw new InvocationTargetException(new NullPointerException(), "Failed to obtain channel for " + receiver.getName());
 		}

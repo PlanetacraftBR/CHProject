@@ -1,5 +1,9 @@
 package com.comphenix.protocol.utility;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.GenericFutureListener;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -10,7 +14,6 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.compat.netty.Netty;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.FuzzyReflection;
 
@@ -94,7 +97,7 @@ public class MinecraftMethods {
 	public static Method getNetworkManagerHandleMethod() {
 		if (networkManagerHandle == null) {
 			networkManagerHandle = FuzzyReflection.fromClass(MinecraftReflection.getNetworkManagerClass(), true).
-					getMethodByParameters("handle", MinecraftReflection.getPacketClass(), Netty.getGenericFutureListenerArray());
+					getMethodByParameters("handle", MinecraftReflection.getPacketClass(), GenericFutureListener[].class);
 			networkManagerHandle.setAccessible(true);
 		}
 		return networkManagerHandle;
@@ -109,7 +112,7 @@ public class MinecraftMethods {
 	public static Method getNetworkManagerReadPacketMethod() {
 		if (networkManagerPacketRead == null) {
 			networkManagerPacketRead = FuzzyReflection.fromClass(MinecraftReflection.getNetworkManagerClass(), true).
-					getMethodByParameters("packetRead", Netty.getChannelHandlerContext(), MinecraftReflection.getPacketClass());
+					getMethodByParameters("packetRead", ChannelHandlerContext.class, MinecraftReflection.getPacketClass());
 			networkManagerPacketRead.setAccessible(true);
 		}
 		return networkManagerPacketRead;
@@ -174,7 +177,7 @@ public class MinecraftMethods {
 			// Create our proxy object
 			Object javaProxy = enhancer.create(
 					new Class<?>[] { MinecraftReflection.getByteBufClass() },
-					new Object[] { Netty.buffer().getHandle() }
+					new Object[] { Unpooled.buffer() }
 			);
 
 			Object lookPacket = new PacketContainer(PacketType.Play.Client.CLOSE_WINDOW).getHandle();

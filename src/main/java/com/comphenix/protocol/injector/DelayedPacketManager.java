@@ -22,10 +22,11 @@ import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.events.ConnectionSide;
+import com.comphenix.protocol.events.ListeningWhitelist;
 import com.comphenix.protocol.events.NetworkMarker;
+import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketListener;
-import com.comphenix.protocol.injector.PacketFilterManager.PlayerInjectHooks;
 import com.comphenix.protocol.injector.netty.WirePacket;
 import com.comphenix.protocol.injector.packet.PacketRegistry;
 import com.comphenix.protocol.reflect.FieldAccessException;
@@ -508,5 +509,16 @@ public class DelayedPacketManager implements InternalManager {
 		if (delegate != null)
 			delegate.close();
 		closed = true;
+	}
+
+	@Override
+	public void verifyWhitelist(PacketListener listener, ListeningWhitelist whitelist) {
+		for (PacketType type : whitelist.getTypes()) {
+			if (type == null) {
+				throw new IllegalArgumentException(String.format("Packet type in in listener %s was NULL.",
+						PacketAdapter.getPluginName(listener))
+				);
+			}
+		}
 	}
 }

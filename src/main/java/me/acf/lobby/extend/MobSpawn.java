@@ -7,8 +7,8 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftCreeper;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftCreeper;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EntityType;
@@ -27,8 +27,9 @@ import org.bukkit.util.Vector;
 
 import me.site.account.Account;
 import me.site.account.rank.Rank;
-import net.minecraft.server.v1_8_R3.EntityCreeper;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.EntityCreeper;
+import net.minecraft.server.v1_10_R1.EntityLiving;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
 
 public class MobSpawn implements Listener {
 	
@@ -137,14 +138,10 @@ public class MobSpawn implements Listener {
 	
 	
 	public static void noAI(Entity bukkitEntity) {
-	    net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
-	    NBTTagCompound tag = nmsEntity.getNBTTag();
-	    if (tag == null) {
-	        tag = new NBTTagCompound();
-	    }
-	    nmsEntity.c(tag);
-	    tag.setInt("NoAI", 1);
-	    tag.setInt("Silent", 1);
-	    nmsEntity.f(tag);
+	    net.minecraft.server.v1_10_R1.Entity nmsEntity = ((CraftEntity) bukkitEntity).getHandle();
+	    NBTTagCompound tag = new NBTTagCompound();
+        nmsEntity.c(tag);
+        tag.setInt("NoAI", 1);
+        nmsEntity.f(tag);
 	}
 }

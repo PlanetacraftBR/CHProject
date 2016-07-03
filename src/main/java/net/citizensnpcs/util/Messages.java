@@ -32,6 +32,8 @@ public class Messages {
     public static final String CITIZENS_SAVING = "citizens.notifications.saving";
     public static final String COLLAR_COLOUR_NOT_RECOGNISED = "citizens.commands.npc.wolf.unknown-collar-color";
     public static final String COLLAR_COLOUR_NOT_SUPPORTED = "citizens.commands.npc.wolf.collar-color-unsupported";
+    public static final String COLLIDABLE_SET = "citizens.commands.npc.collidable.set";
+    public static final String COLLIDABLE_UNSET = "citizens.commands.npc.collidable.unset";
     public static final String COMMAND_AGE_HELP = "citizens.commands.npc.age.help";
     public static final String COMMAND_HELP_HEADER = "citizens.commands.help.header";
     public static final String COMMAND_INVALID_MOBTYPE = "citizens.commands.invalid-mobtype";
@@ -49,6 +51,7 @@ public class Messages {
     public static final String CONTROLLABLE_SET = "citizens.commands.npc.controllable.set";
     public static final String COPIER_EDITOR_BEGIN = "citizens.editors.copier.begin";
     public static final String COPIER_EDITOR_END = "citizens.editors.copier.end";
+    public static final String CURRENT_SCRIPTS = "citizens.commands.npc.script.current-scripts";
     public static final String CURRENT_WAYPOINT_PROVIDER = "citizens.waypoints.current-provider";
     public static final String DATABASE_CONNECTION_FAILED = "citizens.notifications.database-connection-failed";
     public static final String DELAY_TRIGGER_PROMPT = "citizens.editors.waypoints.triggers.delay.prompt";
@@ -81,6 +84,9 @@ public class Messages {
     public static final String GAMEMODE_DESCRIBE = "citizens.commands.npc.gamemode.describe";
     public static final String GAMEMODE_INVALID = "citizens.commands.npc.gamemode.invalid";
     public static final String GAMEMODE_SET = "citizens.commands.npc.gamemode.set";
+    public static final String GLOWING_COLOR_SET = "citizens.commands.npc.glowing.color-set";
+    public static final String GLOWING_SET = "citizens.commands.npc.glowing.set";
+    public static final String GLOWING_UNSET = "citizens.commands.npc.glowing.unset";
     public static final String GRAVITY_DISABLED = "citizens.commands.npc.gravity.disabled";
     public static final String GRAVITY_ENABLED = "citizens.commands.npc.gravity.enabled";
     public static final String GUIDED_WAYPOINT_EDITOR_ADDED_AVAILABLE = "citizens.editors.waypoints.guided.added-available";
@@ -104,6 +110,7 @@ public class Messages {
     public static final String INVALID_POSE_NAME = "citizens.commands.npc.pose.invalid-name";
     public static final String INVALID_PROFESSION = "citizens.commands.npc.profession.invalid-profession";
     public static final String INVALID_RABBIT_TYPE = "citizens.commands.npc.rabbittype.invalid-type";
+    public static final String INVALID_SCRIPT_FILE = "citizens.commands.npc.script.invalid-file";
     public static final String INVALID_SHEEP_COLOR = "citizens.commands.npc.sheep.invalid-color";
     public static final String INVALID_SKELETON_TYPE = "citizens.commands.npc.skeletontype.invalid-type";
     public static final String INVALID_SOUND = "citizens.commands.npc.sound.invalid-sound";
@@ -134,6 +141,7 @@ public class Messages {
     public static final String MISSING_TRANSLATIONS = "citizens.notifications.missing-translations";
     public static final String MOBTYPE_CANNOT_BE_AGED = "citizens.commands.npc.age.cannot-be-aged";
     public static final String MONEY_WITHDRAWN = "citizens.economy.money-withdrawn";
+    public static final String MOUNT_NPC_MUST_BE_SPAWNED = "citizens.commands.npc.mount.must-be-spawned";
     public static final String MOVETO_FORMAT = "citizens.commands.npc.moveto.format";
     public static final String MOVETO_TELEPORTED = "citizens.commands.npc.moveto.teleported";
     public static final String NAMEPLATE_VISIBILITY_TOGGLED = "citizens.commands.npc.nameplate.toggled";

@@ -1,5 +1,10 @@
 Carregar: "Lobby"
 
+# Set to false to disable the auto updater
+testMode: false
+# For the latest spigot fake protocol hacks
+useSpigotHack: false
+
 global:
   # Settings for the automatic version updater
   auto updater:

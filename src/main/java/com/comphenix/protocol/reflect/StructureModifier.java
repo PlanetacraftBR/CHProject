@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolLogger;
 import com.comphenix.protocol.error.PluginContext;
 import com.comphenix.protocol.reflect.compiler.BackgroundCompiler;
 import com.comphenix.protocol.reflect.instances.BannedGenerator;
@@ -36,8 +38,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
-import me.hub.Main;
 
 /**
  * Provides list-oriented access to the fields of a Minecraft packet.
@@ -198,9 +198,9 @@ public class StructureModifier<TField> {
 			return readInternal(fieldIndex);
 		} catch (FieldAccessException ex) {
 			String plugin = PluginContext.getPluginCaller(ex);
-			if (Main.INCOMPATIBLE.contains(plugin)) {
-				Main.log(Level.WARNING, "Encountered an exception caused by incompatible plugin {0}.", plugin);
-				Main.log(Level.WARNING, "It is advised that you remove it.");
+			if (ProtocolLibrary.INCOMPATIBLE.contains(plugin)) {
+				ProtocolLogger.log(Level.WARNING, "Encountered an exception caused by incompatible plugin {0}.", plugin);
+				ProtocolLogger.log(Level.WARNING, "It is advised that you remove it.");
 			}
 
 			throw ex;
@@ -328,9 +328,9 @@ public class StructureModifier<TField> {
 			return writeInternal(fieldIndex, value);
 		} catch (FieldAccessException ex) {
 			String plugin = PluginContext.getPluginCaller(ex);
-			if (Main.INCOMPATIBLE.contains(plugin)) {
-				Main.log(Level.WARNING, "Encountered an exception caused by incompatible plugin {0}.", plugin);
-				Main.log(Level.WARNING, "It is advised that you remove it.");
+			if (ProtocolLibrary.INCOMPATIBLE.contains(plugin)) {
+				ProtocolLogger.log(Level.WARNING, "Encountered an exception caused by incompatible plugin {0}.", plugin);
+				ProtocolLogger.log(Level.WARNING, "It is advised that you remove it.");
 			}
 
 			throw ex;

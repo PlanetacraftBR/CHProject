@@ -13,6 +13,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
@@ -39,10 +40,11 @@ import net.citizensnpcs.api.util.prtree.DistanceResult;
 import net.citizensnpcs.api.util.prtree.PRTree;
 import net.citizensnpcs.api.util.prtree.Region3D;
 import net.citizensnpcs.api.util.prtree.SimplePointND;
+import net.citizensnpcs.trait.waypoint.WaypointProvider.EnumerableWaypointProvider;
 import net.citizensnpcs.util.Messages;
 import net.citizensnpcs.util.Util;
 
-public class GuidedWaypointProvider implements WaypointProvider {
+public class GuidedWaypointProvider implements EnumerableWaypointProvider {
     private final List<Waypoint> available = Lists.newArrayList();
     private GuidedAIGoal currentGoal;
     private final List<Waypoint> helpers = Lists.newArrayList();
@@ -50,7 +52,120 @@ public class GuidedWaypointProvider implements WaypointProvider {
     private boolean paused;
     private PRTree<Region3D<Waypoint>> tree = PRTree.create(new Region3D.Converter<Waypoint>(), 30);
 
+    @Override
+    public WaypointEditor createEditor(final CommandSender sender, CommandContext args) {
+        if (!(sender instanceof Player)) {
+            Messaging.sendErrorTr(sender, Messages.COMMAND_MUST_BE_INGAME);
+            return null;
+        }
+        final Player player = (Player) sender;
+        return new WaypointEditor() {
+            private final WaypointMarkers markers = new WaypointMarkers(player.getWorld());
+            private boolean showPath;
 
+            @Override
+            public void begin() {
+                showPath();
+                Messaging.sendTr(player, Messages.GUIDED_WAYPOINT_EDITOR_BEGIN);
+            }
+
+            private void createWaypointMarkers() {
+                for (Waypoint waypoint : Iterables.concat(available, helpers)) {
+                    markers.createWaypointMarker(waypoint);
+                }
+            }
+
+            private void createWaypointMarkerWithData(Waypoint element) {
+                Entity entity = markers.createWaypointMarker(element);
+                if (entity == null)
+                    return;
+                entity.setMetadata("citizens.waypointhashcode",
+                        new FixedMetadataValue(CitizensAPI.getPlugin(), element.hashCode()));
+            }
+
+            @Override
+            public void end() {
+                Messaging.sendTr(player, Messages.GUIDED_WAYPOINT_EDITOR_END);
+                markers.destroyWaypointMarkers();
+            }
+
+            @EventHandler(ignoreCancelled = true)
+            public void onPlayerChat(AsyncPlayerChatEvent event) {
+                if (event.getMessage().equalsIgnoreCase("toggle path")) {
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(CitizensAPI.getPlugin(), new Runnable() {
+                        @Override
+                        public void run() {
+                            togglePath();
+                        }
+                    });
+                } else if (event.getMessage().equalsIgnoreCase("clear")) {
+                    Bukkit.getScheduler().scheduleSyncDelayedTask(CitizensAPI.getPlugin(), new Runnable() {
+                        @Override
+                        public void run() {
+                            available.clear();
+                            helpers.clear();
+                            if (showPath)
+                                markers.destroyWaypointMarkers();
+                        }
+                    });
+                }
+            }
+
+            @EventHandler(ignoreCancelled = true)
+            public void onPlayerInteract(PlayerInteractEvent event) {
+                if (!event.getPlayer().equals(player) || event.getAction() == Action.PHYSICAL
+                        || event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
+                        || event.getClickedBlock() == null || event.getHand() == EquipmentSlot.OFF_HAND)
+                    return;
+                if (event.getPlayer().getWorld() != npc.getEntity().getWorld())
+                    return;
+                event.setCancelled(true);
+                Location at = event.getClickedBlock().getLocation();
+                Waypoint element = new Waypoint(at);
+                if (player.isSneaking()) {
+                    available.add(element);
+                    Messaging.send(player, Messages.GUIDED_WAYPOINT_EDITOR_ADDED_AVAILABLE);
+                } else {
+                    helpers.add(element);
+                    Messaging.send(player, Messages.GUIDED_WAYPOINT_EDITOR_ADDED_GUIDE);
+                }
+                createWaypointMarkerWithData(element);
+                rebuildTree();
+            }
+
+            @EventHandler(ignoreCancelled = true)
+            public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+                if (!event.getRightClicked().hasMetadata("citizens.waypointhashcode")
+                        || event.getHand() == EquipmentSlot.OFF_HAND)
+                    return;
+                int hashcode = event.getRightClicked().getMetadata("citizens.waypointhashcode").get(0).asInt();
+                Iterator<Waypoint> itr = Iterables.concat(available, helpers).iterator();
+                while (itr.hasNext()) {
+                    if (itr.next().hashCode() == hashcode) {
+                        itr.remove();
+                        break;
+                    }
+                }
+            }
+
+            private void showPath() {
+                for (Waypoint element : Iterables.concat(available, helpers)) {
+                    createWaypointMarkerWithData(element);
+                }
+            }
+
+            private void togglePath() {
+                showPath = !showPath;
+                if (showPath) {
+                    createWaypointMarkers();
+                    Messaging.sendTr(player, Messages.LINEAR_WAYPOINT_EDITOR_SHOWING_MARKERS);
+                } else {
+                    markers.destroyWaypointMarkers();
+                    Messaging.sendTr(player, Messages.LINEAR_WAYPOINT_EDITOR_NOT_SHOWING_MARKERS);
+                }
+            }
+        };
+    }
 
     @Override
     public boolean isPaused() {
@@ -118,6 +233,11 @@ public class GuidedWaypointProvider implements WaypointProvider {
     @Override
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    @Override
+    public Iterable<Waypoint> waypoints() {
+        return Iterables.concat(available, helpers);
     }
 
     private class GuidedAIGoal implements Goal {

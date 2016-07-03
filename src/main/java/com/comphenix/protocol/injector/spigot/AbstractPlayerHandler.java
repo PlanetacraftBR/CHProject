@@ -10,7 +10,7 @@ import com.comphenix.protocol.concurrency.PacketTypeSet;
 import com.comphenix.protocol.events.ListenerOptions;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.injector.GamePhase;
-import com.comphenix.protocol.injector.PacketFilterManager.PlayerInjectHooks;
+import com.comphenix.protocol.injector.PlayerInjectHooks;
 import com.comphenix.protocol.injector.player.PlayerInjectionHandler;
 
 public abstract class AbstractPlayerHandler implements PlayerInjectionHandler {

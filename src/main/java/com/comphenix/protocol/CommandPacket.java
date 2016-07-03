@@ -60,7 +60,7 @@ import com.google.common.collect.Sets;
  * 
  * @author Kristian
  */
-public class CommandPacket extends CommandBase {
+class CommandPacket extends CommandBase {
 	public static final ReportType REPORT_CANNOT_SEND_MESSAGE = new ReportType("Cannot send chat message.");
 
 	private enum SubCommand {

@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.events.PacketListener;
@@ -17,8 +17,6 @@ import com.comphenix.protocol.injector.PacketFilterManager;
 import com.comphenix.protocol.utility.MinecraftVersion;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-
-import me.hub.Main;
 
 /**
  * Constructor for different player injectors.
@@ -113,11 +111,11 @@ public class PlayerInjectorBuilder {
 	 * Called before an object is created with this builder.
 	 */
 	private void initializeDefaults() {
-		ProtocolManager manager = Main.getProtocolManager(); 
+		ProtocolManager manager = ProtocolLibrary.getProtocolManager(); 
 		
 		// Initialize with default values if we can
 		if (reporter == null)
-			reporter = Main.getErrorReporter();
+			reporter = ProtocolLibrary.getErrorReporter();
 		if (invoker == null)
 			invoker = (PacketFilterManager) manager;
 		if (server == null)

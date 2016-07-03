@@ -19,12 +19,10 @@ package com.comphenix.protocol.reflect;
 
 import java.lang.reflect.Field;
 
-
+import com.comphenix.protocol.ProtocolLogger;
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.accessors.FieldAccessor;
 import com.google.common.base.Objects;
-
-import me.hub.Main;
 
 /**
  * Represents a field that will revert to its original state when this class is garbaged collected.
@@ -186,8 +184,7 @@ public class VolatileField {
 				currentSet = false;
 			} else {
 				// This can be a bad sign
-				Main.log("Unable to switch {0} to {1}. Expected {2}, but got {3}.",
-						getField().toGenericString(), previous, current, getValue());
+				ProtocolLogger.log("Unable to switch {0} to {1}. Expected {2}, but got {3}.", getField().toGenericString(), previous, current, getValue());
 			}
 		}
 	}

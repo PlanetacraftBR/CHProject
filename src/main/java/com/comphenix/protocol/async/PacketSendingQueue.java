@@ -27,14 +27,12 @@ import java.util.concurrent.PriorityBlockingQueue;
 import org.bukkit.entity.Player;
 
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.PlayerLoggedOutException;
 import com.comphenix.protocol.reflect.FieldAccessException;
-
-import me.hub.Main;
 
 /**
  * Represents packets ready to be transmitted to a client.
@@ -283,7 +281,7 @@ abstract class PacketSendingQueue {
 			}
 		
 		} catch (PlayerLoggedOutException e) {
-			Main.getErrorReporter().reportDebug(this, Report.newBuilder(REPORT_DROPPED_PACKET).
+			ProtocolLibrary.getErrorReporter().reportDebug(this, Report.newBuilder(REPORT_DROPPED_PACKET).
 				messageParam(marker.getOriginalSendingIndex(), event.getPacketType()).
 				callerParam(event)
 			);

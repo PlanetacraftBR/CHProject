@@ -39,16 +39,16 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldType;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Protocol;
-import com.comphenix.protocol.compat.netty.Netty;
-import com.comphenix.protocol.compat.netty.WrappedByteBuf;
 import com.comphenix.protocol.injector.StructureCache;
 import com.comphenix.protocol.reflect.EquivalentConverter;
 import com.comphenix.protocol.reflect.FuzzyReflection;
@@ -61,6 +61,7 @@ import com.comphenix.protocol.reflect.cloning.Cloner;
 import com.comphenix.protocol.reflect.cloning.CollectionCloner;
 import com.comphenix.protocol.reflect.cloning.FieldCloner;
 import com.comphenix.protocol.reflect.cloning.ImmutableDetector;
+import com.comphenix.protocol.reflect.cloning.OptionalCloner;
 import com.comphenix.protocol.reflect.cloning.SerializableCloner;
 import com.comphenix.protocol.reflect.fuzzy.FuzzyMethodContract;
 import com.comphenix.protocol.reflect.instances.DefaultInstances;
@@ -77,6 +78,9 @@ import com.comphenix.protocol.wrappers.EnumWrappers.ClientCommand;
 import com.comphenix.protocol.wrappers.EnumWrappers.CombatEventType;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
+import com.comphenix.protocol.wrappers.EnumWrappers.EnumConverter;
+import com.comphenix.protocol.wrappers.EnumWrappers.Hand;
+import com.comphenix.protocol.wrappers.EnumWrappers.ItemSlot;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
 import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerAction;
@@ -84,6 +88,7 @@ import com.comphenix.protocol.wrappers.EnumWrappers.PlayerDigType;
 import com.comphenix.protocol.wrappers.EnumWrappers.PlayerInfoAction;
 import com.comphenix.protocol.wrappers.EnumWrappers.ResourcePackStatus;
 import com.comphenix.protocol.wrappers.EnumWrappers.ScoreboardAction;
+import com.comphenix.protocol.wrappers.EnumWrappers.SoundCategory;
 import com.comphenix.protocol.wrappers.EnumWrappers.TitleAction;
 import com.comphenix.protocol.wrappers.EnumWrappers.WorldBorderAction;
 import com.comphenix.protocol.wrappers.MultiBlockChangeInfo;
@@ -97,10 +102,15 @@ import com.comphenix.protocol.wrappers.WrappedServerPing;
 import com.comphenix.protocol.wrappers.WrappedStatistic;
 import com.comphenix.protocol.wrappers.WrappedWatchableObject;
 import com.comphenix.protocol.wrappers.nbt.NbtBase;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 
 /**
  * Represents a Minecraft packet indirectly.
@@ -125,6 +135,7 @@ public class PacketContainer implements Serializable {
 			instanceProvider(DefaultInstances.DEFAULT).
 			andThen(BukkitCloner.class).
 			andThen(ImmutableDetector.class).
+			andThen(OptionalCloner.class).
 			andThen(CollectionCloner.class).
 			andThen(getSpecializedDeepClonerFactory()).
 			build();
@@ -147,8 +158,8 @@ public class PacketContainer implements Serializable {
 	
 	// Packets that cannot be cloned by our default deep cloner
 	private static final Set<PacketType> CLONING_UNSUPPORTED = Sets.newHashSet(
-		PacketType.Play.Server.UPDATE_ATTRIBUTES, PacketType.Status.Server.OUT_SERVER_INFO);
-	
+		PacketType.Play.Server.UPDATE_ATTRIBUTES, PacketType.Status.Server.SERVER_INFO);
+
 	/**
 	 * Creates a packet container for a new packet.
 	 * <p>
@@ -575,12 +586,11 @@ public class PacketContainer implements Serializable {
 		return structureModifier.withType(
 			Collection.class,
 			BukkitConverters.getListConverter(
-					MinecraftReflection.getWatchableObjectClass(),
+					MinecraftReflection.getDataWatcherItemClass(),
 					BukkitConverters.getWatchableObjectConverter())
 		);
 	}
-	
-	
+
 	/**
 	 * Retrieves a read/write structure for block fields.
 	 * <p>
@@ -651,15 +661,19 @@ public class PacketContainer implements Serializable {
 	/**
 	 * Retrieves a read/write structure for arrays of chat components.
 	 * <p>
-	 * This modifier will automatically marshall between WrappedChatComponent and the
-	 * internal Minecraft IChatBaseComponent.
+	 * This modifier will automatically marshal between WrappedChatComponent and the
+	 * internal Minecraft IChatBaseComponent (1.9.2 and below) or the internal
+	 * NBTCompound (1.9.4 and up).
+	 * <p>
+	 * Note that in 1.9.4 and up this modifier only works properly with sign
+	 * tile entities.
 	 * @return A modifier for ChatComponent array fields.
 	 */
 	public StructureModifier<WrappedChatComponent[]> getChatComponentArrays() {
 		// Convert to and from the Bukkit wrapper
 		return structureModifier.<WrappedChatComponent[]>withType(
-				MinecraftReflection.getIChatBaseComponentArrayClass(),
-				BukkitConverters.getIgnoreNull(new WrappedChatComponentArrayConverter()));
+				ComponentArrayConverter.getGenericType(),
+				BukkitConverters.getIgnoreNull(new ComponentArrayConverter()));
 	}
 	
 	/**
@@ -842,6 +856,81 @@ public class PacketContainer implements Serializable {
     			EnumWrappers.getParticleClass(), EnumWrappers.getParticleConverter());
     }
 
+    /**
+     * Retrieve a read/write structure for the MobEffectList class in 1.9.
+     * @return A modifier for MobEffectList fields.
+     */
+    public StructureModifier<PotionEffectType> getEffectTypes() {
+    	// Convert to and from Bukkit
+    	return structureModifier.<PotionEffectType>withType(
+    			MinecraftReflection.getMobEffectListClass(), BukkitConverters.getEffectTypeConverter());
+    }
+
+    /**
+     * Retrieve a read/write structure for the SoundCategory enum in 1.9.
+     * @return A modifier for SoundCategory enum fields.
+     */
+    public StructureModifier<SoundCategory> getSoundCategories() {
+    	// Convert to and from the enums
+    	return structureModifier.<SoundCategory>withType(
+    			EnumWrappers.getSoundCategoryClass(), EnumWrappers.getSoundCategoryConverter());
+    }
+
+    /**
+     * Retrieve a read/write structure for the SoundEffect enum in 1.9.
+     * @return A modifier for SoundEffect enum fields.
+     */
+    public StructureModifier<Sound> getSoundEffects() {
+    	// Convert to and from Bukkit
+    	return structureModifier.<Sound>withType(
+    			MinecraftReflection.getSoundEffectClass(), BukkitConverters.getSoundConverter());
+    }
+
+    /**
+     * Retrive a read/write structure for the ItemSlot enum in 1.9.
+     * @return A modifier for ItemSlot enum fields.
+     */
+    public StructureModifier<ItemSlot> getItemSlots() {
+    	return structureModifier.<ItemSlot>withType(
+    			EnumWrappers.getItemSlotClass(), EnumWrappers.getItemSlotConverter());
+    }
+
+    /**
+     * Retrive a read/write structure for the Hand enum in 1.9.
+     * @return A modifier for Hand enum fields.
+     */
+    public StructureModifier<Hand> getHands() {
+    	return structureModifier.<Hand>withType(
+    			EnumWrappers.getHandClass(), EnumWrappers.getHandConverter());
+    }
+
+    /**
+     * Retrieve a read/write structure for an enum. This allows for the use of
+     * user-created enums that may not exist in ProtocolLib. The specific (user
+     * created) enum constants must match up perfectly with their generic (NMS)
+     * counterparts.
+     * 
+     * @param enumClass The specific Enum class
+     * @param nmsClass The generic Enum class
+     * @return The modifier
+     */
+    public <T extends Enum<T>> StructureModifier<T> getEnumModifier(Class<T> enumClass, Class<?> nmsClass) {
+    	return structureModifier.<T>withType(nmsClass, new EnumConverter<T>(enumClass));
+    }
+
+    /**
+     * Retrieve a read/write structure for an enum. This method is for convenience,
+     * see {@link #getEnumModifier(Class, Class)} for more information.
+     * 
+     * @param enumClass The specific Enum class
+     * @param index Index of the generic Enum
+     * @return The modifier
+     * @see #getEnumModifier(Class, Class)
+     */
+    public <T extends Enum<T>> StructureModifier<T> getEnumModifier(Class<T> enumClass, int index) {
+    	return getEnumModifier(enumClass, structureModifier.getField(index).getType());
+	}
+
 	/**
 	 * Retrieves the ID of this packet.
 	 * <p>
@@ -928,8 +1017,8 @@ public class PacketContainer implements Serializable {
 
 		try {
 			if (MinecraftReflection.isUsingNetty()) {
-				WrappedByteBuf buffer = createPacketBuffer();
-				MinecraftMethods.getPacketWriteByteBufMethod().invoke(handle, buffer.getHandle());
+				ByteBuf buffer = createPacketBuffer();
+				MinecraftMethods.getPacketWriteByteBufMethod().invoke(handle, buffer);
 
 				output.writeInt(buffer.readableBytes());
 				buffer.readBytes(output, buffer.readableBytes());
@@ -965,10 +1054,10 @@ public class PacketContainer implements Serializable {
 			// Call the read method
 			try {
 				if (MinecraftReflection.isUsingNetty()) {
-					WrappedByteBuf buffer = createPacketBuffer();
+					ByteBuf buffer = createPacketBuffer();
 					buffer.writeBytes(input, input.readInt());
 					
-					MinecraftMethods.getPacketReadByteBufMethod().invoke(handle, buffer.getHandle());
+					MinecraftMethods.getPacketReadByteBufMethod().invoke(handle, buffer);
 				} else {
 					if (input.readInt() != -1)
 						throw new IllegalArgumentException("Cannot load a packet from 1.7.2 in 1.6.4.");
@@ -993,8 +1082,15 @@ public class PacketContainer implements Serializable {
 	 * Construct a new packet data serializer.
 	 * @return The packet data serializer.
 	 */
-	private WrappedByteBuf createPacketBuffer() {
-		return Netty.createPacketBuffer();
+	public static ByteBuf createPacketBuffer() {
+		ByteBuf buffer = UnpooledByteBufAllocator.DEFAULT.buffer();
+		Class<?> packetSerializer = MinecraftReflection.getPacketDataSerializerClass();
+
+		try {
+			return (ByteBuf) packetSerializer.getConstructor(ByteBuf.class).newInstance(buffer);
+		} catch (Exception e) {
+			throw new RuntimeException("Cannot construct packet serializer.", e);
+		}
 	}
 
 	// ---- Metadata
@@ -1134,11 +1230,11 @@ public class PacketContainer implements Serializable {
 	 * Represents an equivalent converter for ChatComponent arrays.
 	 * @author dmulloy2
 	 */
-	private static class WrappedChatComponentArrayConverter implements EquivalentConverter<WrappedChatComponent[]> {
+	private static class LegacyComponentConverter implements EquivalentConverter<WrappedChatComponent[]> {
 		final EquivalentConverter<WrappedChatComponent> componentConverter = BukkitConverters.getWrappedChatComponentConverter();
 		
 		@Override
-		public Object getGeneric(Class<?>genericType, WrappedChatComponent[] specific) {
+		public Object getGeneric(Class<?> genericType, WrappedChatComponent[] specific) {
 			Class<?> nmsComponent = MinecraftReflection.getIChatBaseComponentClass();
 			Object[] result = (Object[]) Array.newInstance(nmsComponent, specific.length);
 			
@@ -1164,6 +1260,94 @@ public class PacketContainer implements Serializable {
 		@Override
 		public Class<WrappedChatComponent[]> getSpecificType() {
 			return WrappedChatComponent[].class;
+		}
+	}
+
+	/**
+	 * Converts from NBT to WrappedChatComponent arrays
+	 * @author dmulloy2
+	 */
+	private static class NBTComponentConverter implements EquivalentConverter<WrappedChatComponent[]> {
+		private EquivalentConverter<NbtBase<?>> nbtConverter = BukkitConverters.getNbtConverter();
+		private final int lines = 4;
+
+		@Override
+		public WrappedChatComponent[] getSpecific(Object generic) {
+			NbtBase<?> nbtBase = nbtConverter.getSpecific(generic);
+			NbtCompound compound = (NbtCompound) nbtBase;
+
+			WrappedChatComponent[] components = new WrappedChatComponent[lines];
+			for (int i = 0; i < lines; i++) {
+				if (compound.containsKey("Text" + (i + 1))) {
+					components[i] = WrappedChatComponent.fromJson(compound.getString("Text" + (i + 1)));
+				} else {
+					components[i] = WrappedChatComponent.fromText("");
+				}
+			}
+
+			return components;
+		}
+
+		@Override
+		public Object getGeneric(Class<?> genericType, WrappedChatComponent[] specific) {
+			NbtCompound compound = NbtFactory.ofCompound("");
+
+			for (int i = 0; i < lines; i++) {
+				WrappedChatComponent component;
+				if (i < specific.length && specific[i] != null) {
+					component = specific[i];
+				} else {
+					component = WrappedChatComponent.fromText("");
+				}
+
+				compound.put("Text" + (i + 1), component.getJson());
+			}
+
+			return nbtConverter.getGeneric(genericType, compound);
+		}
+
+		@Override
+		public Class<WrappedChatComponent[]> getSpecificType() {
+			return WrappedChatComponent[].class;
+		}
+	}
+
+	/**
+	 * A delegated converter that supports NBT to Component Array and regular Component Array
+	 * @author dmulloy2
+	 */
+	private static class ComponentArrayConverter implements EquivalentConverter<WrappedChatComponent[]> {
+		private static final EquivalentConverter<WrappedChatComponent[]> DELEGATE;
+		static {
+			Class<?> packetClass = PacketType.Play.Server.UPDATE_SIGN.getPacketClass();
+			if (packetClass.getName().contains("Sign")) {
+				DELEGATE = new LegacyComponentConverter();
+			} else {
+				DELEGATE = new NBTComponentConverter();
+			}
+		}
+
+		@Override
+		public WrappedChatComponent[] getSpecific(Object generic) {
+			return DELEGATE.getSpecific(generic);
+		}
+
+		@Override
+		public Object getGeneric(Class<?> genericType, WrappedChatComponent[] specific) {
+			return DELEGATE.getGeneric(genericType, specific);
+		}
+
+		@Override
+		public Class<WrappedChatComponent[]> getSpecificType() {
+			return DELEGATE.getSpecificType();
+		}
+
+		public static Class<?> getGenericType() {
+			if (DELEGATE instanceof NBTComponentConverter) {
+				return MinecraftReflection.getNBTCompoundClass();
+			} else {
+				return MinecraftReflection.getIChatBaseComponentArrayClass();
+			}
 		}
 	}
 

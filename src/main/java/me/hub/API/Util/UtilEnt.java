@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -120,37 +120,31 @@ public class UtilEnt
   
 	public static void PlayDamageSound(Entity damagee) 
 	{
-		Sound sound = Sound.HURT_FLESH;
+		Sound sound = Sound.ENTITY_CAT_HURT;
 		
-		if (damagee.getType() == EntityType.BAT)				sound = Sound.BAT_HURT;
-		else if (damagee.getType() == EntityType.BLAZE)			sound = Sound.BLAZE_HIT;
-		else if (damagee.getType() == EntityType.CAVE_SPIDER)	sound = Sound.SPIDER_IDLE;
-		else if (damagee.getType() == EntityType.CHICKEN)		sound = Sound.CHICKEN_HURT;
-		else if (damagee.getType() == EntityType.COW)			sound = Sound.COW_HURT;
-		else if (damagee.getType() == EntityType.CREEPER)		sound = Sound.CREEPER_HISS;
-		else if (damagee.getType() == EntityType.ENDER_DRAGON)	sound = Sound.ENDERDRAGON_GROWL;
-		else if (damagee.getType() == EntityType.ENDERMAN)		sound = Sound.ENDERMAN_HIT;
-		else if (damagee.getType() == EntityType.GHAST)			sound = Sound.GHAST_SCREAM;
-		else if (damagee.getType() == EntityType.GIANT)			sound = Sound.ZOMBIE_HURT;
-		else if (damagee.getType() == EntityType.HORSE)		    sound = Sound.HORSE_HIT;
-		else if (damagee.getType() == EntityType.IRON_GOLEM)	sound = Sound.IRONGOLEM_HIT;
-		else if (damagee.getType() == EntityType.MAGMA_CUBE)	sound = Sound.MAGMACUBE_JUMP;
-		else if (damagee.getType() == EntityType.MUSHROOM_COW)	sound = Sound.COW_HURT;
-		else if (damagee.getType() == EntityType.OCELOT)		sound = Sound.CAT_MEOW;
-		else if (damagee.getType() == EntityType.PIG)			sound = Sound.PIG_IDLE;
-		else if (damagee.getType() == EntityType.PIG_ZOMBIE)	sound = Sound.ZOMBIE_HURT;
-		else if (damagee.getType() == EntityType.SHEEP)			sound = Sound.SHEEP_IDLE;
-		else if (damagee.getType() == EntityType.SILVERFISH)	sound = Sound.SILVERFISH_HIT;
-		else if (damagee.getType() == EntityType.SKELETON)		sound = Sound.SKELETON_HURT;
-		else if (damagee.getType() == EntityType.SLIME)			sound = Sound.SLIME_ATTACK;
-		else if (damagee.getType() == EntityType.SNOWMAN)		sound = Sound.STEP_SNOW;
-		else if (damagee.getType() == EntityType.SPIDER)		sound = Sound.SPIDER_IDLE;
+		if (damagee.getType() == EntityType.BAT)				sound = Sound.ENTITY_BAT_HURT;
+		else if (damagee.getType() == EntityType.BLAZE)			sound = Sound.ENTITY_BLAZE_HURT;
+		
+		else if (damagee.getType() == EntityType.CHICKEN)		sound = Sound.ENTITY_CHICKEN_HURT;
+		else if (damagee.getType() == EntityType.COW)			sound = Sound.ENTITY_COW_HURT;
+
+		else if (damagee.getType() == EntityType.ENDER_DRAGON)	sound = Sound.ENTITY_ENDERDRAGON_GROWL;
+		
+		else if (damagee.getType() == EntityType.GHAST)			sound = Sound.ENTITY_GHAST_SCREAM;
+		else if (damagee.getType() == EntityType.GIANT)			sound = Sound.ENTITY_ZOMBIE_HURT;
+		
+		else if (damagee.getType() == EntityType.MAGMA_CUBE)	sound = Sound.ENTITY_MAGMACUBE_JUMP;
+
+		else if (damagee.getType() == EntityType.PIG_ZOMBIE)	sound = Sound.ENTITY_ZOMBIE_HURT;
+		
+		else if (damagee.getType() == EntityType.SKELETON)		sound = Sound.ENTITY_SKELETON_HURT;
+		else if (damagee.getType() == EntityType.SLIME)			sound = Sound.ENTITY_SLIME_ATTACK;
 		//else if (damagee.getType() == EntityType.SQUID)		sound = Sound;
-		else if (damagee.getType() == EntityType.VILLAGER)	    sound = Sound.VILLAGER_HIT;
+		else if (damagee.getType() == EntityType.VILLAGER)	    sound = Sound.ENTITY_VILLAGER_HURT;
 		//else if (damagee.getType() == EntityType.WITCH)		sound = Sound;
-		else if (damagee.getType() == EntityType.WITHER)		sound = Sound.WITHER_HURT;
-		else if (damagee.getType() == EntityType.WOLF)			sound = Sound.WOLF_HURT;
-		else if (damagee.getType() == EntityType.ZOMBIE)		sound = Sound.ZOMBIE_HURT;	
+		else if (damagee.getType() == EntityType.WITHER)		sound = Sound.ENTITY_WITHER_HURT;
+		else if (damagee.getType() == EntityType.WOLF)			sound = Sound.ENTITY_WOLF_HURT;
+		else if (damagee.getType() == EntityType.ZOMBIE)		sound = Sound.ENTITY_ZOMBIE_HURT;	
 
 		damagee.getWorld().playSound(damagee.getLocation(), sound, 1.5f + (float)(0.5f * Math.random()), 0.8f + (float)(0.4f * Math.random()));
 	}

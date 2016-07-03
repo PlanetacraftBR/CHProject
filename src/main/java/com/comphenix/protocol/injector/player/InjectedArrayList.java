@@ -29,7 +29,7 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.injector.ListenerInvoker;
@@ -37,8 +37,6 @@ import com.comphenix.protocol.injector.player.NetworkFieldInjector.FakePacket;
 import com.comphenix.protocol.utility.EnhancerFactory;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.google.common.collect.MapMaker;
-
-import me.hub.Main;
 
 /**
  * The array list that notifies when packets are sent by the server.
@@ -96,7 +94,7 @@ class InjectedArrayList extends ArrayList<Object> {
 			
 		} catch (InvocationTargetException e) {
 			// Prefer to report this to the user, instead of risking sending it to Minecraft
-			Main.getErrorReporter().reportDetailed(this, 
+			ProtocolLibrary.getErrorReporter().reportDetailed(this, 
 					Report.newBuilder(REPORT_CANNOT_REVERT_CANCELLED_PACKET).error(e).callerParam(packet)
 			);
 			

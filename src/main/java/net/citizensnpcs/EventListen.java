@@ -11,6 +11,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,20 +25,26 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Team;
 
 import com.google.common.base.Predicates;
@@ -52,7 +59,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.event.NavigationBeginEvent;
 import net.citizensnpcs.api.ai.event.NavigationCompleteEvent;
 import net.citizensnpcs.api.event.CitizensDeserialiseMetaEvent;
-import net.citizensnpcs.api.event.CitizensReloadEvent;
+import net.citizensnpcs.api.event.CitizensPreReloadEvent;
 import net.citizensnpcs.api.event.CitizensSerialiseMetaEvent;
 import net.citizensnpcs.api.event.CommandSenderCreateNPCEvent;
 import net.citizensnpcs.api.event.DespawnReason;
@@ -157,8 +164,9 @@ public class EventListen implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onCitizensReload(CitizensReloadEvent event) {
+    public void onCitizensReload(CitizensPreReloadEvent event) {
         skinUpdateTracker.reset();
+        toRespawn.clear();
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -184,9 +192,10 @@ public class EventListen implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         NPC npc = npcRegistry.getNPC(event.getEntity());
+
         if (npc == null) {
             if (event instanceof EntityDamageByEntityEvent) {
                 npc = npcRegistry.getNPC(((EntityDamageByEntityEvent) event).getDamager());
@@ -222,6 +231,11 @@ public class EventListen implements Listener {
         if (npc == null) {
             return;
         }
+
+        if (!npc.data().get(NPC.DROPS_ITEMS_METADATA, false)) {
+            event.getDrops().clear();
+        }
+
         final Location location = npc.getEntity().getLocation();
         Bukkit.getPluginManager().callEvent(new NPCDeathEvent(npc, event));
         npc.despawn(DespawnReason.DEATH);
@@ -292,29 +306,29 @@ public class EventListen implements Listener {
 
     @EventHandler
     public void onMetaSerialise(CitizensSerialiseMetaEvent event) {
-        if (event.getMeta() instanceof SkullMeta) {
-            SkullMeta meta = (SkullMeta) event.getMeta();
-            GameProfile profile = NMS.getProfile(meta);
-            if (profile == null)
-                return;
-            if (profile.getName() != null) {
-                event.getKey().setString("skull.owner", profile.getName());
-            }
-            if (profile.getId() != null) {
-                event.getKey().setString("skull.uuid", profile.getId().toString());
-            }
-            if (profile.getProperties() != null) {
-                for (Entry<String, Collection<Property>> entry : profile.getProperties().asMap().entrySet()) {
-                    DataKey relative = event.getKey().getRelative("skull.properties." + entry.getKey());
-                    int i = 0;
-                    for (Property value : entry.getValue()) {
-                        relative.getRelative(i).setString("name", value.getName());
-                        if (value.getSignature() != null) {
-                            relative.getRelative(i).setString("signature", value.getSignature());
-                        }
-                        relative.getRelative(i).setString("value", value.getValue());
-                        i++;
+        if (!(event.getMeta() instanceof SkullMeta))
+            return;
+        SkullMeta meta = (SkullMeta) event.getMeta();
+        GameProfile profile = NMS.getProfile(meta);
+        if (profile == null)
+            return;
+        if (profile.getName() != null) {
+            event.getKey().setString("skull.owner", profile.getName());
+        }
+        if (profile.getId() != null) {
+            event.getKey().setString("skull.uuid", profile.getId().toString());
+        }
+        if (profile.getProperties() != null) {
+            for (Entry<String, Collection<Property>> entry : profile.getProperties().asMap().entrySet()) {
+                DataKey relative = event.getKey().getRelative("skull.properties." + entry.getKey());
+                int i = 0;
+                for (Property value : entry.getValue()) {
+                    relative.getRelative(i).setString("name", value.getName());
+                    if (value.getSignature() != null) {
+                        relative.getRelative(i).setString("signature", value.getSignature());
                     }
+                    relative.getRelative(i).setString("value", value.getValue());
+                    i++;
                 }
             }
         }
@@ -335,21 +349,27 @@ public class EventListen implements Listener {
         ChunkCoord coord = toCoord(event.getSpawnLocation());
         if (toRespawn.containsEntry(coord, event.getNPC()))
             return;
+        Messaging.debug("Stored", event.getNPC().getId(), "for respawn from NPCNeedsRespawnEvent");
         toRespawn.put(coord, event.getNPC());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onNPCDespawn(NPCDespawnEvent event) {
         if (event.getReason() == DespawnReason.PLUGIN || event.getReason() == DespawnReason.REMOVAL
                 || event.getReason() == DespawnReason.RELOAD) {
+            Messaging.debug("Preventing further respawns of " + event.getNPC().getId() + " due to DespawnReason."
+                    + event.getReason().name());
             if (event.getNPC().getStoredLocation() != null) {
                 toRespawn.remove(toCoord(event.getNPC().getStoredLocation()), event.getNPC());
             }
+        } else {
+            Messaging.debug("Removing " + event.getNPC().getId() + " from skin tracker due to DespawnReason."
+                    + event.getReason().name());
         }
         skinUpdateTracker.onNPCDespawn(event.getNPC());
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onNPCSpawn(NPCSpawnEvent event) {
         skinUpdateTracker.onNPCSpawn(event.getNPC());
     }
@@ -373,13 +393,19 @@ public class EventListen implements Listener {
         checkCreationEvent(event);
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerFish(PlayerFishEvent event) {
+        if (npcRegistry.isNPC(event.getCaught()) && npcRegistry.getNPC(event.getCaught()).isProtected()) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         NPC npc = npcRegistry.getNPC(event.getRightClicked());
-        if (npc == null) {
+        if (npc == null || event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
-
         Player player = event.getPlayer();
         NPCRightClickEvent rightClickEvent = new NPCRightClickEvent(npc, player);
         Bukkit.getPluginManager().callEvent(rightClickEvent);
@@ -414,9 +440,40 @@ public class EventListen implements Listener {
         skinUpdateTracker.updatePlayer(event.getPlayer(), 15, true);
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerTeleport(final PlayerTeleportEvent event) {
+        if (event.getCause() == TeleportCause.PLUGIN && !event.getPlayer().hasMetadata("citizens-force-teleporting")
+                && npcRegistry.getNPC(event.getPlayer()) != null && Setting.TELEPORT_DELAY.asInt() > 0) {
+            event.setCancelled(true);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CitizensAPI.getPlugin(), new Runnable() {
+                @Override
+                public void run() {
+                    event.getPlayer().setMetadata("citizens-force-teleporting",
+                            new FixedMetadataValue(CitizensAPI.getPlugin(), true));
+                    event.getPlayer().teleport(event.getTo());
+                    event.getPlayer().removeMetadata("citizens-force-teleporting", CitizensAPI.getPlugin());
+                }
+            }, Setting.TELEPORT_DELAY.asInt());
+        }
         skinUpdateTracker.updatePlayer(event.getPlayer(), 15, true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onProjectileHit(final ProjectileHitEvent event) {
+        if (!(event.getEntity() instanceof FishHook))
+            return;
+        NMS.removeHookIfNecessary(npcRegistry, (FishHook) event.getEntity());
+        new BukkitRunnable() {
+            int n = 0;
+
+            @Override
+            public void run() {
+                if (n++ > 5) {
+                    cancel();
+                }
+                NMS.removeHookIfNecessary(npcRegistry, (FishHook) event.getEntity());
+            }
+        }.runTaskTimer(CitizensAPI.getPlugin(), 0, 1);
     }
 
     @EventHandler
@@ -460,10 +517,13 @@ public class EventListen implements Listener {
                         respawnAllFromCoord(coord);
                     }
                 }
+                event.setCancelled(true);
                 return;
             }
-            storeForRespawn(npc);
-            Messaging.debug("Despawned", npc.getId() + "due to world unload at", event.getWorld().getName());
+            if (npc.isSpawned()) {
+                storeForRespawn(npc);
+                Messaging.debug("Despawned", npc.getId() + "due to world unload at", event.getWorld().getName());
+            }
         }
     }
 

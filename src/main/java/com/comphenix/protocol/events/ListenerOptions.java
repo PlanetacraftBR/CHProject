@@ -2,6 +2,7 @@ package com.comphenix.protocol.events;
 
 import com.comphenix.protocol.injector.GamePhase;
 
+
 /**
  * Represents additional options a listener may require.
  * 

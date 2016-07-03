@@ -28,8 +28,9 @@ public class Util {
     }
 
     public static void callCollisionEvent(NPC npc, Entity entity) {
-        if (NPCCollisionEvent.getHandlerList().getRegisteredListeners().length > 0)
+        if (NPCCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) {
             Bukkit.getPluginManager().callEvent(new NPCCollisionEvent(npc, entity));
+        }
     }
 
     public static NPCPushEvent callPushEvent(NPC npc, Vector vector) {
@@ -125,7 +126,7 @@ public class Util {
         }
         for (T check : values) {
             String name = check.name().toLowerCase();
-            if (name.replace("_", "").equals(toMatch) || name.matches(toMatch) || name.startsWith(toMatch)) {
+            if (name.replace("_", "").equals(toMatch) || name.startsWith(toMatch)) {
                 return check;
             }
         }
@@ -137,7 +138,7 @@ public class Util {
         if (parts.contains("*"))
             return true;
         for (String part : Splitter.on(',').split(parts)) {
-            if (Material.matchMaterial(part) == player.getItemInHand().getType()) {
+            if (Material.matchMaterial(part) == player.getInventory().getItemInMainHand().getType()) {
                 return true;
             }
         }

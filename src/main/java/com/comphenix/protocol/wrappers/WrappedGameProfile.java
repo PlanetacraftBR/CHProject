@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.PluginContext;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
@@ -20,8 +20,6 @@ import com.comphenix.protocol.wrappers.collection.ConvertedMultimap;
 import com.google.common.base.Charsets;
 import com.google.common.base.Objects;
 import com.google.common.collect.Multimap;
-
-import me.hub.Main;
 
 /**
  * Represents a wrapper for a game profile.
@@ -173,7 +171,7 @@ public class WrappedGameProfile extends AbstractWrapper {
 			return UUID.fromString(id);
 		} catch (IllegalArgumentException e) {
 			// Warn once every hour (per plugin)
-			Main.getErrorReporter()
+			ProtocolLibrary.getErrorReporter()
 				.reportWarning(WrappedGameProfile.class, Report.newBuilder(REPORT_INVALID_UUID)
 				.rateLimit(1, TimeUnit.HOURS)
 				.messageParam(PluginContext.getPluginCaller(new Exception()), id));
@@ -252,6 +250,7 @@ public class WrappedGameProfile extends AbstractWrapper {
 	 * 
 	 * @return Property map.
 	 */
+	// In the protocol hack and 1.8 it is a ForwardingMultimap
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Multimap<String, WrappedSignedProperty> getProperties() {
 		Multimap<String, WrappedSignedProperty> result = propertyMap;

@@ -1,41 +1,40 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class AgeableWatcher extends LivingWatcher {
+public class AgeableWatcher extends InsentientWatcher
+{
 
-    public AgeableWatcher(Disguise disguise) {
+    public AgeableWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    public int getAge() {
-        return (Integer) getValue(12, 0);
-    }
-
-    public boolean isAdult() {
+    public boolean isAdult()
+    {
         return !isBaby();
     }
 
-    public boolean isBaby() {
-        return ((Byte) getValue(12, (byte) 0)).intValue() < 0;
+    public boolean isBaby()
+    {
+        return getValue(FlagType.AGEABLE_BABY);
     }
 
-    public void setAdult() {
+    public void setAdult()
+    {
         setBaby(false);
     }
 
-    public void setAge(int newAge) {
-        setValue(12, (byte) newAge);
-        sendData(12);
-    }
-
-    public void setBaby() {
+    public void setBaby()
+    {
         setBaby(true);
     }
 
-    public void setBaby(boolean isBaby) {
-        setValue(12, (byte) (isBaby ? -1 : 0));
-        sendData(12);
+    public void setBaby(boolean isBaby)
+    {
+        setValue(FlagType.AGEABLE_BABY, isBaby);
+        sendData(FlagType.AGEABLE_BABY);
     }
 
 }

@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 
 import net.citizensnpcs.api.ai.Goal;
 import net.citizensnpcs.api.ai.goals.WanderGoal;
-
+import net.citizensnpcs.api.command.CommandContext;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.persistence.Persist;
 import net.citizensnpcs.api.util.DataKey;
@@ -18,7 +18,20 @@ public class WanderWaypointProvider implements WaypointProvider {
     @Persist
     private final int yrange = DEFAULT_YRANGE;
 
+    @Override
+    public WaypointEditor createEditor(CommandSender sender, CommandContext args) {
+        return new WaypointEditor() {
+            @Override
+            public void begin() {
+                // TODO Auto-generated method stub
+            }
 
+            @Override
+            public void end() {
+                // TODO Auto-generated method stub
+            }
+        };
+    }
 
     @Override
     public boolean isPaused() {

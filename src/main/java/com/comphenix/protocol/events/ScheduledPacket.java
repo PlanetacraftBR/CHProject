@@ -6,11 +6,9 @@ import org.bukkit.entity.Player;
 
 import com.comphenix.protocol.PacketStream;
 import com.comphenix.protocol.PacketType.Sender;
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-
-import me.hub.Main;
 
 /**
  * Represents a packet that is scheduled for transmission at a later stage.
@@ -115,7 +113,7 @@ public class ScheduledPacket {
 	 * Schedule the packet transmission or reception.
 	 */
 	public void schedule() {
-		schedule(Main.getProtocolManager());
+		schedule(ProtocolLibrary.getProtocolManager());
 	}
 	
 	/**

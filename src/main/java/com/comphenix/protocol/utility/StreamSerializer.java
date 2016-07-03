@@ -1,5 +1,8 @@
 package com.comphenix.protocol.utility;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -14,8 +17,7 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.inventory.ItemStack;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import com.comphenix.protocol.compat.netty.Netty;
-import com.comphenix.protocol.compat.netty.WrappedByteBuf;
+import com.comphenix.protocol.injector.netty.NettyByteBufAdapter;
 import com.comphenix.protocol.reflect.FuzzyReflection;
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.accessors.MethodAccessor;
@@ -114,10 +116,10 @@ public class StreamSerializer {
 				);
 			}
 
-			WrappedByteBuf buf = Netty.packetWriter(output);
+			ByteBuf buf = NettyByteBufAdapter.packetWriter(output);
 			buf.writeByte(NbtType.TAG_COMPOUND.getRawID());
 
-			WRITE_NBT_METHOD.invoke(buf.getHandle(), handle);
+			WRITE_NBT_METHOD.invoke(buf, handle);
 		} else {
 			if (WRITE_NBT_METHOD == null) {
 				WRITE_NBT_METHOD = Accessors.getMethodAccessor(
@@ -156,7 +158,8 @@ public class StreamSerializer {
 				);
 			}
 
-			nmsCompound = READ_NBT_METHOD.invoke(Netty.packetReader(input).getHandle());
+			ByteBuf buf = NettyByteBufAdapter.packetReader(input);
+			nmsCompound = READ_NBT_METHOD.invoke(buf);
 		} else {
 			if (READ_NBT_METHOD == null) {
 				READ_NBT_METHOD = Accessors.getMethodAccessor(
@@ -206,7 +209,8 @@ public class StreamSerializer {
 				);
 			}
 
-			WRITE_STRING_METHOD.invoke(Netty.packetWriter(output).getHandle(), text);
+			ByteBuf buf = NettyByteBufAdapter.packetWriter(output);
+			WRITE_STRING_METHOD.invoke(buf, text);
 		} else {
 			if (WRITE_STRING_METHOD == null) {
 				WRITE_STRING_METHOD = Accessors.getMethodAccessor(
@@ -250,7 +254,8 @@ public class StreamSerializer {
 				);
 			}
 
-			return (String) READ_STRING_METHOD.invoke(Netty.packetReader(input).getHandle(), maximumLength);
+			ByteBuf buf = NettyByteBufAdapter.packetReader(input);
+			return (String) READ_STRING_METHOD.invoke(buf, maximumLength);
 		} else {
 			if (READ_STRING_METHOD == null) {
 				READ_STRING_METHOD = Accessors.getMethodAccessor(
@@ -282,8 +287,8 @@ public class StreamSerializer {
 		byte[] bytes = null;
 
 		if (MinecraftReflection.isUsingNetty()) {
-			WrappedByteBuf buf = Netty.buffer();
-			Object serializer = MinecraftReflection.getPacketDataSerializer(buf.getHandle());
+			ByteBuf buf = Unpooled.buffer();
+			Object serializer = MinecraftReflection.getPacketDataSerializer(buf);
 
 			if (WRITE_ITEM_METHOD == null) {
 				WRITE_ITEM_METHOD = Accessors.getMethodAccessor(
@@ -331,8 +336,8 @@ public class StreamSerializer {
 		byte[] bytes = Base64Coder.decodeLines(input);
 
 		if (MinecraftReflection.isUsingNetty()) {
-			WrappedByteBuf buf = Netty.copiedBuffer(bytes);
-			Object serializer = MinecraftReflection.getPacketDataSerializer(buf.getHandle());
+			ByteBuf buf = Unpooled.copiedBuffer(bytes);
+			Object serializer = MinecraftReflection.getPacketDataSerializer(buf);
 
 			if (READ_ITEM_METHOD == null) {
 				READ_ITEM_METHOD = Accessors.getMethodAccessor(FuzzyReflection.fromClass(MinecraftReflection.getPacketDataSerializerClass(), true).
@@ -389,8 +394,8 @@ public class StreamSerializer {
 				);
 			}
 
-			WrappedByteBuf buf = Netty.buffer();
-			Object serializer = MinecraftReflection.getPacketDataSerializer(buf.getHandle());
+			ByteBuf buf = Unpooled.buffer();
+			Object serializer = MinecraftReflection.getPacketDataSerializer(buf);
 
 			WRITE_ITEM_METHOD.invoke(serializer, nmsItem);
 
@@ -438,8 +443,8 @@ public class StreamSerializer {
 			byte[] bytes = new byte[8192];
 			input.read(bytes);
 
-			WrappedByteBuf buf = Netty.copiedBuffer(bytes);
-			Object serializer = MinecraftReflection.getPacketDataSerializer(buf.getHandle());
+			ByteBuf buf = Unpooled.copiedBuffer(bytes);
+			Object serializer = MinecraftReflection.getPacketDataSerializer(buf);
 
 			nmsItem = READ_ITEM_METHOD.invoke(serializer);
 		} else {

@@ -16,7 +16,7 @@
  */
 package com.comphenix.protocol.injector.netty;
 
-import com.comphenix.protocol.compat.netty.WrappedByteBuf;
+import io.netty.buffer.ByteBuf;
 
 /**
  * @author dmulloy2
@@ -39,7 +39,7 @@ public class WirePacket {
 		return bytes;
 	}
 
-	public void writeId(WrappedByteBuf output) {
+	public void writeId(ByteBuf output) {
 		int i = id;
 		while ((i & -128) != 0) {
 			output.writeByte(i & 127 | 128);
@@ -49,7 +49,7 @@ public class WirePacket {
 		output.writeByte(i);
 	}
 
-	public void writeBytes(WrappedByteBuf output) {
+	public void writeBytes(ByteBuf output) {
 		output.writeBytes(bytes);
 	}
 }

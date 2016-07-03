@@ -1,6 +1,6 @@
 /**
  *  ProtocolLib - Bukkit server library that allows access to the Minecraft protocol.
- *  Copyright (C) 2012 Kristian S. Stangeland
+ *  Copyright (C) 2016 dmulloy2
  *
  *  This program is free software; you can redistribute it and/or modify it under the terms of the
  *  GNU General Public License as published by the Free Software Foundation; either version 2 of
@@ -16,465 +16,495 @@
  */
 package com.comphenix.protocol.wrappers;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.annotation.Nullable;
-
+import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.injector.BukkitUnwrapper;
 import com.comphenix.protocol.reflect.FieldAccessException;
-import com.comphenix.protocol.reflect.FieldUtils;
 import com.comphenix.protocol.reflect.FuzzyReflection;
+import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.accessors.ConstructorAccessor;
 import com.comphenix.protocol.reflect.accessors.FieldAccessor;
-import com.comphenix.protocol.reflect.accessors.ReadOnlyFieldAccessor;
+import com.comphenix.protocol.reflect.accessors.MethodAccessor;
+import com.comphenix.protocol.reflect.fuzzy.FuzzyFieldContract;
+import com.comphenix.protocol.reflect.fuzzy.FuzzyMethodContract;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.collection.ConvertedMap;
-import com.google.common.base.Function;
-import com.google.common.base.Objects;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Maps;
+import com.google.common.base.Optional;
 
 /**
- * Wraps a DataWatcher that is used to transmit arbitrary key-value pairs with a given entity.
- *
- * @author Kristian
+ * Represents a DataWatcher in 1.9
+ * 
+ * @author dmulloy2
  */
 public class WrappedDataWatcher extends AbstractWrapper implements Iterable<WrappedWatchableObject> {
+	private static final Class<?> HANDLE_TYPE = MinecraftReflection.getDataWatcherClass();
+
+	private static MethodAccessor GETTER = null;
+	private static MethodAccessor SETTER = null;
+	private static MethodAccessor REGISTER = null;
+
+	private static FieldAccessor ENTITY_DATA_FIELD = null;
+	private static FieldAccessor ENTITY_FIELD = null;
+	private static FieldAccessor MAP_FIELD = null;
+
+	private static ConstructorAccessor constructor = null;
+	private static ConstructorAccessor lightningConstructor = null;
+
+	private static Object fakeEntity = null;
+
+	// ---- Construction
+
 	/**
-	 * Every custom watchable type in the Spigot protocol hack.
-	 * @author Kristian
+	 * Constructs a new DataWatcher wrapper around a NMS handle. The resulting
+	 * DataWatcher will likely have existing values that can be removed with
+	 * {@link #clear()}.
+	 * 
+	 * @param handle DataWatcher handle
 	 */
-	public enum CustomType {
-		BYTE_SHORT("org.spigotmc.ProtocolData$ByteShort",   0, short.class),
-		DUAL_BYTE("org.spigotmc.ProtocolData$DualByte",     0, byte.class, byte.class),
-		HIDDEN_BYTE("org.spigotmc.ProtocolData$HiddenByte", 0, byte.class),
-		INT_BYTE("org.spigotmc.ProtocolData$IntByte",       2, int.class, byte.class),
-		DUAL_INT("org.spigotmc.ProtocolData$DualInt",       2, int.class, int.class);
+	public WrappedDataWatcher(Object handle) {
+		super(HANDLE_TYPE);
+		setHandle(handle);
+	}
 
-		private Class<?> spigotClass;
-		private ConstructorAccessor constructor;
-		private FieldAccessor secondaryValue;
-		private int typeId;
+	/**
+	 * Constructs a new DataWatcher using a fake lightning entity. The
+	 * resulting DataWatcher will not have any keys or values and new ones will
+	 * have to be added using watcher objects.
+	 */
+	public WrappedDataWatcher() {
+		this(newHandle(fakeEntity()));
+	}
 
-		private CustomType(String className, int typeId, Class<?>... parameters) {
-			try {
-				this.spigotClass = Class.forName(className);
-				this.constructor = Accessors.getConstructorAccessor(spigotClass, parameters);
-				this.secondaryValue = parameters.length > 1 ? Accessors.getFieldAccessor(spigotClass, "value2", true) : null;
-			} catch (ClassNotFoundException e) {
-				// ProtocolLibrary.log(Level.WARNING, "Unable to find " + className);
-				this.spigotClass = null;
+	/**
+	 * Constructs a new DataWatcher using a real entity. The resulting
+	 * DataWatcher will not have any keys or values and new ones will have to
+	 * be added using watcher objects.
+	 * 
+	 * @param entity The entity
+	 */
+	public WrappedDataWatcher(Entity entity) {
+		this(newHandle(BukkitUnwrapper.getInstance().unwrapItem(entity)));
+	}
+
+	/**
+	 * Constructs a new DataWatcher using a fake lightning entity and a given
+	 * list of watchable objects.
+	 * 
+	 * @param objects The list of objects
+	 */
+	public WrappedDataWatcher(List<WrappedWatchableObject> objects) {
+		this();
+
+		for (WrappedWatchableObject object : objects) {
+			setObject(object.getWatcherObject(), object);
+		}
+	}
+
+	private static Object newHandle(Object entity) {
+		if (constructor == null) {
+			constructor = Accessors.getConstructorAccessor(HANDLE_TYPE, MinecraftReflection.getEntityClass());
+		}
+
+		return constructor.invoke(entity);
+	}
+
+	private static Object fakeEntity() {
+		if (fakeEntity != null) {
+			return fakeEntity;
+		}
+
+		// We can create a fake lightning strike without it affecting anything
+		if (lightningConstructor == null) {
+			lightningConstructor = Accessors.getConstructorAccessor(MinecraftReflection.getMinecraftClass("EntityLightning"),
+					MinecraftReflection.getNmsWorldClass(), double.class, double.class, double.class, boolean.class);
+		}
+
+		return fakeEntity = lightningConstructor.invoke(null, 0, 0, 0, true);
+	}
+
+	// ---- Collection Methods
+
+	@SuppressWarnings("unchecked")
+	private Map<Integer, Object> getMap() {
+		if (MAP_FIELD == null) {
+			FuzzyReflection fuzzy = FuzzyReflection.fromClass(handleType, true);
+			MAP_FIELD = Accessors.getFieldAccessor(fuzzy.getField(FuzzyFieldContract.newBuilder()
+					.banModifier(Modifier.STATIC)
+					.typeDerivedOf(Map.class)
+					.build()));
+		}
+
+		if (MAP_FIELD == null) {
+			throw new FieldAccessException("Could not find index <-> Item map.");
+		}
+
+		return (Map<Integer, Object>) MAP_FIELD.get(handle);
+	}
+
+	/**
+	 * Gets the contents of this DataWatcher as a map.
+	 * @return The contents
+	 */
+	public Map<Integer, WrappedWatchableObject> asMap() {
+		return new ConvertedMap<Integer, Object, WrappedWatchableObject>(getMap()) {
+			@Override
+			protected WrappedWatchableObject toOuter(Object inner) {
+				return inner != null ? new WrappedWatchableObject(inner) : null;
 			}
 
-			this.typeId = typeId;
-		}
-
-		/**
-		 * Construct a new instance of this Spigot type.
-		 * @param value - the value. Cannot be NULL.
-		 * @return The instance to construct.
-		 */
-		Object newInstance(Object value) {
-			return newInstance(value, null);
-		}
-
-		/**
-		 * Construct a new instance of this Spigot type.
-		 * <p>
-		 * The secondary value may be NULL if this custom type does not contain a secondary value.
-		 * @param value - the value.
-		 * @param secondary - optional secondary value.
-		 * @return
-		 */
-		Object newInstance(Object value, Object secondary) {
-			Preconditions.checkNotNull(value, "value cannot be NULL.");
-
-			if (hasSecondary()) {
-				return constructor.invoke(value, secondary);
-			} else {
-				if (secondary != null) {
-					throw new IllegalArgumentException("Cannot construct " + this + " with a secondary value");
-				}
-				return constructor.invoke(value);
+			@Override
+			protected Object toInner(WrappedWatchableObject outer) {
+				return outer != null ? outer.getHandle() : null;
 			}
-		}
+		};
+	}
 
-		/**
-		 * Set the secondary value of a given type.
-		 * @param instance - the instance.
-		 * @param secondary - the secondary value.
-		 */
-		void setSecondary(Object instance, Object secondary)  {
-			if (!hasSecondary()) {
-				throw new IllegalArgumentException(this + " does not have a secondary value.");
-			}
-			secondaryValue.set(instance, secondary);
-		}
+	/**
+	 * Gets a set containing the registered indexes.
+	 * @return The set
+	 */
+	public Set<Integer> getIndexes() {
+		return getMap().keySet();
+	}
 
-		/**
-		 * Get the secondary value of a type.
-		 * @param instance - the instance.
-		 * @return The secondary value.
-		 */
-		Object getSecondary(Object instance) {
-			if (!hasSecondary()) {
-				throw new IllegalArgumentException(this + " does not have a secondary value.");
-			}
-			return secondaryValue.get(instance);
-		}
+	/**
+	 * Gets a list of the contents of this DataWatcher.
+	 * @return The contents
+	 */
+	public List<WrappedWatchableObject> getWatchableObjects() {
+		return new ArrayList<>(asMap().values());
+	}
 
-		/**
-		 * Determine if this type has a secondary value.
-		 * @return TRUE if it does, FALSE otherwise.
-		 */
-		public boolean hasSecondary() {
-			return secondaryValue != null;
-		}
+	@Override
+	public Iterator<WrappedWatchableObject> iterator() {
+		return getWatchableObjects().iterator();
+	}
 
-		/**
-		 * Underlying Spigot class.
-		 * @return The class.
-		 */
-		public Class<?> getSpigotClass() {
-			return spigotClass;
-		}
+	/**
+	 * Gets the size of this DataWatcher's contents.
+	 * @return The size
+	 */
+	public int size() {
+		return getMap().size();
+	}
 
-		/**
-		 * The equivalent type ID.
-		 * @return The equivalent ID.
-		 */
-		public int getTypeId() {
-			return typeId;
-		}
-
-		/**
-		 * Retrieve the custom Spigot type of a value.
-		 * @param value - the value.
-		 * @return The Spigot type, or NULL if not found.
-		 */
-		public static CustomType fromValue(Object value) {
-			for (CustomType type : CustomType.values()) {
-				if (type.getSpigotClass().isInstance(value)) {
-					return type;
-				}
-			}
+	/**
+	 * Gets the item at a given index.
+	 * 
+	 * @param index Index to get
+	 * @return The watchable object, or null if none exists
+	 */
+	public WrappedWatchableObject getWatchableObject(int index) {
+		Object handle = getMap().get(index);
+		if (handle != null) {
+			return new WrappedWatchableObject(handle);
+		} else {
 			return null;
 		}
 	}
 
 	/**
-	 * Used to assign integer IDs to given types.
+	 * Removes the item at a given index.
+	 * 
+	 * @param index Index to remove
+	 * @return The previous value, or null if none existed
 	 */
-	private static Map<Class<?>, Integer> TYPE_MAP;
+	public WrappedWatchableObject remove(int index) {
+		Object removed = getMap().remove(index);
+		return removed != null ? new WrappedWatchableObject(removed) : null;
+	}
 
 	/**
-	 * Custom types in the bountiful update.
+	 * Whether or not this DataWatcher has an object at a given index.
+	 * 
+	 * @param index Index to check for
+	 * @return True if it does, false if not
 	 */
-	private static Map<Class<?>, Integer> CUSTOM_MAP;
-
-	// Accessors
-	private static FieldAccessor TYPE_MAP_ACCESSOR;
-	private static FieldAccessor VALUE_MAP_ACCESSOR;
-
-	// Fields
-	private static Field READ_WRITE_LOCK_FIELD;
-	private static Field ENTITY_FIELD;
-
-	// Methods
-	private static Method CREATE_KEY_VALUE_METHOD;
-	private static Method UPDATE_KEY_VALUE_METHOD;
-	private static Method GET_KEY_VALUE_METHOD;
-
-	// Constructors
-	private static Constructor<?> CREATE_DATA_WATCHER_CONSTRUCTOR;
-
-	// Entity methods
-	private volatile static Field ENTITY_DATA_FIELD;
+	public boolean hasIndex(int index) {
+		return getMap().containsKey(index);
+	}
 
 	/**
-	 * Whether or not this class has already been initialized.
+	 * Clears the contents of this DataWatcher. The watcher will be empty after
+	 * this operation is called.
 	 */
-	private static boolean HAS_INITIALIZED;
+	public void clear() {
+		getMap().clear();
+	}
 
-	// Lock
-	private ReadWriteLock readWriteLock;
-
-	// Map of watchable objects
-	private Map<Integer, Object> watchableObjects;
-
-	// A map view of all the watchable objects
-	private Map<Integer, WrappedWatchableObject> mapView;
+	// ---- Object Getters
 
 	/**
-	 * Initialize a new data watcher.
-	 * @throws FieldAccessException If we're unable to wrap a DataWatcher.
+	 * Get a watched byte.
+	 * 
+	 * @param index - index of the watched byte.
+	 * @return The watched byte, or NULL if this value doesn't exist.
 	 */
-	public WrappedDataWatcher() {
-		super(MinecraftReflection.getDataWatcherClass());
+	public Byte getByte(int index) {
+		return (Byte) getObject(index);
+	}
 
-		// Just create a new watcher
-		try {
-			if (MinecraftReflection.isUsingNetty()) {
-				setHandle(newEntityHandle(null));
-			} else {
-				setHandle(getHandleType().newInstance());
-			}
-			initialize();
+	/**
+	 * Get a watched short.
+	 * 
+	 * @param index - index of the watched short.
+	 * @return The watched short, or NULL if this value doesn't exist.
+	 */
+	public Short getShort(int index) {
+		return (Short) getObject(index);
+	}
 
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to construct DataWatcher.", e);
+	/**
+	 * Get a watched integer.
+	 * 
+	 * @param index - index of the watched integer.
+	 * @return The watched integer, or NULL if this value doesn't exist.
+	 */
+	public Integer getInteger(int index) {
+		return (Integer) getObject(index);
+	}
+
+	/**
+	 * Get a watched float.
+	 * 
+	 * @param index - index of the watched float.
+	 * @return The watched float, or NULL if this value doesn't exist.
+	 */
+	public Float getFloat(int index) {
+		return (Float) getObject(index);
+	}
+
+	/**
+	 * Get a watched string.
+	 * 
+	 * @param index - index of the watched string.
+	 * @return The watched string, or NULL if this value doesn't exist.
+	 */
+	public String getString(int index) {
+		return (String) getObject(index);
+	}
+
+	/**
+	 * Get a watched string.
+	 * 
+	 * @param index - index of the watched string.
+	 * @return The watched string, or NULL if this value doesn't exist.
+	 */
+	public ItemStack getItemStack(int index) {
+		return (ItemStack) getObject(index);
+	}
+
+	/**
+	 * Get a watched string.
+	 * 
+	 * @param index - index of the watched string.
+	 * @return The watched string, or NULL if this value doesn't exist.
+	 */
+	public WrappedChunkCoordinate getChunkCoordinate(int index) {
+		return (WrappedChunkCoordinate) getObject(index);
+	}
+
+	/**
+	 * Retrieve a watchable object by index.
+	 * 
+	 * @param index Index of the object to retrieve.
+	 * @return The watched object.
+	 */
+	public Object getObject(int index) {
+		return getObject(new WrappedDataWatcherObject(index, null));
+	}
+
+	/**
+	 * Retrieve a watchable object by watcher object.
+	 * 
+	 * @param object The watcher object
+	 * @return The watched object
+	 */
+	public Object getObject(WrappedDataWatcherObject object) {
+		Validate.notNull(object, "Watcher object cannot be null!");
+
+		if (GETTER == null) {
+			FuzzyReflection fuzzy = FuzzyReflection.fromClass(handleType);
+			GETTER = Accessors.getMethodAccessor(fuzzy.getMethod(FuzzyMethodContract.newBuilder()
+					.parameterExactType(object.getHandleType())
+					.returnTypeExact(Object.class)
+					.build(), "get"));
+		}
+
+		Object value = GETTER.invoke(handle, object.getHandle());
+		return WrappedWatchableObject.getWrapped(value);
+	}
+
+	// ---- Object Setters
+
+	/**
+	 * Sets the DataWatcher Item at a given index to a new value.
+	 * 
+	 * @param index Index of the object to set
+	 * @param value New value
+	 * 
+	 * @see {@link #setObject(WrappedDataWatcherObject, Object)}
+	 */
+	public void setObject(int index, Object value) {
+		Validate.isTrue(hasIndex(index), "You cannot register objects without the watcher object!");
+		setObject(index, null, value);
+	}
+
+	/**
+	 * Sets the DataWatcher Item at a given index to a new value.
+	 * 
+	 * @param index Index of the object to set
+	 * @param Serializer Serializer from {@link Serializer#get(Class)}
+	 * @param value New value
+	 * 
+	 * @see {@link #setObject(WrappedDataWatcherObject, Object)}
+	 */
+	public void setObject(int index, Serializer serializer, Object value) {
+		setObject(new WrappedDataWatcherObject(index, serializer), value);
+	}
+
+	/**
+	 * Sets the DataWatcher Item associated with a given watcher object to a new value.
+	 * 
+	 * @param object Associated watcher object
+	 * @param value Wrapped value
+	 * 
+	 * @see {@link #setObject(WrappedDataWatcherObject, Object)}
+	 */
+	public void setObject(WrappedDataWatcherObject object, WrappedWatchableObject value) {
+		setObject(object, value.getRawValue());
+	}
+
+	/**
+	 * Sets the DataWatcher Item associated with a given watcher object to a
+	 * new value. If there is not already an object at this index, the
+	 * specified watcher object must have a serializer.
+	 * 
+	 * @param object Associated watcher object
+	 * @param value New value
+	 * 
+	 * @throws IllegalArgumentException If the watcher object is null or must
+	 * 			have a serializer and does not have one.
+	 */
+	public void setObject(WrappedDataWatcherObject object, Object value) {
+		Validate.notNull(object, "Watcher object cannot be null!");
+
+		if (SETTER == null || REGISTER == null) {
+			FuzzyReflection fuzzy = FuzzyReflection.fromClass(handleType, true);
+			FuzzyMethodContract contract = FuzzyMethodContract.newBuilder()
+					.banModifier(Modifier.STATIC)
+					.requireModifier(Modifier.PUBLIC)
+					.parameterExactArray(object.getHandleType(), Object.class)
+					.build();
+			SETTER = Accessors.getMethodAccessor(fuzzy.getMethod(contract, "set"));
+			REGISTER = Accessors.getMethodAccessor(fuzzy.getMethod(contract, "register"));
+		}
+
+		if (hasIndex(object.getIndex())) {
+			SETTER.invoke(handle, object.getHandle(), WrappedWatchableObject.getUnwrapped(value));
+		} else {
+			Serializer serializer = object.getSerializer();
+			Validate.notNull(serializer, "You must specify a serializer to register an object!");
+			REGISTER.invoke(handle, object.getHandle(), WrappedWatchableObject.getUnwrapped(value));
 		}
 	}
 
-	/**
-	 * Create a wrapper for a given data watcher.
-	 * @param handle - the data watcher to wrap.
-	 * @throws FieldAccessException If we're unable to wrap a DataWatcher.
-	 */
-	public WrappedDataWatcher(Object handle) {
-		super(MinecraftReflection.getDataWatcherClass());
-		setHandle(handle);
-		initialize();
-	}
+	// ---- Utility Methods
 
 	/**
-	 * Construct a new data watcher with the given entity.
-	 * <p>
-	 * In 1.6.4 and ealier, this will fall back to using {@link #WrappedDataWatcher()}.
-	 * @param entity - the entity.
-	 * @return The wrapped data watcher.
+	 * Clone the content of the current DataWatcher.
+	 * 
+	 * @return A cloned data watcher.
 	 */
-	public static WrappedDataWatcher newWithEntity(Entity entity) {
-		// Use the old constructor
-		if (!MinecraftReflection.isUsingNetty())
-			return new WrappedDataWatcher();
-		return new WrappedDataWatcher(newEntityHandle(entity));
-	}
+	public WrappedDataWatcher deepClone() {
+		WrappedDataWatcher clone = new WrappedDataWatcher(getEntity());
 
-	/**
-	 * Construct a new native DataWatcher with the given entity.
-	 * <p>
-	 * Warning: This is only supported in 1.7.2 and above.
-	 * @param entity - the entity, or NULL.
-	 * @return The data watcher.
-	 */
-	private static Object newEntityHandle(Entity entity) {
-		Class<?> dataWatcher = MinecraftReflection.getDataWatcherClass();
-
-		try {
-			if (CREATE_DATA_WATCHER_CONSTRUCTOR == null)
-				CREATE_DATA_WATCHER_CONSTRUCTOR = dataWatcher.getConstructor(MinecraftReflection.getEntityClass());
-
-			return CREATE_DATA_WATCHER_CONSTRUCTOR.newInstance(
-					BukkitUnwrapper.getInstance().unwrapItem(entity)
-			);
-		} catch (Exception e) {
-			throw new RuntimeException("Cannot construct data watcher.", e);
-		}
-	}
-
-	/**
-	 * Create a new data watcher for a list of watchable objects.
-	 * <p>
-	 * Note that the watchable objects are not cloned, and will be modified in place. Use "deepClone" if
-	 * that is not desirable.
-	 * <p>
-	 * The {@link #removeObject(int)} method will not modify the given list, however.
-	 *
-	 * @param watchableObjects - list of watchable objects that will be copied.
-	 * @throws FieldAccessException Unable to read watchable objects.
-	 */
-	public WrappedDataWatcher(List<WrappedWatchableObject> watchableObjects) throws FieldAccessException {
-		this();
-
-		Lock writeLock = getReadWriteLock().writeLock();
-		Map<Integer, Object> map = getWatchableObjectMap();
-
-		writeLock.lock();
-
-		try {
-			// Add the watchable objects by reference
-			for (WrappedWatchableObject watched : watchableObjects) {
-				map.put(watched.getIndex(), watched.handle);
-			}
-		} finally {
-			writeLock.unlock();
-		}
-	}
-
-	/**
-	 * Retrieve the ID of a given type, if it's allowed to be watched.
-	 * @param clazz - Class to check for.
-	 * @return The ID, or NULL if it cannot be watched.
-	 * @throws FieldAccessException If we cannot initialize the reflection machinery.
-	 */
-	public static Integer getTypeID(Class<?> clazz) throws FieldAccessException {
-		initialize();
-		Integer result = TYPE_MAP.get(WrappedWatchableObject.getUnwrappedType(clazz));
-
-		if (result == null) {
-			result = CUSTOM_MAP.get(clazz);
-		}
-		return result;
-	}
-
-	/**
-	 * Retrieve the type of a given ID, if it's allowed to be watched.
-	 * @param id - id to get type for
-	 * @return The type using a given ID, or NULL if it cannot be watched.
-	 * @throws FieldAccessException If we cannot initialize the reflection machinery.
-	 */
-	public static Class<?> getTypeClass(int id) throws FieldAccessException {
-		initialize();
-
-		for (Map.Entry<Class<?>, Integer> entry : TYPE_MAP.entrySet()) {
-			if (Objects.equal(entry.getValue(), id)) {
-				return entry.getKey();
-			}
+		for (WrappedWatchableObject wrapper : this) {
+			clone.setObject(wrapper.getWatcherObject(), wrapper);
 		}
 
-		// Unknown class type
+		return clone;
+	}
+
+	/**
+	 * Retrieve the data watcher associated with an entity.
+	 * 
+	 * @param entity - the entity to read from.
+	 * @return Associated data watcher.
+	 */
+	public static WrappedDataWatcher getEntityWatcher(Entity entity) {
+		if (ENTITY_DATA_FIELD == null) {
+			ENTITY_DATA_FIELD = Accessors.getFieldAccessor(MinecraftReflection.getEntityClass(), MinecraftReflection.getDataWatcherClass(), true);
+		}
+
+		BukkitUnwrapper unwrapper = new BukkitUnwrapper();
+		Object handle = ENTITY_DATA_FIELD.get(unwrapper.unwrapItem(entity));
+		return handle != null ? new WrappedDataWatcher(handle) : null;
+	}
+
+	/**
+	 * Retrieve the entity associated with this data watcher.
+	 * @return The entity, or NULL.
+	 */
+	public Entity getEntity() {
+		if (ENTITY_FIELD == null) {
+			ENTITY_FIELD = Accessors.getFieldAccessor(HANDLE_TYPE, MinecraftReflection.getEntityClass(), true);
+		}
+
+		return (Entity) MinecraftReflection.getBukkitEntity(ENTITY_FIELD.get(handle));
+	}
+
+	/**
+	 * Set the entity associated with this data watcher.
+	 * @param entity - the new entity.
+	 */
+	public void setEntity(Entity entity) {
+		if (ENTITY_FIELD == null) {
+			ENTITY_FIELD = Accessors.getFieldAccessor(HANDLE_TYPE, MinecraftReflection.getEntityClass(), true);
+		}
+
+		ENTITY_FIELD.set(handle, BukkitUnwrapper.getInstance().unwrapItem(entity));
+	}
+
+	/**
+	 * No longer supported in 1.9 due to the removal of a consistent type <-> ID map.
+	 * 
+	 * @param clazz
+	 * @return Null
+	 */
+	@Deprecated
+	public static Integer getTypeID(Class<?> clazz) {
 		return null;
 	}
 
-    /**
-     * Get a watched byte.
-     * @param index - index of the watched byte.
-     * @return The watched byte, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public Byte getByte(int index) throws FieldAccessException {
-    	return (Byte) getObject(index);
-    }
-
-    /**
-     * Get a watched short.
-     * @param index - index of the watched short.
-     * @return The watched short, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public Short getShort(int index) throws FieldAccessException {
-    	return (Short) getObject(index);
-    }
-
-    /**
-     * Get a watched integer.
-     * @param index - index of the watched integer.
-     * @return The watched integer, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public Integer getInteger(int index) throws FieldAccessException {
-    	return (Integer) getObject(index);
-    }
-
-    /**
-     * Get a watched float.
-     * @param index - index of the watched float.
-     * @return The watched float, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public Float getFloat(int index) throws FieldAccessException {
-    	return (Float) getObject(index);
-    }
-
-    /**
-     * Get a watched string.
-     * @param index - index of the watched string.
-     * @return The watched string, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public String getString(int index) throws FieldAccessException {
-    	return (String) getObject(index);
-    }
-
-    /**
-     * Get a watched string.
-     * @param index - index of the watched string.
-     * @return The watched string, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public ItemStack getItemStack(int index) throws FieldAccessException {
-    	return (ItemStack) getObject(index);
-    }
-
-    /**
-     * Get a watched string.
-     * @param index - index of the watched string.
-     * @return The watched string, or NULL if this value doesn't exist.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public WrappedChunkCoordinate getChunkCoordinate(int index) throws FieldAccessException {
-    	return (WrappedChunkCoordinate) getObject(index);
-    }
-
-    /**
-     * Retrieve a watchable object by index.
-     * @param index - index of the object to retrieve.
-     * @return The watched object.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public Object getObject(int index) throws FieldAccessException {
-    	Object watchable = getWatchedObject(index);
-
-    	if (watchable != null) {
-    		return new WrappedWatchableObject(watchable).getValue();
-    	} else {
-    		return null;
-    	}
-    }
-
-    /**
-     * Retrieve every watchable object in this watcher.
-     * @return Every watchable object.
-     * @throws FieldAccessException If reflection failed.
-     */
-	public List<WrappedWatchableObject> getWatchableObjects() throws FieldAccessException {
-		Lock readLock = getReadWriteLock().readLock();
-		readLock.lock();
-
-    	try {
-    		List<WrappedWatchableObject> result = new ArrayList<WrappedWatchableObject>();
-
-    		// Add each watchable object to the list
-    		for (Object watchable : getWatchableObjectMap().values()) {
-    			if (watchable != null) {
-    				result.add(new WrappedWatchableObject(watchable));
-    			} else {
-    				result.add(null);
-    			}
-    		}
-    		return result;
-
-    	} finally {
-    		readLock.unlock();
-    	}
-    }
+	/**
+	 * No longer supported in 1.9 due to the removal of a consistent type <-> ID map.
+	 * 
+	 * @param typeID
+	 * @return Null
+	 */
+	@Deprecated
+	public static Class<?> getTypeClass(int typeID) {
+		return null;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
-		// Quick checks
-		if (obj == this)
-			return true;
-		if (obj == null)
-			return false;
+		if (obj == this) return true;
+		if (obj == null) return false;
 
 		if (obj instanceof WrappedDataWatcher) {
 			WrappedDataWatcher other = (WrappedDataWatcher) obj;
@@ -484,13 +514,15 @@ public class WrappedDataWatcher extends AbstractWrapper implements Iterable<Wrap
 			if (size() != other.size())
 				return false;
 
-			for (; first.hasNext() && second.hasNext(); ) {
+			for (; first.hasNext() && second.hasNext();) {
 				// See if the two elements are equal
 				if (!first.next().equals(second.next()))
 					return false;
 			}
+
 			return true;
 		}
+
 		return false;
 	}
 
@@ -499,426 +531,294 @@ public class WrappedDataWatcher extends AbstractWrapper implements Iterable<Wrap
 		return getWatchableObjects().hashCode();
 	}
 
-    /**
-     * Retrieve a copy of every index associated with a watched object.
-     * @return Every watched object index.
-     * @throws FieldAccessException If we're unable to read the underlying object.
-     */
-    public Set<Integer> indexSet() throws FieldAccessException {
-    	Lock readLock = getReadWriteLock().readLock();
-		readLock.lock();
-
-    	try {
-    		return new HashSet<Integer>(getWatchableObjectMap().keySet());
-    	} finally {
-    		readLock.unlock();
-    	}
-    }
-
-    /**
-     * Clone the content of the current DataWatcher.
-     * @return A cloned data watcher.
-     */
-    public WrappedDataWatcher deepClone() {
-    	WrappedDataWatcher clone = new WrappedDataWatcher();
-
-    	// Make a new copy instead
-    	for (WrappedWatchableObject watchable : this) {
-    		clone.setObject(watchable.getIndex(), watchable.getClonedValue());
-    	}
-    	return clone;
-    }
-
-    /**
-     * Retrieve the number of watched objects.
-     * @return Watched object count.
-     * @throws FieldAccessException If we're unable to read the underlying object.
-     */
-    public int size() throws FieldAccessException {
-    	Lock readLock = getReadWriteLock().readLock();
-    	readLock.lock();
-
-    	try {
-    		return getWatchableObjectMap().size();
-    	} finally {
-    		readLock.unlock();
-    	}
-    }
-
-    /**
-     * Remove a given object from the underlying DataWatcher.
-     * @param index - index of the object to remove.
-     * @return The watchable object that was removed, or NULL If none could be found.
-     */
-    public WrappedWatchableObject removeObject(int index) {
-    	Lock writeLock = getReadWriteLock().writeLock();
-    	writeLock.lock();
-
-    	try {
-    		Object removed = getWatchableObjectMap().remove(index);
-    		return removed != null ? new WrappedWatchableObject(removed) : null;
-    	} finally {
-    		writeLock.unlock();
-    	}
-    }
-
-    /**
-     * Set a watched byte.
-     * @param index - index of the watched byte.
-     * @param newValue - the new watched value.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public void setObject(int index, Object newValue) throws FieldAccessException {
-    	setObject(index, newValue, true);
-    }
-
-    /**
-     * Set a watched byte.
-     * @param index - index of the watched byte.
-     * @param newValue - the new watched value.
-     * @param update - whether or not to refresh every listening client.
-     * @throws FieldAccessException Cannot read underlying field.
-     */
-    public void setObject(int index, Object newValue, boolean update) throws FieldAccessException {
-    	// Aquire write lock
-    	Lock writeLock = getReadWriteLock().writeLock();
-    	writeLock.lock();
-
-    	try {
-    		Object watchable = getWatchedObject(index);
-
-	    	if (watchable != null) {
-	    		new WrappedWatchableObject(watchable).setValue(newValue, update);
-	    	} else {
-	    		CREATE_KEY_VALUE_METHOD.invoke(handle, index, WrappedWatchableObject.getUnwrapped(newValue));
-	    	}
-
-	    	// Handle invoking the method
-    	} catch (IllegalArgumentException e) {
-    		throw new FieldAccessException("Cannot convert arguments.", e);
-		} catch (IllegalAccessException e) {
-			throw new FieldAccessException("Illegal access.", e);
-		} catch (InvocationTargetException e) {
-			throw new FieldAccessException("Checked exception in Minecraft.", e);
-		} finally {
-    		writeLock.unlock();
-    	}
-    }
-
-    /**
-     * Set a watched byte with an optional secondary value.
-     * @param index - index of the watched byte.
-     * @param newValue - the new watched value.
-     * @param secondary - optional secondary value.
-     * @param update - whether or not to refresh every listening client.
-     * @param type - custom type.
-     * @throws FieldAccessException If we cannot read the underlying field.
-     */
-    public void setObject(int index, Object newValue, Object secondary, boolean update, CustomType type) throws FieldAccessException {
-		Object created = type.newInstance(newValue, secondary);
-
-		// Now update the watcher
-		setObject(index, created, update);
-    }
-
-    private Object getWatchedObject(int index) throws FieldAccessException {
-    	// We use the get-method first and foremost
-    	if (GET_KEY_VALUE_METHOD != null) {
-			try {
-				return GET_KEY_VALUE_METHOD.invoke(handle, index);
-			} catch (Exception e) {
-				throw new FieldAccessException("Cannot invoke get key method for index " + index, e);
-			}
-    	} else {
-    		try {
-    			getReadWriteLock().readLock().lock();
-    			return getWatchableObjectMap().get(index);
-
-    		} finally {
-    			getReadWriteLock().readLock().unlock();
-    		}
-    	}
-    }
-
-    /**
-     * Retrieve the current read write lock.
-     * @return Current read write lock.
-     * @throws FieldAccessException If we're unable to read the underlying field.
-     */
-    protected ReadWriteLock getReadWriteLock() throws FieldAccessException {
-    	try {
-	    	// Cache the read write lock
-	    	if (readWriteLock != null)
-	    		return readWriteLock;
-	    	else if (READ_WRITE_LOCK_FIELD != null)
-	    		return readWriteLock = (ReadWriteLock) FieldUtils.readField(READ_WRITE_LOCK_FIELD, handle, true);
-	    	else
-	    		return readWriteLock = new ReentrantReadWriteLock();
-    	} catch (IllegalAccessException e) {
-    		throw new FieldAccessException("Unable to read lock field.", e);
-    	}
-    }
-
-    /**
-	 * Retrieve the underlying map of key values that stores watchable objects.
-	 * @return A map of watchable objects.
-	 * @throws FieldAccessException If we don't have permission to perform reflection.
-	 */
-	@SuppressWarnings("unchecked")
-	protected Map<Integer, Object> getWatchableObjectMap() throws FieldAccessException {
-		if (watchableObjects == null)
-			watchableObjects = (Map<Integer, Object>) VALUE_MAP_ACCESSOR.get(handle);
-		return watchableObjects;
-	}
-
-	/**
-	 * Retrieve the data watcher associated with an entity.
-	 * @param entity - the entity to read from.
-	 * @return Associated data watcher.
-	 * @throws FieldAccessException Reflection failed.
-	 */
-	public static WrappedDataWatcher getEntityWatcher(Entity entity) throws FieldAccessException {
-		if (ENTITY_DATA_FIELD == null)
-			ENTITY_DATA_FIELD = FuzzyReflection.fromClass(MinecraftReflection.getEntityClass(), true).
-				getFieldByType("datawatcher", MinecraftReflection.getDataWatcherClass());
-
-		BukkitUnwrapper unwrapper = new BukkitUnwrapper();
-
-		try {
-			Object nsmWatcher = FieldUtils.readField(ENTITY_DATA_FIELD, unwrapper.unwrapItem(entity), true);
-
-			if (nsmWatcher != null)
-				return new WrappedDataWatcher(nsmWatcher);
-			else
-				return null;
-
-		} catch (IllegalAccessException e) {
-			throw new FieldAccessException("Cannot access DataWatcher field.", e);
-		}
-	}
-
-	/**
-	 * Invoked when a data watcher is first used.
-	 */
-	@SuppressWarnings("unchecked")
-	private static void initialize() throws FieldAccessException {
-		// This method should only be run once, even if an exception is thrown
-		if (!HAS_INITIALIZED)
-			HAS_INITIALIZED = true;
-		else
-			return;
-
-		FuzzyReflection fuzzy = FuzzyReflection.fromClass(MinecraftReflection.getDataWatcherClass(), true);
-
-		for (Field lookup : fuzzy.getFieldListByType(Map.class)) {
-			if (Modifier.isStatic(lookup.getModifiers())) {
-				// This must be the type map
-				TYPE_MAP_ACCESSOR = Accessors.getFieldAccessor(lookup, true);
-			} else {
-				// If not, then we're probably dealing with the value map
-				VALUE_MAP_ACCESSOR = Accessors.getFieldAccessor(lookup, true);
-			}
-		}
-		// Spigot workaround (not necessary
-		initializeSpigot(fuzzy);
-
-		// Any custom types
-		CUSTOM_MAP = initializeCustom();
-
-		// Initialize static type type
-		TYPE_MAP = (Map<Class<?>, Integer>) TYPE_MAP_ACCESSOR.get(null);
-
-		try {
-			READ_WRITE_LOCK_FIELD = fuzzy.getFieldByType("readWriteLock", ReadWriteLock.class);
-		} catch (IllegalArgumentException e) {
-			// It's not a big deal
-		}
-
-		// Check for the entity field as well
-		if (MinecraftReflection.isUsingNetty()) {
-			ENTITY_FIELD = fuzzy.getFieldByType("entity", MinecraftReflection.getEntityClass());
-			ENTITY_FIELD.setAccessible(true);
-		}
-		initializeMethods(fuzzy);
-	}
-
-	// For Spigot's bountiful update patch
-	private static Map<Class<?>, Integer> initializeCustom() {
-		Map<Class<?>, Integer> map = Maps.newHashMap();
-
-		for (CustomType type : CustomType.values()) {
-			if (type.getSpigotClass() != null) {
-				map.put(type.getSpigotClass(), type.getTypeId());
-			}
-		}
-		return map;
-	}
-
-	// TODO: Remove, as this was fixed in build #1189 of Spigot
-	private static void initializeSpigot(FuzzyReflection fuzzy) {
-		// See if the workaround is needed
-		if (TYPE_MAP_ACCESSOR != null && VALUE_MAP_ACCESSOR != null)
-			return;
-
-		for (Field lookup : fuzzy.getFields()) {
-			final Class<?> type = lookup.getType();
-
-			if (TroveWrapper.isTroveClass(type)) {
-				// Create a wrapper accessor
-				final ReadOnlyFieldAccessor accessor = TroveWrapper.wrapMapField(
-				  Accessors.getFieldAccessor(lookup, true), new Function<Integer, Integer>() {
-					@Override
-					public Integer apply(@Nullable Integer value) {
-						// Do not use zero for no entry value
-						if (value == 0)
-							return -1;
-						return value;
-					}
-				});
-
-				if (Modifier.isStatic(lookup.getModifiers())) {
-					TYPE_MAP_ACCESSOR = accessor;
-				} else {
-					VALUE_MAP_ACCESSOR = accessor;
-				}
-			}
-		}
-
-		if (TYPE_MAP_ACCESSOR == null)
-			throw new IllegalArgumentException("Unable to find static type map.");
-		if (VALUE_MAP_ACCESSOR == null)
-			throw new IllegalArgumentException("Unable to find static value map.");
-	}
-
-	private static void initializeMethods(FuzzyReflection fuzzy) {
-		List<Method> candidates = fuzzy.getMethodListByParameters(Void.TYPE,
-				  					new Class<?>[] { int.class, Object.class});
-
-		// Load the get-method
-		try {
-			GET_KEY_VALUE_METHOD = fuzzy.getMethodByParameters(
-					"getWatchableObject", MinecraftReflection.getWatchableObjectClass(), new Class[] { int.class });
-			GET_KEY_VALUE_METHOD.setAccessible(true);
-
-		} catch (IllegalArgumentException e) {
-			// Use the fallback method
-		}
-
-		for (Method method : candidates) {
-			if (!method.getName().startsWith("watch")) {
-				CREATE_KEY_VALUE_METHOD = method;
-			} else {
-				UPDATE_KEY_VALUE_METHOD = method;
-			}
-		}
-
-		// Did we succeed?
-		if (UPDATE_KEY_VALUE_METHOD == null || CREATE_KEY_VALUE_METHOD == null) {
-			// Go by index instead
-			if (candidates.size() > 1) {
-				CREATE_KEY_VALUE_METHOD = candidates.get(0);
-				UPDATE_KEY_VALUE_METHOD = candidates.get(1);
-			} else {
-				throw new IllegalStateException("Unable to find create and update watchable object. Update ProtocolLib.");
-			}
-
-			// Be a little scientist - see if this in fact IS the right way around
-			try {
-				WrappedDataWatcher watcher = new WrappedDataWatcher();
-				watcher.setObject(0, 0);
-				watcher.setObject(0, 1);
-
-				if (watcher.getInteger(0) != 1) {
-					throw new IllegalStateException("This cannot be!");
-				}
-			} catch (Exception e) {
-				// Nope
-				UPDATE_KEY_VALUE_METHOD = candidates.get(0);
-				CREATE_KEY_VALUE_METHOD = candidates.get(1);
-			}
-		}
-	}
-
-	@Override
-	public Iterator<WrappedWatchableObject> iterator() {
-		// We'll wrap the iterator instead of creating a new list every time
-		return Iterators.transform(getWatchableObjectMap().values().iterator(),
-				new Function<Object, WrappedWatchableObject>() {
-
-			@Override
-			public WrappedWatchableObject apply(@Nullable Object item) {
-				if (item != null)
-					return new WrappedWatchableObject(item);
-				else
-					return null;
-			}
-		});
-	}
-
-	/**
-	 * Retrieve a view of this DataWatcher as a map.
-	 * <p>
-	 * Any changes to the map will be reflected in this DataWatcher, and vice versa.
-	 * @return A view of the data watcher as a map.
-	 */
-	public Map<Integer, WrappedWatchableObject> asMap() {
-		// Construct corresponding map
-		if (mapView == null) {
-			mapView = new ConvertedMap<Integer, Object, WrappedWatchableObject>(getWatchableObjectMap()) {
-				@Override
-				protected Object toInner(WrappedWatchableObject outer) {
-					if (outer == null)
-						return null;
-					return outer.getHandle();
-				}
-
-				@Override
-				protected WrappedWatchableObject toOuter(Object inner) {
-					if (inner == null)
-						return null;
-					return new WrappedWatchableObject(inner);
-				}
-			};
-		}
-		return mapView;
-	}
-
 	@Override
 	public String toString() {
-		return asMap().toString();
+		return "WrappedDataWatcher[handle=" + handle + "]";
 	}
 
-	/**
-	 * Retrieve the entity associated with this data watcher.
-	 * <p>
-	 * <b>Warning:</b> This is only supported on 1.7.2 and above.
-	 * @return The entity, or NULL.
-	 */
-	public Entity getEntity() {
-		if (!MinecraftReflection.isUsingNetty())
-			throw new IllegalStateException("This method is only supported on 1.7.2 and above.");
+	// ---- 1.9 classes
 
-		try {
-			return (Entity) MinecraftReflection.getBukkitEntity(ENTITY_FIELD.get(handle));
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to retrieve entity.", e);
+	/**
+	 * Represents a DataWatcherObject in 1.9. In order to register an object,
+	 * the serializer must be specified.
+	 * 
+	 * @author dmulloy2
+	 */
+	public static class WrappedDataWatcherObject extends AbstractWrapper {
+		private static final Class<?> HANDLE_TYPE = MinecraftReflection.getDataWatcherObjectClass();
+		private static ConstructorAccessor constructor = null;
+		private static MethodAccessor getSerializer = null;
+
+		private final StructureModifier<Object> modifier;
+
+		/**
+		 * Creates a new watcher object from a NMS handle.
+		 * 
+		 * @param handle The handle
+		 */
+		public WrappedDataWatcherObject(Object handle) {
+			super(HANDLE_TYPE);
+
+			setHandle(handle);
+			this.modifier = new StructureModifier<Object>(HANDLE_TYPE).withTarget(handle);
+		}
+
+		/**
+		 * Creates a new watcher object from an index and serializer.
+		 * 
+		 * @param index Index
+		 * @param serializer Serializer, see {@link Registry}
+		 */
+		public WrappedDataWatcherObject(int index, Serializer serializer) {
+			this(newHandle(index, serializer));
+		}
+
+		private static Object newHandle(int index, Serializer serializer) {
+			if (constructor == null) {
+				constructor = Accessors.getConstructorAccessor(HANDLE_TYPE.getConstructors()[0]);
+			}
+
+			Object handle = serializer != null ? serializer.getHandle() : null;
+			return constructor.invoke(index, handle);
+		}
+
+		/**
+		 * Gets this watcher object's index.
+		 * 
+		 * @return The index
+		 */
+		public int getIndex() {
+			return (int) modifier.read(0);
+		}
+
+		/**
+		 * Gets this watcher object's serializer. Will return null if the
+		 * serializer was never specified.
+		 * 
+		 * @return The serializer, or null
+		 */
+		public Serializer getSerializer() {
+			if (getSerializer == null) {
+				getSerializer = Accessors.getMethodAccessor(FuzzyReflection.fromClass(HANDLE_TYPE, true)
+						.getMethodByParameters("getSerializer", MinecraftReflection.getDataWatcherSerializerClass(), new Class[0]));
+			}
+
+			Object serializer = getSerializer.invoke(handle);
+			if (serializer != null) {
+				Serializer wrapper = Registry.fromHandle(serializer);
+				if (wrapper != null) {
+					return wrapper;
+				} else {
+					return new Serializer(null, serializer, false);
+				}
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public String toString() {
+			return "DataWatcherObject[index=" + getIndex() + ", serializer=" + getSerializer() + "]";
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) return true;
+			if (obj == null) return false;
+
+			if (obj instanceof WrappedDataWatcherObject) {
+				WrappedDataWatcherObject other = (WrappedDataWatcherObject) obj;
+				return handle.equals(other.handle);
+			}
+
+			return false;
 		}
 	}
 
 	/**
-	 * Set the entity associated with this data watcher.
-	 * <p>
-	 * <b>Warning:</b> This is only supported on 1.7.2 and above.
-	 * @param entity - the new entity.
+	 * Represents a DataWatcherSerializer in 1.9. If a Serializer is optional,
+	 * values must be wrapped in a {@link Optional}.
+	 * 
+	 * @author dmulloy2
 	 */
-	public void setEntity(Entity entity) {
-		if (!MinecraftReflection.isUsingNetty())
-			throw new IllegalStateException("This method is only supported on 1.7.2 and above.");
+	public static class Serializer extends AbstractWrapper {
+		private static final Class<?> HANDLE_TYPE = MinecraftReflection.getDataWatcherSerializerClass();
 
-		try {
-			ENTITY_FIELD.set(handle, BukkitUnwrapper.getInstance().unwrapItem(entity));
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to set entity.", e);
+		private final Class<?> type;
+		private final boolean optional;
+
+		/**
+		 * Constructs a new Serializer
+		 * 
+		 * @param type Type it serializes
+		 * @param handle NMS handle
+		 * @param optional Whether or not it's {@link Optional}
+		 */
+		public Serializer(Class<?> type, Object handle, boolean optional) {
+			super(HANDLE_TYPE);
+			this.type = type;
+			this.optional = optional;
+
+			setHandle(handle);
+		}
+
+		/**
+		 * Gets the type this serializer serializes.
+		 * 
+		 * @return The type
+		 */
+		public Class<?> getType() {
+			return type;
+		}
+
+		/**
+		 * Whether or not this serializer is optional, that is whether or not
+		 * the return type is wrapped in a {@link Optional}.
+		 * 
+		 * @return True if it is, false if not
+		 */
+		public boolean isOptional() {
+			return optional;
+		}
+
+		@Override
+		public String toString() {
+			return "Serializer[type=" + type + ", handle=" + handle + ", optional=" + optional + "]";
+		}
+	}
+
+	/**
+	 * Represents a DataWatcherRegistry containing the supported
+	 * {@link Serializer}s in 1.9.
+	 *
+	 * <ul>
+	 *   <li>Byte</li>
+	 *   <li>Integer</li>
+	 *   <li>Float</li>
+	 *   <li>String</li>
+	 *   <li>IChatBaseComponent</li>
+	 *   <li>Optional&lt;ItemStack&gt;</li>
+	 *   <li>Optional&lt;IBlockData&gt;</li>
+	 *   <li>Boolean</li>
+	 *   <li>Vector3f</li>
+	 *   <li>BlockPosition</li>
+	 *   <li>Optional&lt;BlockPosition&gt;</li>
+	 *   <li>EnumDirection</li>
+	 *   <li>Optional&lt;UUID&gt;</li>
+	 * </ul>
+	 *
+	 * @author dmulloy2
+	 */
+	public static class Registry {
+		private static boolean INITIALIZED = false;
+		private static List<Serializer> REGISTRY = new ArrayList<>();
+
+		/**
+		 * Gets the first serializer associated with a given class.
+		 *
+		 * <p><b>Note</b>: If {@link Serializer#isOptional() the serializer is optional},
+		 *   values <i>must</i> be wrapped in an {@link Optional}.</p>
+		 *
+		 * <p>If there are multiple serializers for a given class (i.e. BlockPosition),
+		 *   you should use {@link #get(Class, boolean)} for more precision.</p>
+		 *
+		 * @param clazz Class to find serializer for
+		 * @return The serializer, or null if none exists
+		 */
+		public static Serializer get(Class<?> clazz) {
+			Validate.notNull("Class cannot be null!");
+			initialize();
+
+			for (Serializer serializer : REGISTRY) {
+				if (serializer.getType().equals(clazz)) {
+					return serializer;
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * Gets the first serializer associated with a given class and optional state.
+		 * 
+		 * <p><b>Note</b>: If the serializer is optional, values <i>must<i> be
+		 * wrapped in an {@link Optional}
+		 *
+		 * @param clazz Class to find serializer for
+		 * @param optional Optional state
+		 * @return The serializer, or null if none exists
+		 */
+		public static Serializer get(Class<?> clazz, boolean optional) {
+			Validate.notNull(clazz, "Class cannot be null!");
+			initialize();
+
+			for (Serializer serializer : REGISTRY) {
+				if (serializer.getType().equals(clazz)
+					&& serializer.isOptional() == optional) {
+					return serializer;
+				}
+			}
+
+			return null;
+		}
+
+		/**
+		 * Gets the serializer associated with a given NMS handle.
+		 * @param handle The handle
+		 * @return The serializer, or null if none exists
+		 */
+		public static Serializer fromHandle(Object handle) {
+			Validate.notNull("Handle cannot be null!");
+			initialize();
+
+			for (Serializer serializer : REGISTRY) {
+				if (serializer.getHandle().equals(handle)) {
+					return serializer;
+				}
+			}
+
+			return null;
+		}
+
+		private static void initialize() {
+			if (!INITIALIZED) {
+				INITIALIZED = true;
+			} else {
+				return;
+			}
+
+			List<Field> candidates = FuzzyReflection.fromClass(MinecraftReflection.getDataWatcherRegistryClass(), true)
+					.getFieldListByType(MinecraftReflection.getDataWatcherSerializerClass());
+			for (Field candidate : candidates) {
+				Type generic = candidate.getGenericType();
+				if (generic instanceof ParameterizedType) {
+					ParameterizedType type = (ParameterizedType) generic;
+					Type[] args = type.getActualTypeArguments();
+					Type arg = args[0];
+
+					Class<?> innerClass = null;
+					boolean optional = false;
+
+					if (arg instanceof Class<?>) {
+						innerClass = (Class<?>) arg;
+					} else if (arg instanceof ParameterizedType) {
+						innerClass = (Class<?>) ((ParameterizedType) arg).getActualTypeArguments()[0];
+						optional = true;
+					} else {
+						throw new IllegalStateException("Failed to find inner class of field " + candidate);
+					}
+
+					Object serializer;
+
+					try {
+						serializer = candidate.get(null);
+					} catch (ReflectiveOperationException e) {
+						throw new IllegalStateException("Failed to read field " + candidate);
+					}
+
+					REGISTRY.add(new Serializer(innerClass, serializer, optional));
+				}
+			}
 		}
 	}
 }

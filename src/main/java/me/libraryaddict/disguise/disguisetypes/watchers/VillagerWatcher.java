@@ -1,28 +1,33 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
-import java.util.Random;
-
-import me.libraryaddict.disguise.disguisetypes.Disguise;
-
 import org.bukkit.entity.Villager.Profession;
 
-public class VillagerWatcher extends AgeableWatcher {
+import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
+import me.libraryaddict.disguise.utilities.DisguiseUtilities;
 
-    public VillagerWatcher(Disguise disguise) {
+public class VillagerWatcher extends AgeableWatcher
+{
+
+    public VillagerWatcher(Disguise disguise)
+    {
         super(disguise);
-        setProfession(Profession.values()[new Random().nextInt(Profession.values().length)]);
+        setProfession(Profession.values()[DisguiseUtilities.random.nextInt(Profession.values().length)]);
     }
 
-    public Profession getProfession() {
-        return Profession.values()[(Integer) getValue(16, 0)];
+    public Profession getProfession()
+    {
+        return Profession.values()[getValue(FlagType.VILLAGER_PROFESSION)];
     }
 
-    public void setProfession(int professionId) {
-        setValue(16, professionId % 6);
-        sendData(16);
+    public void setProfession(int professionId)
+    {
+        setValue(FlagType.VILLAGER_PROFESSION, professionId);
+        sendData(FlagType.VILLAGER_PROFESSION);
     }
 
-    public void setProfession(Profession newProfession) {
-        setProfession(newProfession.getId());
+    public void setProfession(Profession newProfession)
+    {
+        setProfession(newProfession.ordinal());
     }
 }

@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
@@ -32,8 +32,6 @@ import com.comphenix.protocol.injector.PacketConstructor.Unwrapper;
 import com.comphenix.protocol.reflect.FieldUtils;
 import com.comphenix.protocol.reflect.instances.DefaultInstances;
 import com.google.common.primitives.Primitives;
-
-import me.hub.Main;
 
 /**
  * Represents an object capable of converting wrapped Bukkit objects into NMS objects.
@@ -65,7 +63,7 @@ public class BukkitUnwrapper implements Unwrapper {
 	 * @return The default instance.
 	 */
 	public static BukkitUnwrapper getInstance() {
-		ErrorReporter currentReporter = Main.getErrorReporter();
+		ErrorReporter currentReporter = ProtocolLibrary.getErrorReporter();
 		
 		// Also recreate the unwrapper if the error reporter has changed
 		if (DEFAULT == null || DEFAULT.reporter != currentReporter) {
@@ -78,7 +76,7 @@ public class BukkitUnwrapper implements Unwrapper {
 	 * Construct a new Bukkit unwrapper with ProtocolLib's default error reporter.
 	 */
 	public BukkitUnwrapper() {
-		this(Main.getErrorReporter());
+		this(ProtocolLibrary.getErrorReporter());
 	}
 	
 	/**

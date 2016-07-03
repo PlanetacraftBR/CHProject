@@ -1,20 +1,24 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class BlazeWatcher extends LivingWatcher {
-
-    public BlazeWatcher(Disguise disguise) {
+public class BlazeWatcher extends InsentientWatcher
+{
+    public BlazeWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    public boolean isBlazing() {
-        return (Byte) getValue(16, (byte) 0) == 1;
+    public boolean isBlazing()
+    {
+        return getValue(FlagType.BLAZE_BLAZING) == 1;
     }
 
-    public void setBlazing(boolean isBlazing) {
-        setValue(16, (byte) (isBlazing ? 1 : 0));
-        sendData(16);
+    public void setBlazing(boolean isBlazing)
+    {
+        setValue(FlagType.BLAZE_BLAZING, (byte) (isBlazing ? 1 : 0));
+        sendData(FlagType.BLAZE_BLAZING);
     }
 
 }

@@ -1,7 +1,7 @@
 package net.citizensnpcs.npc.ai;
 
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.entity.LivingEntity;
 
 import net.citizensnpcs.api.ai.AttackStrategy;
@@ -12,10 +12,10 @@ import net.citizensnpcs.api.ai.event.CancelReason;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.PlayerAnimation;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.NavigationAbstract;
+import net.minecraft.server.v1_10_R1.Entity;
+import net.minecraft.server.v1_10_R1.EntityLiving;
+import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.NavigationAbstract;
 
 public class MCTargetStrategy implements PathStrategy, EntityTarget {
     private final boolean aggro;
@@ -66,8 +66,8 @@ public class MCTargetStrategy implements PathStrategy, EntityTarget {
     }
 
     @Override
-    public LivingEntity getTarget() {
-        return (LivingEntity) target.getBukkitEntity();
+    public org.bukkit.entity.Entity getTarget() {
+        return target.getBukkitEntity();
     }
 
     @Override
@@ -87,10 +87,6 @@ public class MCTargetStrategy implements PathStrategy, EntityTarget {
     @Override
     public boolean isAggressive() {
         return aggro;
-    }
-
-    private void setPath() {
-        targetNavigator.setPath();
     }
 
     @Override
@@ -119,16 +115,19 @@ public class MCTargetStrategy implements PathStrategy, EntityTarget {
         if (!aggro && distanceSquared() < parameters.distanceMargin()) {
             stop();
         } else if (updateCounter++ > parameters.updatePathRate()) {
-            setPath();
+            targetNavigator.setPath();
             updateCounter = 0;
         }
+        targetNavigator.update();
 
         NMS.look(handle, target);
         if (aggro && canAttack()) {
             AttackStrategy strategy = parameters.attackStrategy();
-            if (strategy != null && strategy.handle((LivingEntity) handle.getBukkitEntity(), getTarget())) {
+            if (strategy != null
+                    && strategy.handle((LivingEntity) handle.getBukkitEntity(), (LivingEntity) getTarget())) {
             } else if (strategy != parameters.defaultAttackStrategy()) {
-                parameters.defaultAttackStrategy().handle((LivingEntity) handle.getBukkitEntity(), getTarget());
+                parameters.defaultAttackStrategy().handle((LivingEntity) handle.getBukkitEntity(),
+                        (LivingEntity) getTarget());
             }
             attackTicks = parameters.attackDelayTicks();
         }
@@ -175,6 +174,11 @@ public class MCTargetStrategy implements PathStrategy, EntityTarget {
         public void stop() {
             strategy.stop();
         }
+
+        @Override
+        public void update() {
+            strategy.update();
+        }
     }
 
     private class NavigationFieldWrapper implements TargetNavigator {
@@ -204,12 +208,19 @@ public class MCTargetStrategy implements PathStrategy, EntityTarget {
         public void stop() {
             NMS.stopNavigation(navigation);
         }
+
+        @Override
+        public void update() {
+            NMS.updateNavigation(navigation);
+        }
     }
 
     private static interface TargetNavigator {
         void setPath();
 
         void stop();
+
+        void update();
     }
 
     static final AttackStrategy DEFAULT_ATTACK_STRATEGY = new AttackStrategy() {

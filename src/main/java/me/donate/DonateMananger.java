@@ -181,11 +181,10 @@ public class DonateMananger extends MiniPlugin {
 		    	    		  Patente.UpPatende(jogador);
 		    	    		  Account.UpdateAccount(jogador);
 		    	    		  jogador.sendMessage("§cVocê deu update em sua patente");
-		    	    		  jogador.playSound(jogador.getLocation(), Sound.PISTON_EXTEND, 1, 0);
+		    	    		
 		    	    		  }
 		    	    		  catch (Exception exception)
 		    	  		    {
-		    	    			  jogador.playSound(jogador.getLocation(), Sound.ANVIL_BREAK, 1, 0);
 		    	    			  jogador.sendMessage("§cOps você não tem 5 Niveis suficiente para isso!");
 		    	  		    }
 		    	    		  

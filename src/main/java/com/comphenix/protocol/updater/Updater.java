@@ -22,10 +22,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.plugin.Plugin;
 
+
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.utility.Util;
 import com.google.common.base.Preconditions;
+
+import me.hub.Main;
 
 /**
  * @author dmulloy2
@@ -55,40 +58,53 @@ public abstract class Updater {
 		this.announce = announce;
 	}
 
-	protected boolean versionCheck(String title) {
-        if (this.type != UpdateType.NO_VERSION_CHECK) {
-            String version = this.plugin.getDescription().getVersion();
+	public boolean versionCheck(String title) {
+		if (this.type != UpdateType.NO_VERSION_CHECK) {
+			String version = this.plugin.getDescription().getVersion();
 
-            boolean devBuild = false;
-            if (version.contains("-SNAPSHOT") || version.contains("-BETA")) {
-            	devBuild = true;
-            	version = version.substring(0, version.indexOf("-"));
-            }
+			// Extract the version from the response
+			String[] split = title.split(" ");
+			String remote = "Unknown";
 
-            final String[] splitTitle = title.split(" ");
-            String remoteVersion;
-
-            if (splitTitle.length == 2) {
-            	remoteVersion = splitTitle[1].split("-")[0];
-            } else if (this instanceof SpigotUpdater) {
-            	remoteVersion = splitTitle[0];
-			} else {
+			if (split.length == 2) { // BukkitDev
+				remote = split[1];
+			} else if (this instanceof SpigotUpdater) { // Spigot resource
+				remote = split[0];
+			} else { // Misconfigured
 				// The file's name did not contain the string 'vVersion'
-				final String authorInfo = this.plugin.getDescription().getAuthors().size() == 0 ? "" : " (" + this.plugin.getDescription().getAuthors().get(0) + ")";
-				this.plugin.getLogger().warning("The author of this plugin " + authorInfo + " has misconfigured their Auto Update system");
-				this.plugin.getLogger().warning("File versions should follow the format 'PluginName VERSION[-SNAPSHOT]'");
-				this.plugin.getLogger().warning("Please notify the author of this error.");
+				String authorInfo = this.plugin.getDescription().getAuthors().size() == 0 ? "" : " (" + this.plugin.getDescription().getAuthors().get(0) + ")";
+				plugin.getLogger().warning("The author of this plugin " + authorInfo + " has misconfigured their Auto Update system");
+				plugin.getLogger().warning("File versions should follow the format 'PluginName VERSION[-SNAPSHOT]'");
+				plugin.getLogger().warning("Please notify the author of this error.");
 				this.result = BukkitUpdater.UpdateResult.FAIL_NOVERSION;
 				return false;
 			}
 
-			// Parse the version
-			MinecraftVersion parsedRemote = new MinecraftVersion(remoteVersion);
-			MinecraftVersion parsedCurrent = new MinecraftVersion(plugin.getDescription().getVersion());
+			// Check if the local version is a dev build
+
+			boolean devBuild = false;
+			if (version.contains("-SNAPSHOT") || version.contains("-BETA")) {
+				devBuild = true;
+				version = version.substring(0, version.indexOf("-"));
+			}
+
+			// Remove the v
+			if (remote.startsWith("v")) {
+				remote = remote.substring(1);
+			}
+
+			// Remove the build number if it snuck in there
+			if (version.contains("-b")) {
+				version = version.substring(0, version.lastIndexOf("-"));
+			}
+
+			// Parse it and our local version
+			MinecraftVersion parsedRemote = new MinecraftVersion(remote);
+			MinecraftVersion parsedCurrent = new MinecraftVersion(version);
 
 			if (devBuild && parsedRemote.equals(parsedCurrent)) {
 				// They're using a dev build and this version has been released
-				return true;
+				return !remote.contains("-BETA") && !remote.contains("-SNAPSHOT");
 			}
 
 			// The remote version has to be greater
@@ -98,6 +114,7 @@ public abstract class Updater {
 				return false;
 			}
 		}
+
 		return true;
 	}
 
@@ -266,11 +283,11 @@ public abstract class Updater {
         }
     }
 
-	public static Updater create(Plugin plugin, int id, File file, UpdateType type, boolean announce) {
+	public static Updater create(Main main, int id, File file, UpdateType type, boolean announce) {
 		if (Util.isUsingSpigot()) {
-			return new SpigotUpdater(plugin, type, announce);
+			return new SpigotUpdater(main, type, announce);
 		} else {
-			return new BukkitUpdater(plugin, id, file, type, announce);
+			return new BukkitUpdater(main, id, file, type, announce);
 		}
 	}
 
@@ -286,4 +303,6 @@ public abstract class Updater {
 				return false;
 		}
 	}
+
+	public abstract String getRemoteVersion();
 }

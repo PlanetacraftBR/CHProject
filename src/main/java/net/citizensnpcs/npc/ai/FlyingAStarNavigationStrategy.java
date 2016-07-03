@@ -17,8 +17,7 @@ import net.citizensnpcs.api.astar.pathfinder.VectorGoal;
 import net.citizensnpcs.api.astar.pathfinder.VectorNode;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.util.NMS;
-import net.citizensnpcs.util.Util;
-import net.minecraft.server.v1_8_R3.MathHelper;
+import net.minecraft.server.v1_10_R1.MathHelper;
 
 public class FlyingAStarNavigationStrategy extends AbstractPathStrategy {
     private final NPC npc;
@@ -32,7 +31,7 @@ public class FlyingAStarNavigationStrategy extends AbstractPathStrategy {
         this.target = dest;
         this.parameters = params;
         this.npc = npc;
-        Location location = Util.getEyeLocation(npc.getEntity());
+        Location location = npc.getEntity().getLocation();
         VectorGoal goal = new VectorGoal(dest, (float) params.pathDistanceMargin());
         boolean found = false;
         for (BlockExaminer examiner : params.examiners()) {

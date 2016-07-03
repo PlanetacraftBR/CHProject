@@ -6,15 +6,16 @@ import org.bukkit.inventory.ItemStack;
 
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.api.trait.trait.Equipment.EquipmentSlot;
 import net.citizensnpcs.api.util.Messaging;
 import net.citizensnpcs.util.Messages;
 
 public class GenericEquipper implements Equipper {
     @Override
     public void equip(Player equipper, NPC toEquip) {
-        ItemStack hand = equipper.getItemInHand();
+        ItemStack hand = equipper.getInventory().getItemInMainHand();
         Equipment trait = toEquip.getTrait(Equipment.class);
-        int slot = 0;
+        EquipmentSlot slot = EquipmentSlot.HAND;
         Material type = hand == null ? Material.AIR : hand.getType();
         // First, determine the slot to edit
         switch (type) {
@@ -26,41 +27,50 @@ public class GenericEquipper implements Equipper {
             case GOLD_HELMET:
             case IRON_HELMET:
             case DIAMOND_HELMET:
-                if (!equipper.isSneaking())
-                    slot = 1;
+                if (!equipper.isSneaking()) {
+                    slot = EquipmentSlot.HELMET;
+                }
                 break;
+            case ELYTRA:
             case LEATHER_CHESTPLATE:
             case CHAINMAIL_CHESTPLATE:
             case GOLD_CHESTPLATE:
             case IRON_CHESTPLATE:
             case DIAMOND_CHESTPLATE:
-                if (!equipper.isSneaking())
-                    slot = 2;
+                if (!equipper.isSneaking()) {
+                    slot = EquipmentSlot.CHESTPLATE;
+                }
                 break;
             case LEATHER_LEGGINGS:
             case CHAINMAIL_LEGGINGS:
             case GOLD_LEGGINGS:
             case IRON_LEGGINGS:
             case DIAMOND_LEGGINGS:
-                if (!equipper.isSneaking())
-                    slot = 3;
+                if (!equipper.isSneaking()) {
+                    slot = EquipmentSlot.LEGGINGS;
+                }
                 break;
             case LEATHER_BOOTS:
             case CHAINMAIL_BOOTS:
             case GOLD_BOOTS:
             case IRON_BOOTS:
             case DIAMOND_BOOTS:
-                if (!equipper.isSneaking())
-                    slot = 4;
+                if (!equipper.isSneaking()) {
+                    slot = EquipmentSlot.BOOTS;
+                }
                 break;
             case AIR:
-                for (int i = 0; i < 5; i++) {
-                    if (trait.get(i) != null && trait.get(i).getType() != Material.AIR) {
-                        equipper.getWorld().dropItemNaturally(toEquip.getEntity().getLocation(), trait.get(i));
-                        trait.set(i, null);
+                if (equipper.isSneaking()) {
+                    for (int i = 0; i < 6; i++) {
+                        if (trait.get(i) != null && trait.get(i).getType() != Material.AIR) {
+                            equipper.getWorld().dropItemNaturally(toEquip.getEntity().getLocation(), trait.get(i));
+                            trait.set(i, null);
+                        }
                     }
+                    Messaging.sendTr(equipper, Messages.EQUIPMENT_EDITOR_ALL_ITEMS_REMOVED, toEquip.getName());
+                } else {
+                    return;
                 }
-                Messaging.sendTr(equipper, Messages.EQUIPMENT_EDITOR_ALL_ITEMS_REMOVED, toEquip.getName());
                 break;
             default:
                 break;
@@ -78,7 +88,7 @@ public class GenericEquipper implements Equipper {
             clone.setAmount(1);
             trait.set(slot, clone);
             hand.setAmount(hand.getAmount() - 1);
-            equipper.setItemInHand(hand);
+            equipper.getInventory().setItemInMainHand(hand);
         }
     }
 }

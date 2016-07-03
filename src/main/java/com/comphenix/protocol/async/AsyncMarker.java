@@ -28,7 +28,7 @@ import java.util.logging.Level;
 
 import com.comphenix.protocol.PacketStream;
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLogger;
 import com.comphenix.protocol.events.NetworkMarker;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.PrioritizedListener;
@@ -37,8 +37,6 @@ import com.comphenix.protocol.reflect.FuzzyReflection;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.utility.MinecraftVersion;
 import com.google.common.primitives.Longs;
-
-import me.hub.Main;
 
 /**
  * Contains information about the packet that is being processed by asynchronous listeners.
@@ -431,21 +429,22 @@ public class AsyncMarker implements Serializable, Comparable<AsyncMarker> {
 							// Incoming chat packets are async only if they aren't commands
 							return ! content.startsWith("/");
 						} else {
-							Main.log(Level.WARNING, "Failed to determine contents of incoming chat packet!");
+							ProtocolLogger.log(Level.WARNING, "Failed to determine contents of incoming chat packet!");
 							alwaysSync = true;
 						}
+					} else if (event.getPacketType() == PacketType.Status.Server.SERVER_INFO) {
+						return true;
 					} else {
 						// TODO: Find more cases of async packets
 						return false;
 					}
 				} else {
-					Main.log(Level.INFO, "Could not determine asynchronous state of packets.");
-					Main.log(Level.INFO, "This can probably be ignored.");
+					ProtocolLogger.log(Level.INFO, "Could not determine asynchronous state of packets (this can probably be ignored)");
 					alwaysSync = true;
 				}
 			}
 		}
-		
+
 		if (alwaysSync) {
 			return false;
 		} else {

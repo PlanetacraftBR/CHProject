@@ -32,13 +32,12 @@ import net.sf.cglib.asm.MethodVisitor;
 import net.sf.cglib.asm.Opcodes;
 import net.sf.cglib.asm.Type;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.google.common.base.Objects;
 import com.google.common.primitives.Primitives;
-
-import me.hub.Main;
 
 // public class CompiledStructureModifierPacket20<TField> extends CompiledStructureModifier<TField> {
 //
@@ -228,7 +227,7 @@ public final class StructureCompiler {
 					 newInstance(source, this);
 		} catch (OutOfMemoryError e) {
 			// Print the number of generated classes by the current instances
-		 Main.getErrorReporter().reportWarning(
+			ProtocolLibrary.getErrorReporter().reportWarning(
 				this, Report.newBuilder(REPORT_TOO_MANY_GENERATED_CLASSES).messageParam(compiledCache.size())
 			);
 			throw e;

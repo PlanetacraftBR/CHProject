@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
@@ -22,8 +22,8 @@ import net.citizensnpcs.npc.AbstractEntityController;
 import net.citizensnpcs.npc.skin.Skin;
 import net.citizensnpcs.npc.skin.SkinnableEntity;
 import net.citizensnpcs.util.NMS;
-import net.minecraft.server.v1_8_R3.PlayerInteractManager;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_10_R1.PlayerInteractManager;
+import net.minecraft.server.v1_10_R1.WorldServer;
 
 public class HumanController extends AbstractEntityController {
     public HumanController() {
@@ -34,11 +34,8 @@ public class HumanController extends AbstractEntityController {
     protected Entity createEntity(final Location at, final NPC npc) {
         final WorldServer nmsWorld = ((CraftWorld) at.getWorld()).getHandle();
         String coloredName = Colorizer.parseColors(npc.getFullName());
-        if (coloredName.length() > 16) {
-            coloredName = coloredName.substring(0, 16);
-        }
 
-        String name, prefix = null, suffix = null;
+        String name = coloredName, prefix = null, suffix = null;
         if (coloredName.length() > 16) {
             prefix = coloredName.substring(0, 16);
             if (coloredName.length() > 30) {
@@ -66,7 +63,9 @@ public class HumanController extends AbstractEntityController {
                     name = name.substring(0, 16);
                 }
             }
+            coloredName = coloredName.substring(0, 16);
         }
+
         final String prefixCapture = prefix, suffixCapture = suffix;
 
         UUID uuid = npc.getUniqueId();
@@ -77,7 +76,7 @@ public class HumanController extends AbstractEntityController {
             uuid = new UUID(msb, uuid.getLeastSignificantBits());
         }
 
-        GameProfile profile = new GameProfile(uuid, coloredName);
+        final GameProfile profile = new GameProfile(uuid, name);
 
         final EntityHumanNPC handle = new EntityHumanNPC(nmsWorld.getServer().getServer(), nmsWorld, profile,
                 new PlayerInteractManager(nmsWorld), npc);
@@ -86,8 +85,6 @@ public class HumanController extends AbstractEntityController {
         if (skin != null) {
             skin.apply(handle);
         }
-
-        handle.setPositionRotation(at.getX(), at.getY(), at.getZ(), at.getYaw(), at.getPitch());
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(CitizensAPI.getPlugin(), new Runnable() {
             @Override
@@ -98,14 +95,17 @@ public class HumanController extends AbstractEntityController {
                         Setting.REMOVE_PLAYERS_FROM_PLAYER_LIST.asBoolean());
                 NMS.addOrRemoveFromPlayerList(getBukkitEntity(),
                         npc.data().get("removefromplayerlist", removeFromPlayerList));
-                if (prefixCapture != null) {
+
+                if (Setting.USE_SCOREBOARD_TEAMS.asBoolean()) {
                     Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
-                    String teamName = UUID.randomUUID().toString().substring(0, 16);
+                    String teamName = profile.getId().toString().substring(0, 16);
 
                     Team team = scoreboard.getTeam(teamName);
                     if (team == null) {
                         team = scoreboard.registerNewTeam(teamName);
-                        team.setPrefix(prefixCapture);
+                        if (prefixCapture != null) {
+                            team.setPrefix(prefixCapture);
+                        }
                         if (suffixCapture != null) {
                             team.setSuffix(suffixCapture);
                         }

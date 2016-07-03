@@ -23,12 +23,11 @@ import java.util.Map;
 
 import org.bukkit.plugin.Plugin;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.metrics.Metrics.Graph;
-
-import me.hub.Main;
 
 public class Statistics {
 
@@ -48,7 +47,7 @@ public class Statistics {
 	
 		Graph pluginUsers = metrics.createGraph("Plugin Users");
 		
-		for (Map.Entry<String, Integer> entry : getPluginUsers(Main.getProtocolManager()).entrySet()) {
+		for (Map.Entry<String, Integer> entry : getPluginUsers(ProtocolLibrary.getProtocolManager()).entrySet()) {
 			final int count = entry.getValue();
 			
 			// Plot plugins of this type

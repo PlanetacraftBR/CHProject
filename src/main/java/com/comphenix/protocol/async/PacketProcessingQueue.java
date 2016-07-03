@@ -23,15 +23,13 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.concurrency.AbstractConcurrentListenerMultimap;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.PrioritizedListener;
 import com.google.common.collect.MinMaxPriorityQueue;
-
-import me.hub.Main;
 
 
 /**
@@ -82,7 +80,7 @@ class PacketProcessingQueue extends AbstractConcurrentListenerMultimap<AsyncList
 					<PacketEventHolder>create(), null);
 		} catch (IncompatibleClassChangeError e) {
 			// Print in the console
-			Main.getErrorReporter().reportWarning(
+			ProtocolLibrary.getErrorReporter().reportWarning(
 				this, Report.newBuilder(REPORT_GUAVA_CORRUPT_MISSING).error(e));
 			
 			// It's a Beta class after all

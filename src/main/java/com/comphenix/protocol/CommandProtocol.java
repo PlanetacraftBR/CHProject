@@ -23,6 +23,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
@@ -39,18 +40,16 @@ import com.comphenix.protocol.updater.Updater;
 import com.comphenix.protocol.updater.Updater.UpdateType;
 import com.comphenix.protocol.utility.Closer;
 
-import me.hub.Main;
-
 /**
  * Handles the "protocol" administration command.
  *
  * @author Kristian
  */
-public class CommandProtocol extends CommandBase {
+class CommandProtocol extends CommandBase {
 	/**
 	 * Name of this command.
 	 */
-	public static final String NAME = "api";
+	public static final String NAME = "protocol";
 	
 	private Plugin plugin;
 	private Updater updater;
@@ -71,9 +70,9 @@ public class CommandProtocol extends CommandBase {
 		if (subCommand.equalsIgnoreCase("config") || subCommand.equalsIgnoreCase("reload")) {
 			reloadConfiguration(sender);
 		} else if (subCommand.equalsIgnoreCase("check")) {
-			checkVersion(sender);
+			checkVersion(sender, true);
 		} else if (subCommand.equalsIgnoreCase("update")) {
-			updateVersion(sender);
+			updateVersion(sender, true);
 		} else if (subCommand.equalsIgnoreCase("timings")) {
 			toggleTimings(sender, args);
 		} else if (subCommand.equalsIgnoreCase("listeners")) {
@@ -89,17 +88,17 @@ public class CommandProtocol extends CommandBase {
 		return true;
 	}
 	
-	public void checkVersion(final CommandSender sender) {
-		performUpdate(sender, UpdateType.NO_DOWNLOAD);
+	public void checkVersion(final CommandSender sender, boolean command) {
+		performUpdate(sender, UpdateType.NO_DOWNLOAD, command);
 	}
 	
-	public void updateVersion(final CommandSender sender) {
-		performUpdate(sender, UpdateType.DEFAULT);
+	public void updateVersion(final CommandSender sender, boolean command) {
+		performUpdate(sender, UpdateType.DEFAULT, command);
 	}
 	
 	// Display every listener on the server
 	private void printListeners(final CommandSender sender) {
-		ProtocolManager manager = Main.getProtocolManager();
+		ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		
 		sender.sendMessage(ChatColor.GOLD + "Packet listeners:");
 		for (PacketListener listener : manager.getPacketListeners()) {
@@ -113,7 +112,7 @@ public class CommandProtocol extends CommandBase {
 		}
 	}
 	
-	private void performUpdate(final CommandSender sender, UpdateType type) {
+	private void performUpdate(final CommandSender sender, UpdateType type, final boolean command) {
 		if (updater.isChecking()) {
 			sender.sendMessage(ChatColor.RED + "Already checking for an update.");
 			return;
@@ -123,7 +122,14 @@ public class CommandProtocol extends CommandBase {
 		Runnable notify = new Runnable() {
 			@Override
 			public void run() {
-				if (updater.shouldNotify() || config.isDebug()) {
+				if (command) {
+					sender.sendMessage(ChatColor.YELLOW + "[ProtocolLib] " + updater.getResult());
+					String remoteVersion = updater.getRemoteVersion();
+					if (remoteVersion != null) {
+						sender.sendMessage(ChatColor.YELLOW + "Remote version: " + remoteVersion);
+						sender.sendMessage(ChatColor.YELLOW + "Current version: " + plugin.getDescription().getVersion());
+					}
+				} else if (updater.shouldNotify() || config.isDebug()) {
 					sender.sendMessage(ChatColor.YELLOW + "[ProtocolLib] " + updater.getResult());
 				}
 
@@ -188,7 +194,7 @@ public class CommandProtocol extends CommandBase {
 	 * Prevent further automatic updates until the next delay.
 	 */
 	public void updateFinished() {
-		long currentTime = System.currentTimeMillis() / Main.MILLI_PER_SECOND;
+		long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 
 		config.setAutoLastTime(currentTime);
 		config.saveAll();
@@ -240,7 +246,7 @@ public class CommandProtocol extends CommandBase {
 			pw.println("Java Version: " + System.getProperty("java.version"));
 			pw.println();
 
-			ProtocolManager manager = Main.getProtocolManager();
+			ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 			pw.println("ProtocolLib: " + DetailedErrorReporter.getStringDescription(plugin));
 			pw.println("Manager: " + DetailedErrorReporter.getStringDescription(manager));
 			pw.println();
@@ -258,7 +264,7 @@ public class CommandProtocol extends CommandBase {
 
 			sender.sendMessage("Data dump written to " + file.getAbsolutePath());
 		} catch (IOException ex) {
-			Main.getStaticLogger().log(Level.SEVERE, "Failed to create dump:", ex);
+			ProtocolLogger.log(Level.SEVERE, "Failed to create dump:", ex);
 			sender.sendMessage(ChatColor.RED + "Failed to create dump! Check console!");
 		} finally {
 			closer.close();

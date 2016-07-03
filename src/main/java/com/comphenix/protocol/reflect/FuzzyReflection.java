@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.Validate;
+
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.fuzzy.AbstractFuzzyMatcher;
 import com.comphenix.protocol.reflect.fuzzy.FuzzyMethodContract;
@@ -168,13 +170,42 @@ public class FuzzyReflection {
 	 */
 	public Method getMethod(AbstractFuzzyMatcher<MethodInfo> matcher) {
 		List<Method> result = getMethodList(matcher);
-		
-		if (result.size() > 0)
+
+		if (result.size() > 0) {
 			return result.get(0);
-		else
+		} else {
 			throw new IllegalArgumentException("Unable to find a method that matches " + matcher);
+		}
 	}
-	
+
+	/**
+	 * Retrieve a method that matches. If there are multiple methods that match, the first one with the preferred
+	 * name is selected.
+	 * <p>
+	 * ForceAccess must be TRUE in order for this method to access private, protected and package level method.
+	 * @param matcher - the matcher to use.
+	 * @param preferred - the preferred name.
+	 * @return The first method that satisfies the given matcher.
+	 * @throws IllegalArgumentException If the method cannot be found.
+	 */
+	public Method getMethod(AbstractFuzzyMatcher<MethodInfo> matcher, String preferred) {
+		List<Method> result = getMethodList(matcher);
+
+		if (result.size() > 1) {
+			for (Method method : result) {
+				if (method.getName().equals(preferred)) {
+					return method;
+				}
+			}
+		}
+
+		if (result.size() > 0) {
+			return result.get(0);
+		} else {
+			throw new IllegalArgumentException("Unable to find a method that matches " + matcher);
+		}
+	}
+
 	/**
 	 * Retrieve a list of every method that matches the given matcher.
 	 * <p>
@@ -548,6 +579,8 @@ public class FuzzyReflection {
 	 * @return Every field.
 	 */
 	public Set<Field> getFields() {
+		Validate.notNull(source, "source cannot be null!");
+
 		// We will only consider private fields in the declared class
 		if (forceAccess)
 			return setUnion(source.getDeclaredFields(), source.getFields());
@@ -603,8 +636,7 @@ public class FuzzyReflection {
 	
 	// Prevent duplicate fields
 
-	// @SafeVarargs
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	private static <T> Set<T> setUnion(T[]... array) {
 		Set<T> result = new LinkedHashSet<T>();
 		

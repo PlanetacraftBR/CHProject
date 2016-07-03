@@ -26,12 +26,10 @@ import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.Ordering;
-
-import me.hub.Main;
 
 /**
  * Determine the current Minecraft version.
@@ -45,6 +43,16 @@ public class MinecraftVersion implements Comparable<MinecraftVersion>, Serializa
 	 * Regular expression used to parse version strings.
 	 */
 	private static final Pattern VERSION_PATTERN = Pattern.compile(".*\\(.*MC.\\s*([a-zA-z0-9\\-\\.]+)\\s*\\)");
+
+	/**
+	 * Version 1.10 - the frostburn update.
+	 */
+	public static final MinecraftVersion FROSTBURN_UPDATE = new MinecraftVersion("1.10");
+
+	/**
+	 * Version 1.9 - the combat update.
+	 */
+	public static final MinecraftVersion COMBAT_UPDATE = new MinecraftVersion("1.9");
 
 	/**
 	 * Version 1.8 - the "bountiful" update.
@@ -125,9 +133,9 @@ public class MinecraftVersion implements Comparable<MinecraftVersion>, Serializa
 				snapshot = new SnapshotVersion(section[0]);
 				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
-				MinecraftVersion latest = new MinecraftVersion(Main.MAXIMUM_MINECRAFT_VERSION, false);
+				MinecraftVersion latest = new MinecraftVersion(ProtocolLibrary.MAXIMUM_MINECRAFT_VERSION, false);
 				boolean newer = snapshot.getSnapshotDate().compareTo(
-						        format.parse(Main.MINECRAFT_LAST_RELEASE_DATE)) > 0;
+						        format.parse(ProtocolLibrary.MINECRAFT_LAST_RELEASE_DATE)) > 0;
 						        
 		        numbers[0] = latest.getMajor();
 		        numbers[1] = latest.getMinor() + (newer ? 1 : -1);

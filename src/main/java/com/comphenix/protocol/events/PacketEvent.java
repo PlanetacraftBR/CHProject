@@ -23,13 +23,14 @@ import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.EventObject;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 
-import com.comphenix.protocol.Application;
 import com.comphenix.protocol.PacketType;
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.async.AsyncMarker;
+import com.comphenix.protocol.error.PluginContext;
 import com.comphenix.protocol.error.Report;
 import com.comphenix.protocol.error.ReportType;
 import com.google.common.base.Objects;
@@ -37,8 +38,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
-
-import me.hub.Main;
 
 /**
  * Represents a packet sending or receiving event. Changes to the packet will be
@@ -204,7 +203,7 @@ public class PacketEvent extends EventObject implements Cancellable {
 	 * @return TRUE if we are, FALSE otherwise.
 	 */
 	public boolean isAsync() {
-		return !Application.isPrimaryThread();
+		return !Bukkit.isPrimaryThread();
 	}
 	
 	/**
@@ -231,9 +230,9 @@ public class PacketEvent extends EventObject implements Cancellable {
 		if (this.packet != null && !Objects.equal(oldType, newType)) {
 			// Only report this once
 			if (CHANGE_WARNINGS.put(oldType, newType)) {
-				Main.getErrorReporter().reportWarning(this,
+				ProtocolLibrary.getErrorReporter().reportWarning(this,
 						Report.newBuilder(REPORT_CHANGING_PACKET_TYPE_IS_CONFUSING).
-						messageParam(oldType, newType).
+						messageParam(PluginContext.getPluginCaller(new Exception()), oldType, newType).
 						build());
 			}
 		}

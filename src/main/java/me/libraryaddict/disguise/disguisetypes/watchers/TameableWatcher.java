@@ -1,62 +1,69 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
+import java.util.UUID;
+
+import com.google.common.base.Optional;
+
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class TameableWatcher extends AgeableWatcher {
-
-    public TameableWatcher(Disguise disguise) {
+public class TameableWatcher extends AgeableWatcher
+{
+    public TameableWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    @Override
-    public float getHealth() {
-        return (Float) getValue(18, 8F);
+    public Optional<UUID> getOwner()
+    {
+        return getValue(FlagType.TAMEABLE_OWNER);
     }
 
-    public String getOwner() {
-        return (String) getValue(17, null);
+    public boolean isSitting()
+    {
+        return isTameableFlag(1);
     }
 
-    public boolean isSitting() {
-        return isTrue(1);
+    public boolean isTamed()
+    {
+        return isTameableFlag(4);
     }
 
-    public boolean isTamed() {
-        return isTrue(4);
+    protected boolean isTameableFlag(int no)
+    {
+        return ((byte) getValue(FlagType.TAMEABLE_META) & no) != 0;
     }
 
-    protected boolean isTrue(int no) {
-        return ((Byte) getValue(16, (byte) 0) & no) != 0;
-    }
+    protected void setTameableFlag(int no, boolean flag)
+    {
+        byte value = (byte) getValue(FlagType.TAMEABLE_META);
 
-    protected void setFlag(int no, boolean flag) {
-        byte b0 = (Byte) getValue(16, (byte) 0);
-        if (flag) {
-            setValue(16, (byte) (b0 | no));
-        } else {
-            setValue(16, (byte) (b0 & -(no + 1)));
+        if (flag)
+        {
+            setValue(FlagType.TAMEABLE_META, (byte) (value | no));
         }
-        sendData(16);
+        else
+        {
+            setValue(FlagType.TAMEABLE_META, (byte) (value & -(no + 1)));
+        }
+
+        sendData(FlagType.TAMEABLE_META);
     }
 
-    @Override
-    public void setHealth(float newHealth) {
-        setValue(18, newHealth);
-        setValue(6, newHealth);
-        sendData(6, 18);
+    public void setOwner(UUID owner)
+    {
+        setValue(FlagType.TAMEABLE_OWNER, Optional.of(owner));
+        sendData(FlagType.TAMEABLE_OWNER);
     }
 
-    public void setOwner(String owner) {
-        setValue(17, owner);
-        sendData(17);
+    public void setSitting(boolean sitting)
+    {
+        setTameableFlag(1, sitting);
     }
 
-    public void setSitting(boolean sitting) {
-        setFlag(1, sitting);
-    }
-
-    public void setTamed(boolean tamed) {
-        setFlag(4, tamed);
+    public void setTamed(boolean tamed)
+    {
+        setTameableFlag(4, tamed);
     }
 
 }

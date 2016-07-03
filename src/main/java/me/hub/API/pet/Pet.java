@@ -9,7 +9,7 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftCreature;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftCreature;
 import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -56,7 +56,7 @@ public class Pet extends MiniPlugin{
 	  {
 		  try {
 		  Pets.get(e.getPlayer().getName()).remove();
-		  Bukkit.getWorld("world").playSound(e.getPlayer().getLocation(), Sound.HORSE_DEATH, 0.2F, 0.2F);
+		  Bukkit.getWorld("world").playSound(e.getPlayer().getLocation(), Sound.ENTITY_HORSE_DEATH, 0.2F, 0.2F);
 		  } catch (Exception e2) {
 			  
 		  }

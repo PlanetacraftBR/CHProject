@@ -1,26 +1,34 @@
 package net.citizensnpcs.util;
 
-import java.util.Arrays;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.npc.ai.NPCHolder;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutAnimation;
-import net.minecraft.server.v1_8_R3.PacketPlayOutBed;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
-
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.npc.ai.NPCHolder;
+import net.citizensnpcs.trait.ArmorStandTrait;
+import net.minecraft.server.v1_10_R1.BlockPosition;
+import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.EnumHand;
+import net.minecraft.server.v1_10_R1.Packet;
+import net.minecraft.server.v1_10_R1.PacketPlayOutAnimation;
+import net.minecraft.server.v1_10_R1.PacketPlayOutBed;
+import net.minecraft.server.v1_10_R1.PacketPlayOutEntityMetadata;
 
 public enum PlayerAnimation {
     ARM_SWING {
         @Override
         protected void playAnimation(EntityPlayer player, int radius) {
             playDefaultAnimation(player, radius, 0);
+        }
+    },
+    ARM_SWING_OFFHAND {
+        @Override
+        protected void playAnimation(EntityPlayer player, int radius) {
+            playDefaultAnimation(player, radius, 3);
         }
     },
     CRIT {
@@ -52,7 +60,25 @@ public enum PlayerAnimation {
         protected void playAnimation(final EntityPlayer player, int radius) {
             player.getBukkitEntity().setMetadata("citizens.sitting",
                     new FixedMetadataValue(CitizensAPI.getPlugin(), true));
+            final NPC holder = CitizensAPI.getNPCRegistry().createNPC(EntityType.ARMOR_STAND, "");
+            holder.spawn(player.getBukkitEntity().getLocation());
+            ArmorStandTrait trait = holder.getTrait(ArmorStandTrait.class);
+            trait.setGravity(false);
+            trait.setHasArms(false);
+            trait.setHasBaseplate(false);
+            trait.setSmall(true);
+            trait.setMarker(true);
+            trait.setVisible(false);
+            holder.getTrait(ArmorStandTrait.class).setVisible(false);
+            holder.data().set(NPC.NAMEPLATE_VISIBLE_METADATA, false);
+            holder.data().set(NPC.DEFAULT_PROTECTED_METADATA, true);
             new BukkitRunnable() {
+                @Override
+                public void cancel() {
+                    super.cancel();
+                    holder.destroy();
+                }
+
                 @Override
                 public void run() {
                     if (player.dead || !player.valid
@@ -64,8 +90,8 @@ public enum PlayerAnimation {
                         cancel();
                         return;
                     }
-                    if (player.passenger != player) {
-                        player.mount(player);
+                    if (!NMS.getHandle(holder.getEntity()).passengers.contains(player)) {
+                        NMS.mount(holder.getEntity(), player.getBukkitEntity());
                     }
                 }
             }.runTaskTimer(CitizensAPI.getPlugin(), 0, 1);
@@ -87,10 +113,18 @@ public enum PlayerAnimation {
                     radius);
         }
     },
-    START_USE_ITEM {
+    START_USE_MAINHAND_ITEM {
         @Override
         protected void playAnimation(EntityPlayer player, int radius) {
-            player.f(true);
+            player.c(EnumHand.MAIN_HAND);
+            sendPacketNearby(new PacketPlayOutEntityMetadata(player.getId(), player.getDataWatcher(), true), player,
+                    radius);
+        }
+    },
+    START_USE_OFFHAND_ITEM {
+        @Override
+        protected void playAnimation(EntityPlayer player, int radius) {
+            player.c(EnumHand.OFF_HAND);
             sendPacketNearby(new PacketPlayOutEntityMetadata(player.getId(), player.getDataWatcher(), true), player,
                     radius);
         }
@@ -100,7 +134,7 @@ public enum PlayerAnimation {
         protected void playAnimation(EntityPlayer player, int radius) {
             player.getBukkitEntity().setMetadata("citizens.sitting",
                     new FixedMetadataValue(CitizensAPI.getPlugin(), false));
-            player.mount(null);
+            NMS.mount(player.getBukkitEntity(), null);
         }
     },
     STOP_SLEEPING {
@@ -120,7 +154,7 @@ public enum PlayerAnimation {
     STOP_USE_ITEM {
         @Override
         protected void playAnimation(EntityPlayer player, int radius) {
-            player.f(false);
+            player.cA();
             sendPacketNearby(new PacketPlayOutEntityMetadata(player.getId(), player.getDataWatcher(), true), player,
                     radius);
         }
@@ -143,8 +177,7 @@ public enum PlayerAnimation {
         sendPacketNearby(packet, player, radius);
     }
 
-    protected void sendPacketNearby(Packet packet, EntityPlayer player, int radius) {
-        NMS.sendPacketsNearby(player.getBukkitEntity(), player.getBukkitEntity().getLocation(), Arrays.asList(packet),
-                radius);
+    protected void sendPacketNearby(Packet<?> packet, EntityPlayer player, int radius) {
+        NMS.sendPacketNearby(player.getBukkitEntity(), player.getBukkitEntity().getLocation(), packet, radius);
     }
 }

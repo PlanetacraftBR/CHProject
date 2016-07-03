@@ -1,19 +1,24 @@
 package me.libraryaddict.disguise.disguisetypes.watchers;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 
-public class PigWatcher extends AgeableWatcher {
+public class PigWatcher extends AgeableWatcher
+{
 
-    public PigWatcher(Disguise disguise) {
+    public PigWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    public boolean isSaddled() {
-        return (Byte) getValue(16, (byte) 0) == 1;
+    public boolean isSaddled()
+    {
+        return (boolean) getValue(FlagType.PIG_SADDLED);
     }
 
-    public void setSaddled(boolean isSaddled) {
-        setValue(16, (byte) (isSaddled ? 1 : 0));
-        sendData(16);
+    public void setSaddled(boolean isSaddled)
+    {
+        setValue(FlagType.PIG_SADDLED, isSaddled);
+        sendData(FlagType.PIG_SADDLED);
     }
 }

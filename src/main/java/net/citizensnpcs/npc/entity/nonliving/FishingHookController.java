@@ -1,21 +1,21 @@
 package net.citizensnpcs.npc.entity.nonliving;
 
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_10_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftFish;
+import org.bukkit.entity.FishHook;
+import org.bukkit.util.Vector;
+
 import net.citizensnpcs.api.event.NPCPushEvent;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.npc.CitizensNPC;
 import net.citizensnpcs.npc.MobEntityController;
 import net.citizensnpcs.npc.ai.NPCHolder;
 import net.citizensnpcs.util.Util;
-import net.minecraft.server.v1_8_R3.EntityFishingHook;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.World;
-
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFish;
-import org.bukkit.entity.Fish;
-import org.bukkit.util.Vector;
+import net.minecraft.server.v1_10_R1.EntityFishingHook;
+import net.minecraft.server.v1_10_R1.NBTTagCompound;
+import net.minecraft.server.v1_10_R1.World;
 
 public class FishingHookController extends MobEntityController {
     public FishingHookController() {
@@ -23,8 +23,8 @@ public class FishingHookController extends MobEntityController {
     }
 
     @Override
-    public Fish getBukkitEntity() {
-        return (Fish) super.getBukkitEntity();
+    public FishHook getBukkitEntity() {
+        return (FishHook) super.getBukkitEntity();
     }
 
     public static class EntityFishingHookNPC extends EntityFishingHook implements NPCHolder {
@@ -40,7 +40,7 @@ public class FishingHookController extends MobEntityController {
         }
 
         @Override
-        public void collide(net.minecraft.server.v1_8_R3.Entity entity) {
+        public void collide(net.minecraft.server.v1_10_R1.Entity entity) {
             // this method is called by both the entities involved - cancelling
             // it will not stop the NPC from moving.
             super.collide(entity);
@@ -90,11 +90,11 @@ public class FishingHookController extends MobEntityController {
         }
 
         @Override
-        public void t_() {
+        public void m() {
             if (npc != null) {
                 npc.update();
             } else {
-                super.t_();
+                super.m();
             }
         }
     }

@@ -3,7 +3,7 @@ package net.citizensnpcs.trait;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -16,7 +16,8 @@ import org.bukkit.util.Vector;
 import com.google.common.collect.Maps;
 
 import net.citizensnpcs.Settings.Setting;
-
+import net.citizensnpcs.api.command.CommandConfigurable;
+import net.citizensnpcs.api.command.CommandContext;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.exception.NPCLoadException;
 import net.citizensnpcs.api.persistence.Persist;
@@ -26,13 +27,13 @@ import net.citizensnpcs.api.trait.trait.Owner;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.util.NMS;
 import net.citizensnpcs.util.Util;
-import net.minecraft.server.v1_8_R3.EntityEnderDragon;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_10_R1.EntityEnderDragon;
+import net.minecraft.server.v1_10_R1.EntityLiving;
+import net.minecraft.server.v1_10_R1.EntityPlayer;
 
 //TODO: reduce reliance on CitizensNPC
 @TraitName("controllable")
-public class Controllable extends Trait implements Toggleable {
+public class Controllable extends Trait implements Toggleable, CommandConfigurable {
     private MovementController controller = new GroundController();
     @Persist
     private boolean enabled = true;
@@ -49,11 +50,27 @@ public class Controllable extends Trait implements Toggleable {
         this.enabled = enabled;
     }
 
+    @Override
+    public void configure(CommandContext args) {
+        if (args.hasFlag('f')) {
+            explicitType = EntityType.BLAZE;
+        } else if (args.hasFlag('g')) {
+            explicitType = EntityType.OCELOT;
+        } else if (args.hasFlag('o')) {
+            explicitType = EntityType.UNKNOWN;
+        } else if (args.hasFlag('r')) {
+            explicitType = null;
+        } else if (args.hasValueFlag("explicittype"))
+            explicitType = Util.matchEntityType(args.getFlag("explicittype"));
+        if (npc.isSpawned()) {
+            loadController();
+        }
+    }
 
     private void enterOrLeaveVehicle(Player player) {
         EntityPlayer handle = ((CraftPlayer) player).getHandle();
-        if (getHandle().passenger != null) {
-            if (getHandle().passenger == handle) {
+        if (getHandle().isVehicle()) {
+            if (getHandle().passengers.contains(handle)) {
                 player.leaveVehicle();
             }
             return;
@@ -61,10 +78,10 @@ public class Controllable extends Trait implements Toggleable {
         if (ownerRequired && !npc.getTrait(Owner.class).isOwnedBy(handle.getBukkitEntity())) {
             return;
         }
-        handle.mount(getHandle());
+        NMS.mount(npc.getEntity(), player);
     }
 
-    private net.minecraft.server.v1_8_R3.Entity getHandle() {
+    private net.minecraft.server.v1_10_R1.Entity getHandle() {
         return NMS.getHandle(npc.getEntity());
     }
 
@@ -74,8 +91,9 @@ public class Controllable extends Trait implements Toggleable {
 
     @Override
     public void load(DataKey key) throws NPCLoadException {
-        if (key.keyExists("explicittype"))
+        if (key.keyExists("explicittype")) {
             explicitType = Util.matchEntityType(key.getString("explicittype"));
+        }
     }
 
     private void loadController() {
@@ -119,9 +137,8 @@ public class Controllable extends Trait implements Toggleable {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (!npc.isSpawned() || !enabled)
             return;
-        EntityPlayer handle = ((CraftPlayer) event.getPlayer()).getHandle();
         Action performed = event.getAction();
-        if (!handle.equals(getHandle().passenger))
+        if (!getHandle().passengers.contains(getHandle()))
             return;
         switch (performed) {
             case RIGHT_CLICK_BLOCK:
@@ -151,10 +168,10 @@ public class Controllable extends Trait implements Toggleable {
 
     @Override
     public void run() {
-        if (!enabled || !npc.isSpawned() || getHandle().passenger == null
-                || !(getHandle().passenger.getBukkitEntity() instanceof Player))
+        if (!enabled || !npc.isSpawned() || !getHandle().isVehicle()
+                || !(getHandle().passengers.get(0).getBukkitEntity() instanceof Player))
             return;
-        controller.run((Player) getHandle().passenger.getBukkitEntity());
+        controller.run((Player) getHandle().passengers.get(0).getBukkitEntity());
     }
 
     @Override
@@ -171,7 +188,7 @@ public class Controllable extends Trait implements Toggleable {
         return enabled;
     }
 
-    private void setMountedYaw(net.minecraft.server.v1_8_R3.Entity handle) {
+    private void setMountedYaw(net.minecraft.server.v1_10_R1.Entity handle) {
         if (handle instanceof EntityEnderDragon || !Setting.USE_BOAT_CONTROLS.asBoolean())
             return; // EnderDragon handles this separately
         double tX = handle.locX + handle.motX;
@@ -191,18 +208,18 @@ public class Controllable extends Trait implements Toggleable {
     @Override
     public boolean toggle() {
         enabled = !enabled;
-        if (!enabled && getHandle().passenger != null) {
-            getHandle().passenger.getBukkitEntity().leaveVehicle();
+        if (!enabled && getHandle().isVehicle()) {
+            getHandle().passengers.get(0).getBukkitEntity().leaveVehicle();
         }
         return enabled;
     }
 
-    private double updateHorizontalSpeed(net.minecraft.server.v1_8_R3.Entity handle,
-            net.minecraft.server.v1_8_R3.Entity passenger, double speed, float speedMod) {
+    private double updateHorizontalSpeed(net.minecraft.server.v1_10_R1.Entity handle,
+            net.minecraft.server.v1_10_R1.Entity passenger, double speed, float speedMod) {
         double oldSpeed = Math.sqrt(handle.motX * handle.motX + handle.motZ * handle.motZ);
-        double angle = Math.toRadians(passenger.yaw - ((EntityLiving) passenger).aZ * 45.0F);
-        handle.motX += speedMod * -Math.sin(angle) * ((EntityLiving) passenger).ba * 0.05;
-        handle.motZ += speedMod * Math.cos(angle) * ((EntityLiving) passenger).ba * 0.05;
+        double angle = Math.toRadians(passenger.yaw - ((EntityLiving) passenger).bf * 45.0F);
+        handle.motX += speedMod * -Math.sin(angle) * ((EntityLiving) passenger).bg * 0.05;
+        handle.motZ += speedMod * Math.cos(angle) * ((EntityLiving) passenger).bg * 0.05;
 
         double newSpeed = Math.sqrt(handle.motX * handle.motX + handle.motZ * handle.motZ);
         if (newSpeed > oldSpeed && speed < 0.35D) {
@@ -231,8 +248,8 @@ public class Controllable extends Trait implements Toggleable {
 
         @Override
         public void run(Player rider) {
-            net.minecraft.server.v1_8_R3.Entity handle = getHandle();
-            net.minecraft.server.v1_8_R3.Entity passenger = ((CraftPlayer) rider).getHandle();
+            net.minecraft.server.v1_10_R1.Entity handle = getHandle();
+            net.minecraft.server.v1_10_R1.Entity passenger = ((CraftPlayer) rider).getHandle();
             boolean onGround = handle.onGround;
             float speedMod = npc.getNavigator().getDefaultParameters()
                     .modifiedSpeed((onGround ? GROUND_SPEED : AIR_SPEED));
@@ -283,7 +300,7 @@ public class Controllable extends Trait implements Toggleable {
             }
             Vector dir = rider.getEyeLocation().getDirection();
             dir.multiply(npc.getNavigator().getDefaultParameters().speedModifier());
-            net.minecraft.server.v1_8_R3.Entity handle = getHandle();
+            net.minecraft.server.v1_10_R1.Entity handle = getHandle();
             handle.motX = dir.getX();
             handle.motY = dir.getY();
             handle.motZ = dir.getZ();
@@ -326,8 +343,8 @@ public class Controllable extends Trait implements Toggleable {
                 getHandle().motY = 0.001;
                 return;
             }
-            net.minecraft.server.v1_8_R3.Entity handle = getHandle();
-            net.minecraft.server.v1_8_R3.Entity passenger = ((CraftPlayer) rider).getHandle();
+            net.minecraft.server.v1_10_R1.Entity handle = getHandle();
+            net.minecraft.server.v1_10_R1.Entity passenger = ((CraftPlayer) rider).getHandle();
 
             speed = updateHorizontalSpeed(handle, passenger, speed, 1F);
             boolean shouldJump = NMS.shouldJump(passenger);

@@ -2,6 +2,7 @@ package me.security.Accout.buffer;
 
 import org.bukkit.entity.Player;
 
+import me.acf.lobby.patentes.Patente;
 import me.security.Accout.AccountAPI;
 import me.site.account.rank.Rank;
 
@@ -19,6 +20,19 @@ public class AccountInfo {
 		AccountAPI conta = AccountBuffer.Return(p);
 		return conta.rank;
 	}
+	
+	public static Patente getPatente(Player p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.patente;
+	}
+	
+	public static Patente getPatente(String p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.patente;
+	}
+	
 	
 	public static int getPlanets(Player p)
 	{

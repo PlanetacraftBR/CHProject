@@ -89,8 +89,6 @@ public class Cage {
 		block.getBlock().setType(Material.BEDROCK);
 		
 		loc.getWorld().playEffect(block, Effect.STEP_SOUND, 7);
-		staff.playSound(staff.getLocation(), Sound.FIREWORK_LAUNCH, 0.1F, 1.0F);
-		jogador.playSound(jogador.getLocation(), Sound.CHICKEN_EGG_POP, 0.1F, 1.0F);
 		
 	}
 	

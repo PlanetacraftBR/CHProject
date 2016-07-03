@@ -3,6 +3,7 @@ package com.comphenix.protocol.injector;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.events.NetworkMarker;
@@ -10,8 +11,6 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.events.PacketOutputHandler;
 import com.comphenix.protocol.events.PacketPostListener;
 import com.comphenix.protocol.events.ScheduledPacket;
-
-import me.hub.Main;
 
 /**
  * Represents a processor for network markers.
@@ -98,7 +97,7 @@ public class NetworkProcessor {
 	private void sendScheduledPackets(NetworkMarker marker) {
 		// Next, invoke post packet transmission
 		List<ScheduledPacket> scheduled = NetworkMarker.readScheduledPackets(marker);
-		ProtocolManager manager = Main.getProtocolManager();
+		ProtocolManager manager = ProtocolLibrary.getProtocolManager();
 		
 		if (scheduled != null) {
 			for (ScheduledPacket packet : scheduled) {

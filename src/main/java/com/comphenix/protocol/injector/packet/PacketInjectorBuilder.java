@@ -2,7 +2,7 @@ package com.comphenix.protocol.injector.packet;
 
 import javax.annotation.Nonnull;
 
-
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.error.ErrorReporter;
 import com.comphenix.protocol.injector.ListenerInvoker;
@@ -10,8 +10,6 @@ import com.comphenix.protocol.injector.PacketFilterManager;
 import com.comphenix.protocol.injector.player.PlayerInjectionHandler;
 import com.comphenix.protocol.reflect.FieldAccessException;
 import com.google.common.base.Preconditions;
-
-import me.hub.Main;
 
 /**
  * A builder responsible for creating incoming packet injectors.
@@ -73,11 +71,11 @@ public class PacketInjectorBuilder {
 	 * Called before an object is created with this builder.
 	 */
 	private void initializeDefaults() {
-		ProtocolManager manager = Main.getProtocolManager(); 
+		ProtocolManager manager = ProtocolLibrary.getProtocolManager(); 
 		
 		// Initialize with default values if we can
 		if (reporter == null)
-			reporter = Main.getErrorReporter();
+			reporter = ProtocolLibrary.getErrorReporter();
 		if (invoker == null)
 			invoker = (PacketFilterManager) manager;
 		if (playerInjection == null)

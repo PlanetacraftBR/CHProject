@@ -3,62 +3,55 @@ package me.libraryaddict.disguise.disguisetypes.watchers;
 import org.bukkit.inventory.ItemStack;
 
 import me.libraryaddict.disguise.disguisetypes.Disguise;
+import me.libraryaddict.disguise.disguisetypes.FlagType;
 import me.libraryaddict.disguise.disguisetypes.FlagWatcher;
 
-public class MinecartWatcher extends FlagWatcher {
+public class MinecartWatcher extends FlagWatcher
+{
 
-    public MinecartWatcher(Disguise disguise) {
+    public MinecartWatcher(Disguise disguise)
+    {
         super(disguise);
     }
 
-    public ItemStack getBlockInCart() {
-        int id = (Integer) getValue(20, 0) & 0xffff;
-        int data = (Integer) getValue(20, 0) >> 16;
+    public ItemStack getBlockInCart()
+    {
+        int id = (int) getValue(FlagType.MINECART_BLOCK) & 0xffff;
+        int data = (int) getValue(FlagType.MINECART_BLOCK) >> 16;
+
         return new ItemStack(id, 1, (short) data);
     }
 
-    public int getBlockOffset() {
-        return (Integer) getValue(21, 0);
+    public int getBlockYOffset()
+    {
+        return (int) getValue(FlagType.MINECART_BLOCK_Y);
     }
 
-    @Deprecated
-    public int getBlockOffSet() {
-        return getBlockOffset();
+    public boolean isViewBlockInCart()
+    {
+        return (boolean) getValue(FlagType.MINECART_BLOCK_VISIBLE);
     }
 
-    public float getDamage() {
-        return (Float) getValue(19, 0F);
-    }
-
-    public boolean getViewBlockInCart() {
-        return ((Byte) getValue(22, (byte) 0)) == (byte) 1;
-    }
-
-    public void setBlockInCart(ItemStack item) {
+    public void setBlockInCart(ItemStack item)
+    {
         int id = item.getTypeId();
         int data = item.getDurability();
-        setValue(20, (int) (id & 0xffff | data << 16));
-        setValue(22, (byte) 1);
-        sendData(20, 22);
+
+        setValue(FlagType.MINECART_BLOCK, id & 0xffff | data << 16);
+        setValue(FlagType.MINECART_BLOCK_VISIBLE, true); // Show block
+
+        sendData(FlagType.MINECART_BLOCK);
     }
 
-    public void setBlockOffset(int i) {
-        setValue(21, i);
-        sendData(21);
+    public void setBlockOffset(int i)
+    {
+        setValue(FlagType.MINECART_BLOCK_Y, i);
+        sendData(FlagType.MINECART_BLOCK_Y);
     }
 
-    @Deprecated
-    public void setBlockOffSet(int i) {
-        setBlockOffset(i);
-    }
-
-    public void setDamage(float damage) {
-        setValue(19, damage);
-        sendData(19);
-    }
-
-    public void setViewBlockInCart(boolean viewBlock) {
-        setValue(22, (byte) (viewBlock ? 1 : 0));
-        sendData(22);
+    public void setViewBlockInCart(boolean viewBlock)
+    {
+        setValue(FlagType.MINECART_BLOCK_VISIBLE, viewBlock);
+        sendData(FlagType.MINECART_BLOCK_VISIBLE);
     }
 }

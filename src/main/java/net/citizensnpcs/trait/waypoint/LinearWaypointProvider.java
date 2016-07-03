@@ -17,6 +17,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 import com.google.common.collect.Lists;
 
@@ -26,7 +27,8 @@ import net.citizensnpcs.api.ai.GoalSelector;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.event.CancelReason;
 import net.citizensnpcs.api.ai.event.NavigatorCallback;
-
+import net.citizensnpcs.api.command.CommandContext;
+import net.citizensnpcs.api.command.exception.CommandException;
 import net.citizensnpcs.api.event.NPCDespawnEvent;
 import net.citizensnpcs.api.event.NPCRemoveEvent;
 import net.citizensnpcs.api.npc.NPC;
@@ -34,16 +36,61 @@ import net.citizensnpcs.api.persistence.PersistenceLoader;
 import net.citizensnpcs.api.util.DataKey;
 import net.citizensnpcs.api.util.Messaging;
 import net.citizensnpcs.editor.Editor;
+import net.citizensnpcs.trait.waypoint.WaypointProvider.EnumerableWaypointProvider;
 import net.citizensnpcs.trait.waypoint.triggers.TriggerEditPrompt;
 import net.citizensnpcs.util.Messages;
 import net.citizensnpcs.util.Util;
 
-public class LinearWaypointProvider implements WaypointProvider {
+public class LinearWaypointProvider implements EnumerableWaypointProvider {
     private LinearWaypointGoal currentGoal;
     private NPC npc;
     private final List<Waypoint> waypoints = Lists.newArrayList();
 
+    @Override
+    public WaypointEditor createEditor(CommandSender sender, CommandContext args) {
+        if (args.hasFlag('h')) {
+            try {
+                if (args.getSenderLocation() != null) {
+                    waypoints.add(new Waypoint(args.getSenderLocation()));
+                }
+            } catch (CommandException e) {
+                Messaging.sendError(sender, e.getMessage());
+            }
+            return null;
+        } else if (args.hasValueFlag("at")) {
+            try {
+                Location location = CommandContext.parseLocation(args.getSenderLocation(), args.getFlag("at"));
+                if (location != null) {
+                    waypoints.add(new Waypoint(location));
+                }
+            } catch (CommandException e) {
+                Messaging.sendError(sender, e.getMessage());
+            }
+            return null;
+        } else if (args.hasFlag('c')) {
+            waypoints.clear();
+            return null;
+        } else if (args.hasFlag('l')) {
+            if (waypoints.size() > 0) {
+                waypoints.remove(waypoints.size() - 1);
+            }
+            return null;
+        } else if (args.hasFlag('p')) {
+            setPaused(!isPaused());
+            return null;
+        } else if (!(sender instanceof Player)) {
+            Messaging.sendErrorTr(sender, Messages.COMMAND_MUST_BE_INGAME);
+            return null;
+        }
+        return new LinearWaypointEditor((Player) sender);
+    }
 
+    public Waypoint getCurrentWaypoint() {
+        if (currentGoal != null && currentGoal.currentDestination != null) {
+            return currentGoal.currentDestination;
+        }
+        return null;
+    }
 
     @Override
     public boolean isPaused() {
@@ -86,6 +133,11 @@ public class LinearWaypointProvider implements WaypointProvider {
     @Override
     public void setPaused(boolean paused) {
         currentGoal.setPaused(paused);
+    }
+
+    @Override
+    public Iterable<Waypoint> waypoints() {
+        return waypoints;
     }
 
     private final class LinearWaypointEditor extends WaypointEditor {
@@ -209,7 +261,8 @@ public class LinearWaypointProvider implements WaypointProvider {
         @EventHandler(ignoreCancelled = true)
         public void onPlayerInteract(PlayerInteractEvent event) {
             if (!event.getPlayer().equals(player) || event.getAction() == Action.PHYSICAL || !npc.isSpawned()
-                    || event.getPlayer().getWorld() != npc.getEntity().getWorld())
+                    || event.getPlayer().getWorld() != npc.getEntity().getWorld()
+                    || event.getHand() == EquipmentSlot.OFF_HAND)
                 return;
             if (event.getAction() == Action.LEFT_CLICK_BLOCK || event.getAction() == Action.LEFT_CLICK_AIR) {
                 if (event.getClickedBlock() == null)
@@ -253,7 +306,7 @@ public class LinearWaypointProvider implements WaypointProvider {
 
         @EventHandler(ignoreCancelled = true)
         public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-            if (!player.equals(event.getPlayer()) || !showPath)
+            if (!player.equals(event.getPlayer()) || !showPath || event.getHand() == EquipmentSlot.OFF_HAND)
                 return;
             if (!event.getRightClicked().hasMetadata("waypointindex"))
                 return;
