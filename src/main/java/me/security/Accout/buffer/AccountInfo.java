@@ -8,9 +8,6 @@ import me.site.account.rank.Rank;
 public class AccountInfo {
 
 	
-   
-	
-	
 	public static Rank getRank(Player p)
 	{
 		AccountAPI conta = AccountBuffer.Return(p);
@@ -34,5 +31,20 @@ public class AccountInfo {
 		AccountAPI conta = AccountBuffer.Return(p);
 		return conta.Planets();
 	}
+	
+	public static int getCash(Player p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.Cash();
+	}
+	
+	public static int getCash(String p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.Cash();
+	}
+	
+	
+	
 	
 }

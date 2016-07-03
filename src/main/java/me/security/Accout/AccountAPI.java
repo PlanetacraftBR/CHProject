@@ -75,6 +75,7 @@ public class AccountAPI {
 	public String erro_log;
 	public String erro_info;
 	public int ExpAdd = 0;
+	public int CashAdd = 0;
 	public int PlanetsAdd = 0;
 	
 	
@@ -135,6 +136,7 @@ public class AccountAPI {
 	{
 		AddExp();
 		AddPlanets();
+		AddCash();
 	}
 	
 	public int Planets()
@@ -142,10 +144,15 @@ public class AccountAPI {
 		return Integer.parseInt((String)planets.replace(".", ""));
 	}
 	
+	public int Cash()
+	{
+		return Integer.parseInt((String)cash.replace(".", ""));
+	}
+	
 	 private void AddPlanets()
 	 {
 		 if (PlanetsAdd >= 1) {
-			 String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=ADD&nick=" + nome + "&quantidade=" + PlanetsAdd, "OK");
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=ADD&nick=" + nome + "&quantidade=" + PlanetsAdd);
 		     System.out.print(buscar);
 		 }
 		 if (PlanetsAdd < 0) {
@@ -162,6 +169,17 @@ public class AccountAPI {
 		  System.out.print(buscar);  
 		 }
 	  }
+	 private void AddCash()
+	   {
+		  if (CashAdd >= 1) {
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/cash.php?modo=ADD&nick=" + nome + "&quantidade=" + CashAdd);
+		     System.out.print(buscar);
+		  }
+		  if (CashAdd < 0) {
+			  //Não sei o URL da API de remover os Cash kkkkkkkk
+		  }
+			  
+		  }
 	 
 	
 }
