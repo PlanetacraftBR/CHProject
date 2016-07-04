@@ -1,5 +1,6 @@
 package me.hub.API.Util;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -25,9 +26,14 @@ import org.bukkit.entity.Projectile;
 
 import com.comphenix.protocol.events.PacketContainer;
 
+import me.hub.API.Util.Holo1_7.UtilHolo1_7;
+
 public class UtilHolo {
 
 	private static HashSet<Entity> holo = new HashSet();
+	public static ArrayList<Player> Player1_7 = new ArrayList<>();
+	
+	
 	
 	public static void Holo(Location loc, String name)
 	{
@@ -47,6 +53,7 @@ public class UtilHolo {
         hologram.setGravity(false);
         
         holo.add(hologram);
+       
 	}
 	
 	public static void HoloPerm(Location loc, String name)
@@ -81,6 +88,30 @@ public class UtilHolo {
     	  }
 	}
 	
+	private static ArrayList<Entity> holograns = new ArrayList<>();
+	
+	public static void AddPlayer1_7(Player add)
+	{
+		Player1_7.add(add);
+		for (Entity ent : holograns)
+		{
+		    UtilHolo1_7 holo1_7 = new UtilHolo1_7(ent.getCustomName());
+		    holo1_7.Holo1_7.add(add);
+		    holo1_7.show(ent.getLocation());
+		}
+	}
+	public static void ArmoStand()
+	{
+	      List<Entity> entities = Bukkit.getWorld("world").getEntities();
+    	  for (Entity entity : entities){
+    		  if (entity.getType() == EntityType.ARMOR_STAND)
+    		  {
+    			  if (entity.getCustomName() != null)
+    				  holograns.add(entity);
+    				  }
+    	  }
+	}
+	
 	public static void RemoveAllHolo()
 	{
 	      List<Entity> entities = Bukkit.getWorld("world").getEntities();
@@ -104,6 +135,11 @@ public class UtilHolo {
     holo.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
     PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(holo);
     nmsPlayer.playerConnection.sendPacket(packet);
+    if (Player1_7.contains(p)) {
+    UtilHolo1_7 holo1_7 = new UtilHolo1_7(message);
+    holo1_7.Holo1_7.add(p);
+    holo1_7.show(loc);
+    }
     }
     
 

@@ -518,7 +518,7 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 		 getServer().getScheduler().scheduleSyncRepeatingTask(this, new Update(this), 200L, 2L);
 		CHub.onEnable();
 		BarAPI.onEnable(this);
-		
+		UtilHolo.ArmoStand();
 	}
 
 	// Plugin authors: Notify me to remove these
