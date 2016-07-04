@@ -1,6 +1,10 @@
 package me.hub.API.Util;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,14 +19,13 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import me.hub.Main;
-import me.hub.NMS.BossBar.*;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.UUID;
+import me.hub.NMS.BossBar.BossBarFake;
+import me.hub.NMS.BossBar.FakeDragon;
+import me.hub.NMS.BossBar.Util;
+import me.hub.NMS.BossBar.v1_8Fake;
+import me.hub.NMS.BossBar.v1_9;
 
 /**
  * Allows plugins to safely set a health bar message.
@@ -34,6 +37,7 @@ public class BarAPI  implements Listener {
 
   private static HashMap<UUID, FakeDragon> players = new HashMap<UUID, FakeDragon>();
   private static HashMap<UUID, Integer> timers = new HashMap<UUID, Integer>();
+  public static ArrayList<Player> outros = new ArrayList<Player>();
 
   private static Main plugin;
 
@@ -73,6 +77,11 @@ public class BarAPI  implements Listener {
    */
   @Deprecated
   public static void setMessage(Player player, String message) {
+	  if (BarAPI.outros.contains(player))
+	  {
+		  BossBarFake.setName(player, message,1000);
+		  return;
+	  }
     if (hasBar(player))
       removeBar(player);
     FakeDragon dragon = getDragon(player, message);
@@ -123,7 +132,11 @@ public class BarAPI  implements Listener {
   @Deprecated
   public static void setMessage(Player player, String message, float percent) {
     Validate.isTrue(0F <= percent && percent <= 100F, "Percent must be between 0F and 100F, but was: ", percent);
-
+    if (BarAPI.outros.contains(player))
+	  {
+		  BossBarFake.setName(player, message,percent);
+		  return;
+	  }
     if (hasBar(player))
       removeBar(player);
 
@@ -179,7 +192,19 @@ public class BarAPI  implements Listener {
   @Deprecated
   public static void setMessage(final Player player, String message, int seconds) {
     Validate.isTrue(seconds > 0, "Seconds must be above 1 but was: ", seconds);
+    if (BarAPI.outros.contains(player))
+	  {
+		  BossBarFake.setName(player, message,1000);
+		  Bukkit.getScheduler().runTaskTimer(Main.plugin, new Runnable() {
 
+		      @Override
+		      public void run() {
+		    	  BossBarFake.removeBar(player);
+		      }
+		  }, seconds, seconds);
+		  return;
+	  }
+    
     if (hasBar(player))
       removeBar(player);
 

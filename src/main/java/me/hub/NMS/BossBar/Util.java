@@ -25,7 +25,7 @@ public class Util {
 
   public static boolean newProtocol = false;
   public static String version;
-  public static Class<?> fakeDragonClass = v1_6.class;
+  public static Class<?> fakeDragonClass = v1_9.class;
   public static boolean isBelowGround = true;
 
   static {
