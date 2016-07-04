@@ -21,11 +21,12 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 import me.hub.Main;
-import me.hub.NMS.BossBar.BossBarFake;
+
 import me.hub.NMS.BossBar.FakeDragon;
 import me.hub.NMS.BossBar.Util;
 import me.hub.NMS.BossBar.v1_8Fake;
 import me.hub.NMS.BossBar.v1_9;
+import me.hub.NMS.BossBar.wither.BossBarFake;
 
 /**
  * Allows plugins to safely set a health bar message.

@@ -83,6 +83,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import me.acf.lobby.MagicChest.ChestMagic;
 import me.hub.API.Util.BarAPI;
 import me.hub.API.Util.UtilHolo;
+import me.hub.NMS.BossBar.wither.BossBarFake;
 import me.hub.atualizar.Update;
 import me.hub.config.Config;
 import me.libraryaddict.disguise.LibsDisguises;
@@ -439,6 +440,7 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 			Server server = getServer();
 			PluginManager manager = server.getPluginManager();
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "timings on");
+			BossBarFake boss = new BossBarFake(this);
 		    plugin = this;
 	        Config conf = new Config();
 			// Don't do anything else!
