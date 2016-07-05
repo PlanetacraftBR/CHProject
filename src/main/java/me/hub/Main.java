@@ -188,6 +188,11 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 	public static final ReportType REPORT_CANNOT_CREATE_TIMEOUT_TASK = new ReportType("Unable to create packet timeout task.");
 	public static final ReportType REPORT_CANNOT_UPDATE_PLUGIN = new ReportType("Cannot perform automatic updates.");
 
+	public static Main instance;
+
+	boolean usePackets = false;
+	
+	
 	// Update information
 	static final String BUKKIT_DEV_SLUG = "protocollib";
 	static final int BUKKIT_DEV_ID = 45564;
@@ -435,6 +440,7 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 
 	@Override
 	public void onEnable() {
+	
 		try {
 			NPCEnable();
 			Server server = getServer();
@@ -686,6 +692,7 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 	@Override
 	public void onDisable() {
 		NPCDisable();
+
 		if (skipDisable) {
 			return;
 		}
@@ -725,8 +732,6 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 	  		deleteDir(file);
 	  		UtilHolo.RemoveAllHolo();
 	  		ChestMagic.Remove_Stop();
-	  	   
-
 	
 	}
 
