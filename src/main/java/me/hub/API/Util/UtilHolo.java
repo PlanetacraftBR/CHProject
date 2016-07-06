@@ -155,18 +155,4 @@ public class UtilHolo {
 	    nmsPlayer.playerConnection.sendPacket(packet);
     }
     
-    public void TEst(Player p)
-    {
-    	setBlockFast(((CraftWorld) p.getWorld()).getHandle(),1,1,1,1,(byte)0);
-    }
-    
-    public void setBlockFast(World world, int x, int y, int z, int blockId, byte data) {
-        net.minecraft.server.v1_10_R1.World w = world;
-        net.minecraft.server.v1_10_R1.Chunk chunk = w.getChunkAt(x >> 4, z >> 4);
-        BlockPosition bp = new BlockPosition(x, y, z);
-        int combined = blockId + (data << 12);
-        IBlockData ibd = net.minecraft.server.v1_10_R1.Block.getByCombinedId(combined);
-        chunk.a(bp, ibd);
-    }
-
 }
