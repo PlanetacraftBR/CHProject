@@ -1,5 +1,7 @@
 package me.hub.API.Util;
 
+import java.util.UUID;
+
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
@@ -20,11 +22,6 @@ public class UtilPlayer
   
   public static int Ping(Player jogador)
   {
-	  if (jogador.getName().equals("BrinePlay"))
-	  {
-		  int lag = ((CraftPlayer)jogador).getHandle().ping+292;
-		  return ((CraftPlayer)jogador).getHandle().ping;
-	  }
 		  return ((CraftPlayer)jogador).getHandle().ping;
   }
   
@@ -34,6 +31,20 @@ public class UtilPlayer
   }
   
   
+  public static Player searchExact(String name)
+	{
+		for (Player cur : UtilServer.Jogadores())
+			if (cur.getName().equalsIgnoreCase(name))
+				return cur;
+
+		return null;
+	}
+
+	public static Player searchExact(UUID uuid)
+	{
+		return UtilServer.getServer().getPlayer(uuid);
+	}
+	
   public static void Teleportar(Player jogador, Player para)
   {
 	  jogador.teleport(para.getLocation());
