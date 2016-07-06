@@ -6,15 +6,19 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.craftbukkit.v1_10_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_10_R1.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import net.minecraft.server.v1_10_R1.BlockPosition;
 import net.minecraft.server.v1_10_R1.EntityArmorStand;
 import net.minecraft.server.v1_10_R1.EntityBat;
 import net.minecraft.server.v1_10_R1.EntityPlayer;
+import net.minecraft.server.v1_10_R1.IBlockData;
+import net.minecraft.server.v1_10_R1.PacketPlayOutBlockChange;
 import net.minecraft.server.v1_10_R1.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_10_R1.World;
 
@@ -151,5 +155,18 @@ public class UtilHolo {
 	    nmsPlayer.playerConnection.sendPacket(packet);
     }
     
+    public void TEst(Player p)
+    {
+    	setBlockFast(((CraftWorld) p.getWorld()).getHandle(),1,1,1,1,(byte)0);
+    }
+    
+    public void setBlockFast(World world, int x, int y, int z, int blockId, byte data) {
+        net.minecraft.server.v1_10_R1.World w = world;
+        net.minecraft.server.v1_10_R1.Chunk chunk = w.getChunkAt(x >> 4, z >> 4);
+        BlockPosition bp = new BlockPosition(x, y, z);
+        int combined = blockId + (data << 12);
+        IBlockData ibd = net.minecraft.server.v1_10_R1.Block.getByCombinedId(combined);
+        chunk.a(bp, ibd);
+    }
 
 }

@@ -45,7 +45,9 @@ import me.hub.API.Util.UtilTitle;
 import me.hub.Bungee.Bungee;
 import me.hub.atualizar.Atualizar;
 import me.hub.atualizar.ModosUpdate;
+import me.site.account.Account;
 import me.site.account.AccountWeb;
+import me.site.account.rank.Rank;
 
 /**
  * @author adriancf
@@ -208,10 +210,13 @@ public class LoginManager extends MiniPlugin {
 	event.setJoinMessage(null);
 	
 	String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=lobby", "status");
-	if (!Servidor.equals("ON"))
+	if (Servidor == null)
 	{
+		 if (!Account.getRank(event.getPlayer()).Has(event.getPlayer(), Rank.STAFF, false))
+	      {
 	       UtilPlayer.Kick(event.getPlayer(), "Lobby não esta online");
 		return;
+	      }
 	}
 	
 	for (Player p : Bukkit.getOnlinePlayers())
