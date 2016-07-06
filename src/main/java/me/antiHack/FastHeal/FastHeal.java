@@ -1,25 +1,16 @@
 package me.antiHack.FastHeal;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import me.antiHack.AntiHack;
 import me.antiHack.Detector;
 import me.hub.MiniPlugin;
-import me.hub.API.Util.UtilPlayer;
-import me.hub.API.Util.UtilServer;
 
 public class FastHeal  extends MiniPlugin
 implements Detector

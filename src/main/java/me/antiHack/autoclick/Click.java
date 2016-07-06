@@ -7,6 +7,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -95,6 +96,30 @@ Plugin plugin;
 			
 		}
 
+		  @EventHandler
+		  public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
+		  {
+		    if (!(event.getDamager() instanceof Player)) {
+		      return;
+		    }
+		    Player player = (Player)event.getDamager();
+		    
+		    AntiHack.setLastAttackTime(player.getUniqueId());
+		  }
+		  
+		  @EventHandler
+		  public void onEntityDamage(EntityDamageEvent event)
+		  {
+		    if (!(event.getEntity() instanceof Player)) {
+		      return;
+		    }
+		    if (event.getCause() == EntityDamageEvent.DamageCause.SUICIDE) {
+		      return;
+		    }
+		    Player player = (Player)event.getEntity();
+		    
+		   AntiHack.setLastAttackTime(player.getUniqueId());
+		  }
 	
 	public void Reset(Player paramPlayer) {
 		

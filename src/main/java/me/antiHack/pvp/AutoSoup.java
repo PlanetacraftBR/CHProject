@@ -29,30 +29,6 @@ implements Detector
   private Map<Player, Integer> a = new HashMap();
   private AntiHack Host;
   
-  @EventHandler
-  public void onEntityDamageByEntity(EntityDamageByEntityEvent event)
-  {
-    if (!(event.getDamager() instanceof Player)) {
-      return;
-    }
-    Player player = (Player)event.getDamager();
-    
-    AntiHack.setLastAttackTime(player.getUniqueId());
-  }
-  
-  @EventHandler
-  public void onEntityDamage(EntityDamageEvent event)
-  {
-    if (!(event.getEntity() instanceof Player)) {
-      return;
-    }
-    if (event.getCause() == EntityDamageEvent.DamageCause.SUICIDE) {
-      return;
-    }
-    Player player = (Player)event.getEntity();
-    
-   AntiHack.setLastAttackTime(player.getUniqueId());
-  }
   
   @EventHandler
   public void autosoup(InventoryClickEvent e)

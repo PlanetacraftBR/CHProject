@@ -29,8 +29,10 @@ import me.acf.FormatText.Format;
 import me.antiHack.FastHeal.FastHeal;
 import me.antiHack.Move.Fly;
 import me.antiHack.Move.NoFall;
+import me.antiHack.Move.NoSlowDown;
 import me.antiHack.Move.Speed;
 import me.antiHack.autoclick.Click;
+import me.antiHack.pvp.AntiKnockback;
 import me.antiHack.pvp.AutoSoup;
 import me.antiHack.pvp.FastBow;
 import me.hub.MiniPlugin;
@@ -83,6 +85,8 @@ public class AntiHack
     this._detectors.add(new FastHeal(this));
     this._detectors.add(new FastBow(this));
     this._detectors.add(new NoFall(this));
+    this._detectors.add(new NoSlowDown(this));
+    this._detectors.add(new AntiKnockback(this));
     
     MovementDetection MovementDetection = new MovementDetection(plugin);
     Click Click = new Click(plugin);
