@@ -107,8 +107,10 @@ public class UtilHolo {
     	  for (Entity entity : entities){
     		  if (entity.getType() == EntityType.ARMOR_STAND)
     		  {
-    			  if (entity.getCustomName() != null)
+    			  if (entity.getCustomName() != null) {
+    				if (!holograns.contains(entity))
     				  holograns.add(entity);
+    			  }
     				  }
     	  }
 	}
