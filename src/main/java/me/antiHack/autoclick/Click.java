@@ -60,9 +60,12 @@ Plugin plugin;
 		public void HitMob(EntityDamageByEntityEvent e)
 		{
 
+		    if (!(e.getDamager() instanceof Player)) {
+			      return;
+			    }
+		    
 			Player p = (Player) e.getDamager();
 			
-		  if (e.getDamager().getType() == EntityType.PLAYER){
 			
 		      if (Click.containsKey(p))
 				{
@@ -72,7 +75,7 @@ Plugin plugin;
 				    Click.remove(p);
 				    Click.put(p, "" + clicks);
 				    
-			if (clicks >= 4){
+			if (clicks >= 6){
 				Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "f "+p.getName());
 			}
 			if (clicks == 13){
@@ -84,7 +87,7 @@ Plugin plugin;
 				UtilPlayer.Kick(p, "Você esta muito suspeito de ser algum Cheat");
 				this.Host.addSuspicion(p, "Esta Clickando muito rapido (Extremo)");
 			}
-			if (clicks >= 4){
+			if (clicks >= 6){
 			this.Host.addSuspicion(p, "Esta Clickando muito rapido ("+clicks+")");
 			}
 				}
@@ -92,7 +95,8 @@ Plugin plugin;
 				{
 					Click.put(p, "1");
 				}
-			}
+		  
+			
 			
 		}
 

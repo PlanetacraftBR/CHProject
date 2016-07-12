@@ -1,12 +1,16 @@
 package me.antiHack.Move;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 
 import me.antiHack.AntiHack;
 import me.antiHack.Detector;
 import me.hub.MiniPlugin;
+import me.hub.API.Util.UtilPlayer;
 
 public class NoSlowDown
 extends MiniPlugin
@@ -17,7 +21,9 @@ implements Detector
 	    super("NoSlowDown Detector", host.GetPlugin());
 	    this.Host = host;
 	  }
+	  
 	 private AntiHack Host;
+     	 
 	 
 	  @EventHandler
 	  public void onslowCheck(FoodLevelChangeEvent e)

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -20,19 +21,15 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-import me.acf.lobby.patentes.Patente;
-import me.hub.Main;
 import me.site.account.rank.Rank;
  
 public class ScoreboardAPI {
     public static Scoreboard scoreboard;
-    private static String title;
     private static Map<String, Integer> scores;
     private static List<Team> teams;
  
-    public ScoreboardAPI(String title) {
+    public ScoreboardAPI() {
         this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        this.title = title;
         this.scores = Maps.newLinkedHashMap();
         this.teams = Lists.newArrayList();
 
@@ -118,20 +115,40 @@ public class ScoreboardAPI {
  
         int line = 15;
 
+
+               for (Map.Entry<String, Integer> text : scores.entrySet())
+        	        {
+        	            Map.Entry<Team, String> team = createTeam(text.getKey());
+        	            Integer score = text.getValue() != null ? text.getValue() : line;
+        	            OfflinePlayer player = Bukkit.getOfflinePlayer((String)team.getValue());
+        	            if (team.getKey() != null)
+        	                team.getKey().addPlayer(player);
+        	            if (!ScoreboardAPI.contem(p, player.getName())) 
+        	            obj.getScore(player).setScore(score);
+        	            
+        	            line--;
+        	      }
+               
+        /*
         for (final Map.Entry<String, Integer> text : scores.entrySet()) {
             final Map.Entry<Team, String> team = createTeam(text.getKey());
       
             String value = team.getValue();
+            Integer score = text.getValue() != null ? text.getValue() : index;
             if (team.getKey() != null) {
             	if (!ScoreboardAPI.contem(p, value))
                 team.getKey().addEntry(value);
             }
                      
             line--;
-                       if (!ScoreboardAPI.contem(p, value))
+                       if (!ScoreboardAPI.contem(p, value)) {
+                    	   if (scores.get())
           			 obj.getScore(value).setScore(line);
+                       }
           			 
           		}
+          		*/
+               
         scores.clear();
           	
         
@@ -140,7 +157,6 @@ public class ScoreboardAPI {
     }
  
     public void reset() {
-        title = null;
         scores.clear();
         for (Team t : teams) {
             t.unregister();

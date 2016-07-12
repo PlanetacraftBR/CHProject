@@ -14,6 +14,12 @@ public class Format {
 		p.sendMessage("§c§l" + nome.toUpperCase() + "§7 " + msg);
 	}
 	
+	public static void Main(String nome, String msg , Player p)
+	{
+		if (!Perfil.Notification.contains(p))
+		p.sendMessage("§c§l" + nome.toUpperCase() + "§7 " + msg);
+	}
+	
 	public static void Recebeu(String de, String premium , Player p)
 	{
 		if (!Perfil.Notification.contains(p))

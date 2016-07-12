@@ -36,10 +36,6 @@ import me.hub.API.Util.UtilPlayer;
 import me.hub.atualizar.Atualizar;
 import me.hub.atualizar.ModosUpdate;
 
-
-/////Code por Mineplex
-
-
 public class Explosion extends MiniPlugin
 {
 	private boolean _regenerateGround = false;
@@ -214,7 +210,7 @@ public class Explosion extends MiniPlugin
 	@EventHandler
 	public void ExplosionBlockUpdate(Atualizar event)
 	{
-		if (event.getType() != ModosUpdate.TICK)
+		if (event.getType() != ModosUpdate.FAST)
 			return;
 
 		//Clean Archived Games

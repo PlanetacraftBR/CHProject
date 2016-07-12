@@ -61,6 +61,7 @@ public class CHub  {
 	public static void onEnable()
 	{
 	   System.out.print("Feito");
+	   Test test = new Test(Main.plugin);
 	}
 	
 	public static void onDisable()

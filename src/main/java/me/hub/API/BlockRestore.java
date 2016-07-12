@@ -20,7 +20,6 @@ import me.hub.atualizar.Atualizar;
 import me.hub.atualizar.ModosUpdate;
 
 
-
 public class BlockRestore
   extends MiniPlugin
 {

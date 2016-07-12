@@ -16,6 +16,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -31,6 +32,7 @@ import me.antiHack.Move.Fly;
 import me.antiHack.Move.NoFall;
 import me.antiHack.Move.NoSlowDown;
 import me.antiHack.Move.Speed;
+import me.antiHack.Move.ToggleSneak;
 import me.antiHack.autoclick.Click;
 import me.antiHack.pvp.AntiKnockback;
 import me.antiHack.pvp.AutoSoup;
@@ -69,7 +71,7 @@ public class AntiHack
   public ArrayList<Detector> _detectors;
 
   
-  protected AntiHack(JavaPlugin plugin, Bungee portal)
+  public AntiHack(JavaPlugin plugin, Bungee portal)
   {
     super("AntiHack", plugin);
     
@@ -87,6 +89,7 @@ public class AntiHack
     this._detectors.add(new NoFall(this));
     this._detectors.add(new NoSlowDown(this));
     this._detectors.add(new AntiKnockback(this));
+    this._detectors.add(new ToggleSneak(this));
     
     MovementDetection MovementDetection = new MovementDetection(plugin);
     Click Click = new Click(plugin);
@@ -306,8 +309,14 @@ public class AntiHack
 	  for (Player p : UtilServer.Jogadores())
 	  {
 		  Click.Click.remove(p);
+			if (ToggleSneak.inv.contains(p))
+			  addSuspicion(p, "Suspeito de ToggleSneak");
+		  
+		  
 	  }
   }
+  
+ 
   
   @EventHandler
   public void processOffenses(Atualizar event)

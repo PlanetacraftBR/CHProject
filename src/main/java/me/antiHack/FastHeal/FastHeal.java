@@ -36,6 +36,9 @@ public void onEntityRegainHealthLow(EntityRegainHealthEvent event)
   if (event.getRegainReason() != EntityRegainHealthEvent.RegainReason.SATIATED) {
     return;
   }
+  if (event.getRegainReason() != EntityRegainHealthEvent.RegainReason.MAGIC_REGEN) {
+	    return;
+	  }
   if (FastHealListener.check(player) == 0.0D) {
     return;
   }
