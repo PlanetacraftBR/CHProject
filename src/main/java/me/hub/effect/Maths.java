@@ -250,7 +250,7 @@ public class Maths
               {
                 loc.setY(loc.getY() + 0.1D);
                 
-                ParticleEffect.valueOf(particle).display(new ParticleEffect.OrdinaryColor(r, g, b), loc, 50.0D);
+                ParticleEffect.valueOf(particle).display(loc, 50.0D);
               }
             }
           }
@@ -281,7 +281,7 @@ public class Maths
               Vector v = new Vector(k * Math.sin(k * this.step) / 3.0D, -k + 3.8D, k * Math.cos(k * this.step) / 3.0D);
               loc.add(v);
               
-              ParticleEffect.valueOf(particle).display(new ParticleEffect.OrdinaryColor(r, g, b), loc, 50.0D);
+              ParticleEffect.valueOf(particle).display(loc, 50.0D);
             }
             this.step -= 0.1F;
             if (this.step <= -10.0F) {
@@ -291,9 +291,9 @@ public class Maths
           else
           {
             Location l = p.getLocation().add(0.0D, 1.0D, 0.0D);
-            ParticleEffect.valueOf(particle).display(new ParticleEffect.OrdinaryColor(r, g, b), l.add(RandomUtils.getRandomVector()), 50.0D);
-            ParticleEffect.valueOf(particle).display(new ParticleEffect.OrdinaryColor(r, g, b), l.add(RandomUtils.getRandomVector()), 50.0D);
-            ParticleEffect.valueOf(particle).display(new ParticleEffect.OrdinaryColor(r, g, b), l.add(RandomUtils.getRandomVector()), 50.0D);
+            ParticleEffect.valueOf(particle).display(l.add(RandomUtils.getRandomVector()), 50.0D);
+            ParticleEffect.valueOf(particle).display(l.add(RandomUtils.getRandomVector()), 50.0D);
+            ParticleEffect.valueOf(particle).display(l.add(RandomUtils.getRandomVector()), 50.0D);
           }
         }
       }, 0L, 0L).getTaskId();

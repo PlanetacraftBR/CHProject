@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import me.hub.Main;
+import me.hub.API.Util.Particles;
 import me.hub.effect.ParticleEffect;
 
 public class MagicEvent {
@@ -39,15 +40,16 @@ public class MagicEvent {
 	        this.step2 += 1;
 	        if (this.step <= 51)
 	        {
-	          ParticleEffect.VILLAGER_HAPPY.display(0.0F, 0.0F, 0.0F, 0.0F, 1, magic.getEyeLocation(), 20);
-	          ParticleEffect.REDSTONE.display(0.0F, 0.0F, 0.0F, 5.0F, 1, magic.getEyeLocation(), 20);
-	          magic.getWorld().playSound(magic.getLocation(), Sound.BLOCK_NOTE_BASEDRUM, 0.5F, 2.0F);
+	        	
+	          Particles.VILLAGER_HAPPY.display(0.0F, 0.0F, 0.0F, 0.0F, 1, magic.getEyeLocation(), 20);
+	          Particles.REDSTONE.display(0.0F, 0.0F, 0.0F, 5.0F, 1, magic.getEyeLocation(), 20);
+	          magic.getWorld().playSound(magic.getLocation(), Sound.BLOCK_NOTE_SNARE, 0.5F, 2.0F);
 	          magic.teleport(magic.getLocation().add(0, 0.1D, 0));
 	        }
 	        else if (this.step == 53)
 	        {
-	          ParticleEffect.ENCHANTMENT_TABLE.display(0.0F, 0.0F, 0.0F, 1.0F, 150, magic.getEyeLocation().add(0.0D, 1.0D, 0.0D), 20);
-
+	         Particles.ENCHANTMENT_TABLE.display(0.0F, 0.0F, 0.0F, 1.0F, 150, magic.getEyeLocation().add(0.0D, 1.0D, 0.0D), 20);
+	         magic.getWorld().playSound(magic.getLocation(), Sound.ENTITY_FIREWORK_TWINKLE, 0.5F, 2.0F);
 	          
 	        }
 	      }
