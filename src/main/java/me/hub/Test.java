@@ -6,11 +6,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.acf.Magic_Chest.MagicEvent;
 import me.antiHack.AntiHack;
 import me.hub.API.BlockRestore;
 import me.hub.API.Explosion.Explosion;
 import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
+import me.security.Accout.Account;
+import me.security.Accout.AccountAPI;
+import me.security.Accout.buffer.AccountBuffer;
 
 public class Test extends MiniPlugin {
 
@@ -23,7 +27,7 @@ public class Test extends MiniPlugin {
 		AntiHack hacks = new AntiHack(plugin,bunge);
 		BlockRestore block = new BlockRestore(plugin);
 		Explosion explo = new Explosion(plugin,block);
-		
+		Account account = new Account(plugin);
 		System.out.print(texto);
 	}
 	
@@ -36,21 +40,23 @@ public class Test extends MiniPlugin {
 	@EventHandler
 	public void test(PlayerJoinEvent event)
 	{
+		AccountAPI conta = AccountBuffer.Return(event.getPlayer());
 		CriarScoreboard(event.getPlayer());
 	    ScoreboardAPI.add("§c"); //15
-        ScoreboardAPI.add("Grupo: §f§lMEMBRO",500); //15
-        ScoreboardAPI.add("Cash: §a500"); //14
-        ScoreboardAPI.add("Planets: §a500"); //13
+        ScoreboardAPI.add("Grupo: " + conta.rank.GetTag(true),500); //15
+        ScoreboardAPI.add("Cash: §a" + conta.Cash()); //14
+        ScoreboardAPI.add("Planets: §a" + conta.Planets()); //13
         ScoreboardAPI.add("§5"); //12
         ScoreboardAPI.add("§7"); //11
-        ScoreboardAPI.add("Nivel:§a 4"); //10
-        ScoreboardAPI.add("Patente: §eIniciante"); //9
+        ScoreboardAPI.add("Nivel:§a " + conta.nivel); //10
+        ScoreboardAPI.add("Patente: §e" + conta.patente.GetTag(true)); //9
         ScoreboardAPI.add("§f"); //8    
-        ScoreboardAPI.add("Chaves: §c500"); //7
+        ScoreboardAPI.add("Chaves: §c" + conta.Chave()); //7
         ScoreboardAPI.add("Servidor Lobby: §aCentral"); //6
         ScoreboardAPI.add("§2"); //5
         
         ScoreboardAPI.build(event.getPlayer(), texto);
+		MagicEvent.Magic(event.getPlayer(), event.getPlayer().getLocation());
         event.getPlayer().getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(10);
 	}
 

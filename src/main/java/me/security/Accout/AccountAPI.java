@@ -47,6 +47,7 @@ import org.json.JSONObject;
 
 import me.acf.lobby.patentes.Patente;
 import me.hub.Main;
+import me.hub.API.Util.UtilTime;
 import me.security.Accout.buffer.AccountBuffer;
 import me.site.account.AccountWeb;
 import me.site.account.rank.Rank;
@@ -63,7 +64,6 @@ public class AccountAPI {
 	public String cash;
 	public String planets;
 	public String nivel;
-	public String exp;
 	public String chave;
 	public Rank rank;
 	public Patente patente;
@@ -77,7 +77,9 @@ public class AccountAPI {
 	public int ExpAdd = 0;
 	public int CashAdd = 0;
 	public int PlanetsAdd = 0;
-	
+	//Tempo online
+	public String info_on = "00/00/00 - 00:00:00";
+	public String info_leave = "00/00/00 - 00:00:00";
 	
 	public AccountAPI(String nome)
 	{
@@ -88,19 +90,19 @@ public class AccountAPI {
 		if (erro)
 			return;
 		try {
-	    JSONObject obj = new JSONObject(AccountWeb.Conectar(Main.site + "/API/conta.php?nick=" + nome));	
+	    JSONObject obj = new JSONObject(AccountWeb.Conectar(Main.site + "/API/Account_v2/conta.php?nick=" + nome));	
 		json = obj;
 		uuid = obj.getString("uuid");
 		cash = obj.getString("cash");
 		kdr = obj.getString("kdr");
 		nivel = obj.getString("nivel");
-		exp = obj.getString("exp");
 		chave = obj.getString("chaves");
 		ponto_staff= obj.getString("pontos_staff");
 		planets = obj.getString("planets"); 
 		rank = Rank.valueOf(obj.getString("grupo"));
 		patente = Patente.valueOf(obj.getString("patente"));
 		ip = obj.getString("ip");	
+		info_on = UtilTime.TimeData();
 		}
 		 catch (Exception exception)
 	    {
@@ -110,6 +112,15 @@ public class AccountAPI {
 			 exception.printStackTrace();
 	    }
 		}
+	
+	
+	public String Tempo_online()
+	{
+	     String tempo = UtilTime.convertString(UtilTime.DataTempo(UtilTime.TimeData(), info_on), 0, UtilTime.TimeUnit.FIT);
+	     
+	     return tempo;
+	}
+	
 	
 	
 	private void AddJogador()
@@ -144,6 +155,12 @@ public class AccountAPI {
 		return Integer.parseInt((String)planets.replace(".", ""));
 	}
 	
+	
+	public int Chave()
+	{
+		return Integer.parseInt((String)chave.replace(".", ""));
+	}
+	
 	public int Cash()
 	{
 		return Integer.parseInt((String)cash.replace(".", ""));
@@ -169,6 +186,7 @@ public class AccountAPI {
 		  System.out.print(buscar);  
 		 }
 	  }
+	 
 	 private void AddCash()
 	   {
 		  if (CashAdd >= 1) {

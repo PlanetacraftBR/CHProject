@@ -2,6 +2,8 @@ package me.hub.API.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 
 public class UtilTime
@@ -18,6 +20,36 @@ public class UtilTime
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     return sdf.format(cal.getTime());
   }
+  
+  public static long DataTempo(String maior, String menor)
+  {
+	  long sec = 0;
+	  try {
+      Date d1 = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss").parse(menor);
+      Date d2 = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss").parse(maior);
+      sec = d2.getTime() - d1.getTime();
+	  }
+	  catch (Exception exception)
+	    {
+		  
+	    }
+      
+      
+      return sec;
+  }
+  
+  
+  public static String TimeData()
+  {
+  	Calendar calendar = new GregorianCalendar();
+  	SimpleDateFormat out = new SimpleDateFormat("dd/MM/yyyy - HH:mm:ss");
+  	Date date = new Date();
+  	calendar.setTime(date);
+      
+   String s1 = out.format(calendar.getTime());
+   return s1;
+  }
+  
 
   public static String DiaHorario(long time)
   {

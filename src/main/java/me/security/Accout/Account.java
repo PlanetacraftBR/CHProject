@@ -47,9 +47,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import me.acf.servidor.Servidor;
 import me.hub.Main;
+import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilPlayer;
 import me.hub.API.Util.UtilServer;
 import me.security.Accout.buffer.AccountBuffer;
@@ -60,7 +62,13 @@ import me.site.account.rank.Rank;
  * Código por adriancf, Group CH-Project
  */
 
-public class Account {
+public class Account extends MiniPlugin {
+
+	public Account(JavaPlugin plugin) {
+		super("Account v2", plugin);
+		// TODO Auto-generated constructor stub
+	}
+
 
 	/** Nota AdrianCF:
 	 *  Account 2.0 
@@ -118,6 +126,7 @@ public class Account {
 	  @EventHandler
 	  public void Leave(PlayerQuitEvent event)
 	  {
+		  System.out.print(event.getPlayer().getName()+" tempo online: " + AccountBuffer.Return(event.getPlayer()).Tempo_online());
 		  AccountBuffer.Remove(event.getPlayer());
 	  }
 	  

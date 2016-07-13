@@ -14,6 +14,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
+import me.hub.Main;
+
 public enum ParticleEffect
 {
   EXPLOSION_NORMAL(
@@ -639,7 +641,8 @@ public enum ParticleEffect
       }
       try
       {
-        version = Integer.parseInt(Character.toString(ReflectionUtils.PackageType.getServerVersion().charAt(3)));
+    	  version = Integer.parseInt(ReflectionUtils.PackageType.getServerVersion().split("_")[1]);
+   
         if (version > 7) {
           enumParticle = ReflectionUtils.PackageType.MINECRAFT_SERVER.getClass("EnumParticle");
         }
