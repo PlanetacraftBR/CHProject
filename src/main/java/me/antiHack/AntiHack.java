@@ -309,9 +309,10 @@ public class AntiHack
 	  for (Player p : UtilServer.Jogadores())
 	  {
 		  Click.Click.remove(p);
+		  if (p.isSneaking()) {
 			if (ToggleSneak.inv.contains(p))
 			  addSuspicion(p, "Suspeito de ToggleSneak");
-		  
+		  }
 		  
 	  }
   }

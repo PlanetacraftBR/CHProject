@@ -10,11 +10,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import me.hub.Main;
 import me.hub.API.Util.Particles;
-import me.hub.effect.ParticleEffect;
+import me.hub.API.Util.UtilFirework;
+import me.hub.API.Util.UtilParticles;
+import me.hub.API.Util.UtilSound;
+import me.hub.API.Util.Sound.Sounds;
 
 public class MagicEvent {
 	
-	public static void Magic(final Player p,Location loc)
+	public static void Magic(final Player p,final Location loc)
 	{
 		
 		   final ArmorStand magic = (ArmorStand)p.getWorld().spawn(loc.clone().add(0.5,0,0.5), ArmorStand.class);
@@ -38,19 +41,29 @@ public class MagicEvent {
 	        }
 	        this.step += 1;
 	        this.step2 += 1;
-	        if (this.step <= 51)
+	        if (this.step <= 48)
 	        {
-	        	
-	          Particles.VILLAGER_HAPPY.display(0.0F, 0.0F, 0.0F, 0.0F, 1, magic.getEyeLocation(), 20);
-	          Particles.REDSTONE.display(0.0F, 0.0F, 0.0F, 5.0F, 1, magic.getEyeLocation(), 20);
-	          magic.getWorld().playSound(magic.getLocation(), Sound.BLOCK_NOTE_SNARE, 0.5F, 2.0F);
+	          UtilParticles.display(255, 255, 255, magic.getEyeLocation());
+	          UtilParticles.display(Particles.FIREWORKS_SPARK, magic.getEyeLocation(), 20);
+	          UtilSound.playSound(magic.getEyeLocation(), Sounds.NOTE_PIANO, 0.5f, 2.0F);
 	          magic.teleport(magic.getLocation().add(0, 0.1D, 0));
 	        }
-	        else if (this.step == 53)
+	        if (this.step == 50)
 	        {
 	         Particles.ENCHANTMENT_TABLE.display(0.0F, 0.0F, 0.0F, 1.0F, 150, magic.getEyeLocation().add(0.0D, 1.0D, 0.0D), 20);
 	         magic.getWorld().playSound(magic.getLocation(), Sound.ENTITY_FIREWORK_TWINKLE, 0.5F, 2.0F);
 	          
+	        }
+	        if (this.step == 69)
+	        {
+	        	magic.setHelmet(null);
+	        	Particles.EXPLOSION_NORMAL.display(0.0F, 0.0F, 0.0F, 1.0F, 150, magic.getEyeLocation().add(0.0D, 1.0D, 0.0D), 20);
+	        	Particles.CRIT_MAGIC.display(0.0F, 0.0F, 0.0F, 1.0F, 150, magic.getEyeLocation().add(0.0D, 1.0D, 0.0D), 20);
+	        	UtilSound.playSound(magic.getEyeLocation(), Sounds.CHICKEN_EGG_POP, 1.5F, 1.2F);
+	        }
+	        if (this.step == 70)
+	        {
+	        	UtilFirework.SimplesFirework(magic.getEyeLocation());
 	        }
 	      }
 	        

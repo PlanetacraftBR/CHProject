@@ -35,9 +35,10 @@ public class ToggleSneak
 	  {
 		  Player player = (Player) event.getWhoClicked();
 		  if (player.isSneaking()) {
-		  this.Host.addSuspicion(player, "Suspeito de NoSlowDown");
+		  this.Host.addSuspicion(player, "Suspeito de ToggleSneak");
 		  UtilPlayer.Kick(player, "Você esta muito suspeito de ser algum Cheat");
 		  event.setCancelled(true);
+		 ((Player) player).setSneaking(false);
 		  }
 		  
 	  }  
@@ -47,11 +48,13 @@ public class ToggleSneak
 	public void onInventoryOpen(InventoryOpenEvent event) {
 		((Player) event.getPlayer()).setSneaking(false);
 		inv.add((Player) event.getPlayer());
+		
 	}
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		inv.remove((Player) event.getPlayer());
+		((Player) event.getPlayer()).setSneaking(false);
 	}
 
 	@Override

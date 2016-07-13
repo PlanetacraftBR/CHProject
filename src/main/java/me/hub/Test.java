@@ -7,6 +7,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.acf.Magic_Chest.MagicEvent;
+import me.acf.Magic_Chest.MagicMananger;
 import me.antiHack.AntiHack;
 import me.hub.API.BlockRestore;
 import me.hub.API.Explosion.Explosion;
@@ -28,6 +29,7 @@ public class Test extends MiniPlugin {
 		BlockRestore block = new BlockRestore(plugin);
 		Explosion explo = new Explosion(plugin,block);
 		Account account = new Account(plugin);
+		MagicMananger magic = new MagicMananger(plugin);
 		System.out.print(texto);
 	}
 	
@@ -56,7 +58,6 @@ public class Test extends MiniPlugin {
         ScoreboardAPI.add("§2"); //5
         
         ScoreboardAPI.build(event.getPlayer(), texto);
-		MagicEvent.Magic(event.getPlayer(), event.getPlayer().getLocation());
         event.getPlayer().getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(10);
 	}
 

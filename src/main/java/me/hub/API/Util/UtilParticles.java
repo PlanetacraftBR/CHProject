@@ -1,11 +1,15 @@
 package me.hub.API.Util;
 
+
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import me.hub.Main;
 
+/**
+ * Created by sacha on 07/08/15.
+ */
 public class UtilParticles {
 
     private final static int DEF_RADIUS = 128;
@@ -89,7 +93,6 @@ public class UtilParticles {
         display(Particles.REDSTONE, red, green, blue, location, 1);
     }
 
-    
     public static void display(Particles effect, int red, int green, int blue, Location location) {
         display(effect, red, green, blue, location, 1);
     }
