@@ -46,6 +46,7 @@ public class ChestMagic implements Listener
 	public static HashMap<Location, Player> open = new HashMap<>();
 	public static HashMap<Player, Location> Local = new HashMap<>();
 	public static ArrayList<Entity> remove = new ArrayList<>();
+	
 	 @EventHandler
 	   public void EnderChest(final PlayerInteractEvent event)
 	   {

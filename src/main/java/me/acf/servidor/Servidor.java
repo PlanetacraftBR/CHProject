@@ -43,6 +43,7 @@ public class Servidor {
 		  catch (Exception exception)
 	    {
 			  System.out.print("Não foi possivel verificar o modo manutenção do servidor!");
+			  return false;
 	    }
 		
 		if (Bukkit.hasWhitelist())

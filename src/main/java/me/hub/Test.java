@@ -6,16 +6,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.acf.Magic_Chest.MagicEvent;
 import me.acf.Magic_Chest.MagicMananger;
+import me.acf.punish.PunishMananger;
 import me.antiHack.AntiHack;
 import me.hub.API.BlockRestore;
 import me.hub.API.Explosion.Explosion;
 import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
-import me.security.Accout.Account;
+import me.security.SecurityManager;
 import me.security.Accout.AccountAPI;
 import me.security.Accout.buffer.AccountBuffer;
+import me.site.account.Account;
 
 public class Test extends MiniPlugin {
 
@@ -29,7 +30,9 @@ public class Test extends MiniPlugin {
 		BlockRestore block = new BlockRestore(plugin);
 		Explosion explo = new Explosion(plugin,block);
 		Account account = new Account(plugin);
+		PunishMananger punish = new PunishMananger(plugin);
 		MagicMananger magic = new MagicMananger(plugin);
+		SecurityManager secu = new SecurityManager(plugin);
 		System.out.print(texto);
 	}
 	
@@ -39,7 +42,7 @@ public class Test extends MiniPlugin {
 	    }
 	 
 	
-	@EventHandler
+
 	public void test(PlayerJoinEvent event)
 	{
 		AccountAPI conta = AccountBuffer.Return(event.getPlayer());

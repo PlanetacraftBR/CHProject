@@ -76,20 +76,16 @@ public class Bungee extends MiniPlugin
   
   public static void KickPlayer(Player jogador, String msg)
   {
-	  Player p = null;
-	    ByteArrayOutputStream b = new ByteArrayOutputStream();
-	    DataOutputStream out = new DataOutputStream(b);
-	    try {
+	
+	  ByteArrayOutputStream b = new ByteArrayOutputStream();
+	  DataOutputStream out = new DataOutputStream(b);
+	  try {
 	  out.writeUTF("KickPlayer");
 	  out.writeUTF(jogador.getName());
 	  out.writeUTF(msg);
-	  for (Player player : UtilServer.Jogadores())
-	  {
-		  p = player;
-	  }
-	  p.sendPluginMessage(Main.plugin, "BungeeCord", b.toByteArray());
-  }
-	    catch (IOException e)
+	  jogador.sendPluginMessage(Main.plugin, "BungeeCord", b.toByteArray());
+       }
+	  catch (IOException e)
 	      {
 	        e.printStackTrace();
 	      }

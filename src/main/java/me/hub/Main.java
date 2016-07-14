@@ -83,6 +83,7 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import me.acf.lobby.MagicChest.ChestMagic;
 import me.hub.API.Util.BarAPI;
 import me.hub.API.Util.UtilHolo;
+import me.hub.API.Util.UtilTime;
 import me.hub.NMS.BossBar.wither.BossBarFake;
 import me.hub.atualizar.Update;
 import me.hub.config.Config;
@@ -169,7 +170,7 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 	public static Main plugin;
 	public static String NomeDoServidor = "§f§lPlanetaCraft_BR";
 	public static String site = "http://api.planetacraft.com.br";
-
+    public static String servidor_ligado = "00/00/00 00:00:00";
 	
 	public static final ReportType REPORT_CANNOT_LOAD_CONFIG = new ReportType("Cannot load configuration");
 	public static final ReportType REPORT_CANNOT_DELETE_CONFIG = new ReportType("Cannot delete old ProtocolLib configuration.");
@@ -259,6 +260,8 @@ public class Main extends JavaPlugin implements Listener, CitizensPlugin {
 	public void onLoad() {
 		  File file = new File("plugins/CHub/saves.yml");
 			deleteDir(file);
+		
+		Main.servidor_ligado = UtilTime.TimeData();	
 			
 		// Logging
 		logger = getLoggerSafely();

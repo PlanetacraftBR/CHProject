@@ -5,6 +5,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
+import me.hub.API.Util.UtilTime;
+
 
 
 public abstract class MiniPlugin
@@ -15,12 +17,15 @@ public abstract class MiniPlugin
 
   public MiniPlugin(String moduleName, JavaPlugin plugin)
   {
+    String tempo = UtilTime.convertString(UtilTime.DataTempo(UtilTime.TimeData(), Main.servidor_ligado), 0, UtilTime.TimeUnit.FIT);
     this._moduleName = moduleName;
     this._plugin = plugin;
 
     onEnable();
 
     RegisterEvents(this);
+    System.out.print("Class @" + moduleName + " iniciada! [@CHProject] em " + tempo);
+    
   }
 
   public PluginManager GetPluginManager()
@@ -45,7 +50,6 @@ public abstract class MiniPlugin
 
   public final void onEnable()
   {
-    long epoch = System.currentTimeMillis();
     Enable();
     AddComandos();
   }

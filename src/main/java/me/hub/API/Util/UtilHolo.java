@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import me.acf.Magic_Chest.MagicEvent;
 import net.minecraft.server.v1_10_R1.BlockPosition;
 import net.minecraft.server.v1_10_R1.EntityArmorStand;
 import net.minecraft.server.v1_10_R1.EntityBat;
@@ -108,8 +109,10 @@ public class UtilHolo {
     		  if (entity.getType() == EntityType.ARMOR_STAND)
     		  {
     			  if (entity.getCustomName() != null) {
-    				if (!holograns.contains(entity))
-    				  holograns.add(entity);
+    				if (!holograns.contains(entity)) {
+    				 if (!MagicEvent.magics.contains(entity))
+    					holograns.add(entity);
+    				}
     			  }
     				  }
     	  }
@@ -119,6 +122,8 @@ public class UtilHolo {
 	{
 	      List<Entity> entities = Bukkit.getWorld("world").getEntities();
     	  for (Entity entity : entities){
+    		  if (MagicEvent.magics.contains(entity))
+    			  entity.remove();
     		  if (holo.equals(entity))
     		  {
     			  entity.remove();

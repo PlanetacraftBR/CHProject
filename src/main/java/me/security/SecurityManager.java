@@ -103,9 +103,13 @@ public class SecurityManager extends MiniPlugin {
 	      
 	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
 	    if (!VerificarBungee(event.getPlayer()))
-		    event.setCancelled(false);
+	    {
+	    	event.setCancelled(false);
+	    }
 	    else
-	    	event.setCancelled(true);
+	    	event.setCancelled(false);
+	    
+	    
 	  }
 	
 	  public static boolean VerificarBungee(Player p)
