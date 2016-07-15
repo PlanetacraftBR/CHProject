@@ -48,6 +48,7 @@ import org.bukkit.entity.Player;
 
 import me.hub.API.Util.UtilPlayer;
 import me.security.Accout.AccountAPI;
+import me.security.Punish.PunishAPI;
 
 /**
  * Código por adriancf, Group CH-Project
@@ -74,7 +75,7 @@ public class AccountBuffer {
 	public static void CheckBan(Player jogador)
 	{
 		AccountAPI conta = new AccountAPI(jogador.getName());
-		
+		PunishAPI punish = new PunishAPI(jogador, conta.Ban_Motivo, conta.Ban_Staff, conta.Ban_Data, conta.Ban_Exp);
 	}
 	
 	public static void add(Player jogador)

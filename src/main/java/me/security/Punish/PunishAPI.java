@@ -18,6 +18,10 @@ public class PunishAPI {
 	
 	public PunishAPI(Player p,String motivo,String staff,String DiaBan,String expBan)
 	{
+		this.Ban_Motivo = motivo;
+		this.Ban_Staff = staff;
+		this.Ban_DiaBan = DiaBan;
+		this.Ban_ExpBan = expBan;
 		
 		Check_IP();
 		if (banido)

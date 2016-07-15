@@ -42,11 +42,9 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.security.Accout;
 
-import org.bukkit.entity.Player;
 import org.json.JSONObject;
 
 import me.acf.lobby.patentes.Patente;
-import me.acf.punish.PunishMananger;
 import me.hub.Main;
 import me.hub.API.Util.UtilTime;
 import me.security.Accout.buffer.AccountBuffer;

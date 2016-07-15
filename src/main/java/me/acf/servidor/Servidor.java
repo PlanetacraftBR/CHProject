@@ -7,6 +7,9 @@ import me.site.account.AccountWeb;
 
 public class Servidor {
 	
+	
+	public static String mai = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR&nome=" + Bukkit.getServerName(), "status");
+	
 	public Servidor()
 	{
 		System.out.print(AccountWeb.Conectar(Main.site + "/API/sala.php?modo=ADD&nome=" + Bukkit.getServerName()+"&status=ON&quantidade=" + Bukkit.getMaxPlayers() + "&onlines=" + Bukkit.getOnlinePlayers().size()));
@@ -35,16 +38,10 @@ public class Servidor {
 	public static boolean GetMain()
 	{
 
-		try {
-		String mai = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR&nome=" + Bukkit.getServerName(), "status");
+	
         if (mai.equals("MANUTENCAO"))
         return true;
-		}
-		  catch (Exception exception)
-	    {
-			  System.out.print("Não foi possivel verificar o modo manutenção do servidor!");
-			  return false;
-	    }
+
 		
 		if (Bukkit.hasWhitelist())
 			return true;
