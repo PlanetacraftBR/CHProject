@@ -154,8 +154,8 @@ public class UtilHolo {
 	    World world = nmsPlayer.getWorld(); 
 	    final EntityBat holo = new EntityBat(world);
 	    holo.setCustomName(message);
+	    holo.setAI(true);
 	    holo.setNoGravity(true);
-	    holo.setInvulnerable(false);
 	    holo.setCustomNameVisible(true);
 	    holo.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
 	    PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(holo);
