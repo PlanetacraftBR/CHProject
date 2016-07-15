@@ -1,34 +1,25 @@
 package me.acf.lobby.extend;
 
-import java.lang.reflect.Field;
 import java.util.Random;
 
-
-import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
-import org.bukkit.craftbukkit.v1_10_R1.entity.CraftCreeper;
 import org.bukkit.craftbukkit.v1_10_R1.entity.CraftEntity;
 import org.bukkit.entity.Cow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Player;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Rabbit;
 import org.bukkit.entity.Sheep;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.util.Vector;
 
 import me.site.account.Account;
 import me.site.account.rank.Rank;
-import net.minecraft.server.v1_10_R1.EntityCreeper;
-import net.minecraft.server.v1_10_R1.EntityLiving;
 import net.minecraft.server.v1_10_R1.NBTTagCompound;
 
 public class MobSpawn implements Listener {

@@ -61,7 +61,6 @@ public class Test extends MiniPlugin {
         ScoreboardAPI.add("§2"); //5
         
         ScoreboardAPI.build(event.getPlayer(), texto);
-        event.getPlayer().getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(10);
 	}
 
 }

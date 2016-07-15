@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
@@ -148,7 +149,7 @@ public class SecurityManager extends MiniPlugin {
 	{
 		if (!VerificarBungee(event.getPlayer()))
 			event.getPlayer().kickPlayer("§6Servidor Privado");
-		
+		event.getPlayer().getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(10);
 	}
 	
 	
