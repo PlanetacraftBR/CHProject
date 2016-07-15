@@ -71,6 +71,12 @@ public class AccountBuffer {
 		return contas_name.get(jogador);
 	}
 	
+	public static void CheckBan(Player jogador)
+	{
+		AccountAPI conta = new AccountAPI(jogador.getName());
+		
+	}
+	
 	public static void add(Player jogador)
 	{
 		if (contas.containsKey(jogador))

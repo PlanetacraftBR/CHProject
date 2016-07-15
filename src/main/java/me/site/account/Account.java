@@ -148,10 +148,12 @@ public class Account extends MiniPlugin
 		  String patentes = obj.getString("patente");
 		  patente.put(p, Patente.valueOf(patentes));
 		  ip.put(p, obj.getString("ip"));
+		  
 		  PunishMananger.Ban_Motivo.put(p, obj.getString("ban_mt"));
 		  PunishMananger.Ban_Staff.put(p, obj.getString("ban_st"));
 		  PunishMananger.Dia_Ban.put(p, obj.getString("ban_at"));
 		  PunishMananger.Exp_Ban.put(p, obj.getString("ban_es"));
+		  
 		  DonateMananger.Exp_VIP.put(p, obj.getString("vip_es"));
 	       if (!obj.getString("clan").contains("null"))
 	       {

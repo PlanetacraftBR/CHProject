@@ -46,6 +46,7 @@ import org.bukkit.entity.Player;
 import org.json.JSONObject;
 
 import me.acf.lobby.patentes.Patente;
+import me.acf.punish.PunishMananger;
 import me.hub.Main;
 import me.hub.API.Util.UtilTime;
 import me.security.Accout.buffer.AccountBuffer;
@@ -67,7 +68,13 @@ public class AccountAPI {
 	public String chave;
 	public Rank rank;
 	public Patente patente;
+	
 	public String ponto_staff;
+	public String Ban_Motivo;
+	public String Ban_Staff;
+	public String Ban_Exp;
+	public String Ban_Data;
+	
 	public String ip;
 	public int Numero_Load;
 	public JSONObject json;
@@ -106,6 +113,12 @@ public class AccountAPI {
 		patente = Patente.valueOf(obj.getString("patente"));
 		ip = obj.getString("ip");	
 		info_on = UtilTime.TimeData();
+		
+		Ban_Motivo = obj.getString("ban_mt");
+		Ban_Staff = obj.getString("ban_st");
+		Ban_Data = obj.getString("ban_at");
+		Ban_Exp = obj.getString("ban_es");
+		
 		}
 		 catch (Exception exception)
 	    {
@@ -123,7 +136,6 @@ public class AccountAPI {
 	     
 	     return tempo;
 	}
-	
 	
 	
 	private void AddJogador()

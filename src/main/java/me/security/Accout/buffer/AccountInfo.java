@@ -33,6 +33,12 @@ public class AccountInfo {
 		return conta.patente;
 	}
 	
+	public static String getIP(Player p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.ip;
+	}
+	
 	
 	public static int getPlanets(Player p)
 	{
@@ -50,6 +56,12 @@ public class AccountInfo {
 	{
 		AccountAPI conta = AccountBuffer.Return(p);
 		return conta.Cash();
+	}
+	
+	public static int getChaves(Player p)
+	{
+		AccountAPI conta = AccountBuffer.Return(p);
+		return conta.Chave();
 	}
 	
 	public static int getCash(String p)
