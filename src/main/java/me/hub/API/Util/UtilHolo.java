@@ -156,6 +156,7 @@ public class UtilHolo {
 	    holo.setCustomName(message);
 	    holo.setAI(true);
 	    holo.setNoGravity(true);
+	    loc = loc.clone().add(0,1,0);
 	    holo.setCustomNameVisible(true);
 	    holo.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
 	    PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(holo);
