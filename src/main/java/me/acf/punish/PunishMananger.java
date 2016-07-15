@@ -145,7 +145,7 @@ public class PunishMananger extends MiniPlugin{
 	    }
 	    if (banned != null) { 
 	    if (banned.isOnline()) 
-	    	Bungee.KickPlayer(banned, Main.NomeDoServidor + " - Kickado \n§fVocê foi banido do servidor");
+	    	Bungee.KickPlayer(banned.getName(), Main.NomeDoServidor + " - Kickado \n§fVocê foi banido do servidor");
 	    	banned.kickPlayer("§6" + Main.NomeDoServidor + " - Kickado \n§fVocê foi banido do servidor");
 	    }
 	    }

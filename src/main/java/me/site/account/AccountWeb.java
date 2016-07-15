@@ -50,7 +50,7 @@ public class AccountWeb {
 	      }
 	      catch (IOException e)
 	      {
-              
+              e.printStackTrace();
 	      }
 	      System.out.print(texto);
       return texto;
@@ -93,7 +93,7 @@ public class AccountWeb {
       }
       catch (Exception e)
       {
-    	 
+    	 e.printStackTrace();
       }
       return respond;
     }

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 
 import me.hub.Main;
+import me.hub.Bungee.Bungee;
 
 
 
@@ -64,6 +65,12 @@ public class UtilPlayer
   public static void Kick(Player jogador, String Motivo)
   {
 	  String Msg = "§6" + Main.NomeDoServidor + " - Kickado \n§fVocê foi kickado por " + Motivo + ". ( §cSistema§f )\nCuidado com os kicks para não ser §cbanido permanente§f.\nVocê pode retornar ao servidor normalmente agora.";
+	  Bungee.KickPlayer(jogador.getName(),Msg);
+	  if (jogador == null)
+		  return;
+	  if (!jogador.isOnline())
+		  return;
+	  
 	  jogador.kickPlayer(Msg);
   }
   

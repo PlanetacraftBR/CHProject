@@ -101,7 +101,7 @@ public class SecurityManager extends MiniPlugin {
 	        return;
 	      }
 	      
-	    Bungee.KickPlayer(event.getPlayer(), event.getReason());
+	    Bungee.KickPlayer(event.getPlayer().getName(), event.getReason());
 	    if (!VerificarBungee(event.getPlayer()))
 	    {
 	    	event.setCancelled(false);

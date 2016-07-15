@@ -82,6 +82,7 @@ public class Account extends MiniPlugin {
 	  {
 		AccountBuffer.add(event.getPlayer());
 		AccountAPI conta = AccountBuffer.Return(event.getPlayer());
+		AccountBuffer.CheckBan(event.getPlayer());
 		if (conta.erro)
 		{
 			UtilPlayer.Kick(event.getPlayer(), conta.erro_info);
