@@ -16,7 +16,7 @@ public class MagicMananger extends MiniPlugin {
 	public MagicMananger(JavaPlugin plugin)
 	{
 		super("Magic Chest",plugin);
-        MenuMagic menu = new MenuMagic();
+		MenuMagic magic = new MenuMagic(null);
 	}
 
 	

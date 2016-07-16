@@ -81,13 +81,27 @@ public class UtilInv {
     
     //Daqui para baixo é a api de item
     
-    public static void AddItem(Inventory inv, boolean encantado, Material item,int contidade, byte data,String nome, String meta, int slot)
+    public static void AddItem(Inventory inv, boolean encantado, Material item,int contidade, byte data,String nome, String list, int slot)
     {
     	      ItemStack bau = new ItemStack(item, contidade , data);
     	      ItemMeta metae = bau.getItemMeta();
     	      metae.setDisplayName(nome);
     	      ArrayList<String> desce = new ArrayList();
-    	      desce.add(meta);
+    	      desce.add(list);
+    	      metae.setLore(desce);
+    	      bau.setItemMeta(metae);
+    	      if (encantado)
+    	      inv.setItem(slot, Enchant.addGlow(bau));
+    	      else
+    	          inv.setItem(slot, bau);
+    }
+    
+    public static void AddItemString(Inventory inv, boolean encantado, Material enderChest,int contidade, byte data,String nome, ArrayList<String> meta, int slot)
+    {
+    	      ItemStack bau = new ItemStack(enderChest, contidade , data);
+    	      ItemMeta metae = bau.getItemMeta();
+    	      metae.setDisplayName(nome);
+    	      ArrayList<String> desce = meta;
     	      metae.setLore(desce);
     	      bau.setItemMeta(metae);
     	      if (encantado)
@@ -110,6 +124,7 @@ public class UtilInv {
     	      else
     	          inv.setItem(slot, bau);
     }
+    
     public static ItemStack AddItemReturn(int mushroomSoup,int contidade, byte i,String nome, String meta)
     {
     	      ItemStack bau = new ItemStack(mushroomSoup, contidade , i);
@@ -169,6 +184,7 @@ public class UtilInv {
     	      else
     	          inv.setItem(slot, bau);
     }
+    
     
     public static void repairAll(Player player) {
         for (ItemStack is : player.getInventory().getContents()) {
