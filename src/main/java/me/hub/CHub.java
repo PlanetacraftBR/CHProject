@@ -38,8 +38,6 @@ Ass: αdяiαиcf - Códigos livres
 
 */
 
-
-
 package me.hub;
 
 import org.bukkit.plugin.java.JavaPlugin;

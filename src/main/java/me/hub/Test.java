@@ -25,14 +25,7 @@ public class Test extends MiniPlugin {
 	
 	public Test (JavaPlugin plugin) {
 		super("Tests", plugin);
-		Bungee bunge = new Bungee(plugin);
-		AntiHack hacks = new AntiHack(plugin,bunge);
-		BlockRestore block = new BlockRestore(plugin);
-		Explosion explo = new Explosion(plugin,block);
-		Account account = new Account(plugin);
-		PunishMananger punish = new PunishMananger(plugin);
 		MagicMananger magic = new MagicMananger(plugin);
-		SecurityManager secu = new SecurityManager(plugin);
 		System.out.print(texto);
 	}
 	

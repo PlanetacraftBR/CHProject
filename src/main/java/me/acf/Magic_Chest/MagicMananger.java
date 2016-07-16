@@ -8,6 +8,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.acf.Magic_Chest.modulo.MenuMagic;
 import me.hub.MiniPlugin;
 
 public class MagicMananger extends MiniPlugin {
@@ -15,6 +16,7 @@ public class MagicMananger extends MiniPlugin {
 	public MagicMananger(JavaPlugin plugin)
 	{
 		super("Magic Chest",plugin);
+        MenuMagic menu = new MenuMagic();
 	}
 
 	
