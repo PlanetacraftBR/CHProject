@@ -20,9 +20,9 @@ public class MenuMagic {
 	
 	public MenuMagic(Player p)
 	{
+		inv = Bukkit.createInventory(null, 54, "Magic Chest Boxs");
 		//Chaves = AccountInfo.getChaves(jogador);
 		GerarBaus();
-		inv = Bukkit.createInventory(null, 54, "Magic Chest Boxs");
 		if (p == null)
 			return;
 		if (baus.contains(Magic.MAGIC_MONSTER))
@@ -32,6 +32,9 @@ public class MenuMagic {
 		if (baus.contains(Magic.MAGIC_EPIC))
 			jogador.sendMessage("§b§lMAGIC §7Você tem um §a§lMOSTER §7para abrir");
 	}
+	
+	
+	
 	
 	
 	
@@ -57,6 +60,7 @@ public class MenuMagic {
 		       i += Magic.MAGIC_NORMAL.Chaves;
 		   }
 	   }
+	   
 	   int slot = 0;
 	   for (Magic s : baus)
 	   {
@@ -68,9 +72,8 @@ public class MenuMagic {
 	   list.add("§6");
 	   list.add("§7Avaliado em:§e " + s.avaliado + " pontos");
 	   list.add("§6Click para abrir");
-	   
-       UtilInv.AddItemString(inv, false, Material.ENDER_CHEST, 1, (byte) 0,s.nome,list, slot);
-       slot++;
+	   UtilInv.AddItemString(inv, false, Material.ENDER_CHEST, 1, (byte) 0,s.nome,list, slot);
+	   slot++;
 	   }
    }
 	

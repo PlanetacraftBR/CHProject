@@ -13,10 +13,11 @@ import me.hub.MiniPlugin;
 
 public class MagicMananger extends MiniPlugin {
 	
+	MenuMagic magic = null;
 	public MagicMananger(JavaPlugin plugin)
 	{
 		super("Magic Chest",plugin);
-		MenuMagic magic = new MenuMagic(null);
+		magic = new MenuMagic(null);
 	}
 
 	
@@ -34,9 +35,12 @@ public class MagicMananger extends MiniPlugin {
 	    	   event.setCancelled(true);
 	       }
 	       if (event.getClickedBlock().getType() == Material.ENDER_CHEST) {
-	    	   MagicEvent.Magic(jogador, event.getClickedBlock().getLocation());
+	    	   jogador.openInventory(magic.inv);
+	    	   // MagicEvent.Magic(jogador, event.getClickedBlock().getLocation());
 	       }
 	     }
 	   }
+	 
+	 
 	
 }
