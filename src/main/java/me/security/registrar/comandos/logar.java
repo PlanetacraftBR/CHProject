@@ -52,10 +52,7 @@ public class logar implements CommandExecutor {
 		 {
 			 Format.Comando("Security", "Você foi logado com exito", jogador);
 			 Bungee.SendPlayerToServer(jogador, "lobby");
-			  	UtilTitle log = new UtilTitle("Logado com exito","Obrigado",4,5,4);
-				log.setTitleColor(ChatColor.GREEN);
-              log.setSubtitleColor(ChatColor.RED);              
-				log.send(jogador);
+			 UtilTitle.sendTitle(jogador,20,20,20,"&f&lLogado com exito","&a&lObrigado");
 		 }
 
 		   

@@ -231,19 +231,12 @@ public class LoginManager extends MiniPlugin {
 		 String verificar = AccountWeb.Conectar(Main.site + "/API/registrado.php?nick=" + event.getPlayer().getName(), "registrado");
 		 if (!verificar.contains("sim"))
 		 {
-			    UtilTitle reg = new UtilTitle("Seja Bem-Vindo ao servidor de espera!","Você deve se registrar");
-			    reg.setTitleColor(ChatColor.GREEN);
-             reg.setSubtitleColor(ChatColor.RED);              
-				reg.send(event.getPlayer());
+	    UtilTitle.sendTitle(event.getPlayer(),20,20,20,"&f&lSeja Bem-Vindo ao servidor de espera!","&6&lVocê deve se registrar");
 		 registrar.add(event.getPlayer()); 
 		 }
 		 else
 		 {
-			  	UtilTitle log = new UtilTitle("Seja Bem-Vindo ao servidor de espera!","Você deve se logar");
-				log.setTitleColor(ChatColor.GREEN);
-                log.setSubtitleColor(ChatColor.RED);              
- 				log.send(event.getPlayer());
- 				
+			 UtilTitle.sendTitle(event.getPlayer(),20,20,20,"&f&lSeja Bem-Vindo ao servidor de espera!","&6&lVocê deve se logar");
 		 }
 		 SecurityManager.Add(event.getPlayer());
 	 }

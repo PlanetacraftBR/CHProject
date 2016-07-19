@@ -35,7 +35,9 @@ public class MagicMananger extends MiniPlugin {
 	    	   event.setCancelled(true);
 	       }
 	       if (event.getClickedBlock().getType() == Material.ENDER_CHEST) {
+	    	   event.setCancelled(true);
 	    	   jogador.openInventory(magic.inv);
+	    	   
 	    	   // MagicEvent.Magic(jogador, event.getClickedBlock().getLocation());
 	       }
 	     }

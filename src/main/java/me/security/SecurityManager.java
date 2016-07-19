@@ -170,10 +170,7 @@ public class SecurityManager extends MiniPlugin {
 		Bungee.SendPlayerToServer(p, "lobby");
         Format.Comando("Security", "Você foi registrado com exito",p);
 		   
-		UtilTitle log = new UtilTitle("Registrado com exito","Obrigado",4,5,4);
-		log.setTitleColor(ChatColor.GREEN);
-        log.setSubtitleColor(ChatColor.RED);
-	    log.send(p);
+		 UtilTitle.sendTitle(p,20,20,20,"§f§lRegistrado com exito","§6§lObrigado");
         LoginManager.registrar.remove(p);
 	}
 	public static boolean VerSenha(String senha,String email, Player p)

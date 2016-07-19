@@ -29,50 +29,6 @@ public class Load
     protectionCountry = config.getBoolean("protection.country.enabled");
     countriesWhitelist = config.getStringList("protection.country.countriesWhitelist");
     countriesBlacklist = config.getStringList("protection.country.countriesBlacklist");
-    
-    protectionProxy = true;
-    LoaderStaff("https://raw.githubusercontent.com/JotinhaBR/CH-PlanetaCraft_BR/master/Proxys.txt");
-    System.out.print("Total de Proxy block: " + addressBlacklist.size());
   }
-  
-  
-  private static void LoaderStaff(String grupo)
-	{
-	     URL host = null;
-	      try
-	      {
-	        host = new URL(Main.site + "/API/contas.php?grupo=" + grupo);
-	       
-	      }
-	      catch (MalformedURLException e1)
-	      {
-	       
-	      }
-	      URLConnection connection = null;
-	      try
-	      {
-	        connection = host.openConnection();
-	   
-	        BufferedReader reader = null;
-	     
-	        reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-	  
-	        String inputLine;
-	        while ((inputLine = reader.readLine()) != null)
-	        {
-	        	String json = inputLine;
-
-	        	addressBlacklist.add(json);
-	        		
-	        	
-	        }
-	        reader.close();
-	       
-	      }
-	      catch (IOException e)
-	      {
-	       
-	      }
-	}
   
 }

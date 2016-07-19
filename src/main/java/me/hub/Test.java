@@ -11,6 +11,7 @@ import me.acf.punish.PunishMananger;
 import me.antiHack.AntiHack;
 import me.hub.API.BlockRestore;
 import me.hub.API.Explosion.Explosion;
+import me.hub.API.Util.UtilTitle;
 import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
 import me.security.SecurityManager;
@@ -35,6 +36,12 @@ public class Test extends MiniPlugin {
 	    }
 	 
 	
+	 @EventHandler
+	 public void test2(PlayerJoinEvent event)
+	 {
+		 UtilTitle.sendTitle(event.getPlayer(),20,20,20,"Seja Bem-Vindo ao servidor de espera!","Você deve se registrar");
+	 }
+	 
 
 	public void test(PlayerJoinEvent event)
 	{

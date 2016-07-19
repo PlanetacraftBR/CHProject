@@ -32,12 +32,7 @@ public class MenuMagic {
 		if (baus.contains(Magic.MAGIC_EPIC))
 			jogador.sendMessage("§b§lMAGIC §7Você tem um §a§lMOSTER §7para abrir");
 	}
-	
-	
-	
-	
-	
-	
+
    public void GerarBaus()
    {
 	   System.out.println("Gerar sistema de Baus");
@@ -196,15 +191,7 @@ public class MenuMagic {
 	   baus.add(magic);
 	   Chaves -= magic.Chaves;
 	   System.out.println("[Magic Chest] add "+ magic.nome + " nota: " + magic.avaliado);
-   }
-   
-	
-   
-	public void Menu_Generete()
-	{
-		
-	}
-	
+   }	
 	
 	public enum Magic
 	{

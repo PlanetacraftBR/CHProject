@@ -29,12 +29,5 @@ public class GeoIP_Login
         return;
       }
     }
-    if (Load.protectionProxy) {
-      if ((!Load.addressBlacklist.isEmpty()) && (Load.addressBlacklist.contains(Account.getIP(event.getPlayer()))))
-      {
-    	  UtilPlayer.Kick(event.getPlayer(), "O seu IP esta banido do servidor");
-        return;
-      }
-    }
   }
 }
