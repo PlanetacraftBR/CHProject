@@ -26,7 +26,6 @@ public class Enchant extends MiniPlugin {
 	}
 	ArrayList<ItemStack> list = new ArrayList<ItemStack>();
 	
-	  public ArrayList<EnchantingInventory> inventories;
 
 	@EventHandler
     public void onInventoryOpen(InventoryOpenEvent e) {
@@ -39,19 +38,10 @@ public class Enchant extends MiniPlugin {
             i.setAmount(64);
             list.add(i);
             inv.setItem(1, i);
-            inventories.add(inv);
+
         }
     }
-	
-	  @EventHandler
-	  public void closeInventoryEvent(InventoryCloseEvent e)
-	  {
-	        if (e.getInventory() instanceof EnchantingInventory) {
-		  EnchantingInventory inv = (EnchantingInventory) e.getInventory();
-		  inventories.remove(inv);
-	        }
-	  }
-	
+
 	@EventHandler
 	public void PlayerIntaract(InventoryClickEvent e)
 	{
