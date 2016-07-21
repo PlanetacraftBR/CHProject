@@ -101,12 +101,17 @@ public class UtilServerPlayerStatos {
 	
 	private static String Statos(String sala)
 	{
-		
+		String nome = null;
+		try {
 	   String Servidor = AccountWeb.Conectar(Main.site + "/API/sala.php?modo=CONSUTAR_ON&nome=" + sala.replace("§a§o", ""), "online");
-	   String nome =  Servidor + " Player(s)";
+	    nome =  Servidor + " Player(s)";
 	   if (Servidor.equals("0"))
                nome = "Ninguem";
-	   
+		}
+		catch (Exception ex)
+		{
+			nome = "§c§lFull Sala";
+		}
 	   
 	     return nome;
 	}
