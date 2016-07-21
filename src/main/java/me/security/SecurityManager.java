@@ -17,6 +17,7 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -24,6 +25,7 @@ import me.acf.FormatText.Format;
 import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilTitle;
+import me.hub.API.module.tablist.TabAPI;
 import me.hub.Admin.Staff;
 import me.hub.Bungee.Bungee;
 import me.security.GeoIP.API.GeoIPLite;
@@ -144,7 +146,7 @@ public class SecurityManager extends MiniPlugin {
 	  
 	  
 	@EventHandler
-	public void Entrar (PlayerJoinEvent event)
+	public void Entrar(PlayerJoinEvent event)
 	{
 		if (!VerificarBungee(event.getPlayer()))
 			event.getPlayer().kickPlayer("§6Servidor Privado");
@@ -153,7 +155,12 @@ public class SecurityManager extends MiniPlugin {
 	
 	
 	
-	
+	@EventHandler
+	public void Sair(PlayerQuitEvent event) {
+		Player player = event.getPlayer();
+
+		TabAPI.removeTab(player);
+	}
 	
 	
 	

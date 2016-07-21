@@ -162,9 +162,7 @@ public class Recharge extends MiniPlugin
 		else
 		{
 			if (inform)
-				UtilPlayer.message(player, F.main("Recharge", "You cannot use " + F.skill(ability) + " for " + 
-					F.time(UtilTime.convertString((Get(player).get(ability).GetRemaining()), 1, TimeUnit.FIT)) + "."));
-			
+			Format.Comando("Tempo", "Você deve esperar §a" + F.time(UtilTime.convertString((Get(player).get(ability).GetRemaining()), 1, TimeUnit.FIT)) + " para utitlizar o §a" + F.skill(ability) + "§7.", player);
 			return false;
 		}
 	}

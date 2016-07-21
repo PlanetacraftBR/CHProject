@@ -1,23 +1,16 @@
 package me.hub;
 
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.acf.Magic_Chest.MagicMananger;
-import me.acf.punish.PunishMananger;
-import me.antiHack.AntiHack;
-import me.hub.API.BlockRestore;
-import me.hub.API.Explosion.Explosion;
+import me.hub.API.Util.UtilTablist;
 import me.hub.API.Util.UtilTitle;
-import me.hub.Bungee.Bungee;
 import me.hub.Scoreboard.ScoreboardAPI;
-import me.security.SecurityManager;
 import me.security.Accout.AccountAPI;
 import me.security.Accout.buffer.AccountBuffer;
-import me.site.account.Account;
 
 public class Test extends MiniPlugin {
 
@@ -35,12 +28,18 @@ public class Test extends MiniPlugin {
 		   scoreboard.send(j);     
 	    }
 	 
+	 
+	 
 	
 	 @EventHandler
 	 public void test2(PlayerJoinEvent event)
 	 {
 		 UtilTitle.sendTitle(event.getPlayer(),20,20,20,"Seja Bem-Vindo ao servidor de espera!","Você deve se registrar");
-	 }
+	     UtilTablist.setFooter(event.getPlayer(), "Testando......","Testando.....");
+	     UtilTablist.setHeader(event.getPlayer(), "Testando......","Testando.....");
+	     UtilTablist.AddItem(event.getPlayer(), "Jotinha_BR");
+	     UtilTablist.RemoveItem(event.getPlayer(), event.getPlayer().getName());
+   	 }
 	 
 
 	public void test(PlayerJoinEvent event)

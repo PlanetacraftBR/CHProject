@@ -14,6 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import me.acf.Magic_Chest.MagicEvent;
+import me.hub.API.module.Reflection;
 import net.minecraft.server.v1_10_R1.BlockPosition;
 import net.minecraft.server.v1_10_R1.EntityArmorStand;
 import net.minecraft.server.v1_10_R1.EntityBat;
@@ -132,6 +133,10 @@ public class UtilHolo {
 	}
 	
     public static void showHolo(Player p, String message, Location loc) {
+    	   if (Player1_7.contains(p)) {
+    	    	Holo1_7(p,message,loc);
+    	       return;
+    	   }    	   
     final EntityPlayer nmsPlayer = ((CraftPlayer) p).getHandle();
     World world = nmsPlayer.getWorld(); 
     final EntityArmorStand holo = new EntityArmorStand(world);
@@ -141,11 +146,7 @@ public class UtilHolo {
     holo.setNoGravity(true);
     holo.setCustomNameVisible(true);
     holo.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-    PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(holo);
-    nmsPlayer.playerConnection.sendPacket(packet);
-    if (Player1_7.contains(p)) {
-    	Holo1_7(p,message,loc);
-    }
+    Reflection.sendPacket(p, holo);
     }
     
     public static void Holo1_7(Player p, String message, Location loc)
@@ -159,8 +160,7 @@ public class UtilHolo {
 	    loc = loc.clone().add(0,1,0);
 	    holo.setCustomNameVisible(true);
 	    holo.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-	    PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(holo);
-	    nmsPlayer.playerConnection.sendPacket(packet);
+	    Reflection.sendPacket(p, holo);
     }
     
 }
