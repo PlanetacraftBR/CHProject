@@ -10,24 +10,30 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.acf.FormatText.Format;
 import me.hub.Main;
 import me.hub.MiniPlugin;
+import me.hub.API.Util.UtilServer;
 import me.hub.API.Util.UtilTitle;
 import me.hub.API.module.tablist.TabAPI;
 import me.hub.Admin.Staff;
 import me.hub.Bungee.Bungee;
+import me.hub.atualizar.Atualizar;
+import me.hub.atualizar.ModosUpdate;
 import me.security.GeoIP.API.GeoIPLite;
 import me.security.GeoIP.API.GeoIP_Login;
 import me.security.move.AntiMove;
@@ -112,6 +118,28 @@ public class SecurityManager extends MiniPlugin {
 	    	event.setCancelled(false);
 	    
 	    
+	  }
+	  
+	  @EventHandler
+	  public void Null(InventoryClickEvent event)
+	  {
+		  if (event.getSlot() == 45)
+			  event.setCancelled(true);
+	  }
+	  
+	  
+	  @EventHandler
+	  public void Update(Atualizar event)
+	  {
+		  if (event.getType() != ModosUpdate.SEC)
+		   return;
+		  
+		  for (Player j : UtilServer.Jogadores())
+		  {
+			  j.getInventory().remove(Material.SHIELD);
+			  j.getInventory().setItem(45, new ItemStack(Material.AIR));
+			  
+		  }
 	  }
 	
 	  public static boolean VerificarBungee(Player p)
