@@ -31,7 +31,7 @@ public class RechargeData
 	public boolean AttachItem;
 	public boolean AttachDurability;
 
-	public RechargeData(Recharge host, Player player, String name, ItemStack stack, long rechargeTime, boolean attachitem, boolean attachDurability)
+	public RechargeData(Recharge host, Player player, String name, ItemStack stack, long rechargeTime, boolean attachitem, boolean attachDurability,boolean display_bar)
 	{
 		Host = host;
 
@@ -42,6 +42,7 @@ public class RechargeData
 		Recharge = rechargeTime;
 		
 		AttachItem = attachitem;
+		DisplayForce = display_bar;
 		AttachDurability = attachDurability;
 	}
 

@@ -29,7 +29,7 @@ public class Recharge extends MiniPlugin
 	public HashSet<String> informSet = new HashSet<String>();
 	public NautHashMap<String, NautHashMap<String, RechargeData>> _recharge = new NautHashMap<String, NautHashMap<String, RechargeData>>();
 	
-	protected Recharge(JavaPlugin plugin)
+	public Recharge(JavaPlugin plugin)
 	{
 		super("Recharge", plugin);
 	}
@@ -102,15 +102,19 @@ public class Recharge extends MiniPlugin
 	
 	public boolean use(Player player, String ability, String abilityFull, long recharge, boolean inform, boolean attachItem)
 	{
-		return use(player, ability, abilityFull, recharge, inform, attachItem, false);
+		return use(player, ability, abilityFull, recharge, inform, attachItem, false,false);
 	}
 	
 	public boolean use(Player player, String ability, long recharge, boolean inform, boolean attachItem, boolean attachDurability)
 	{
-		return use(player, ability, ability, recharge, inform, attachItem, attachDurability);
+		return use(player, ability, ability, recharge, inform, attachItem, attachDurability,false);
+	}
+	public boolean use(Player player, String ability, long recharge, boolean inform, boolean attachItem, boolean attachDurability,boolean display_bar)
+	{
+		return use(player, ability, ability, recharge, inform, attachItem, attachDurability,display_bar);
 	}
 	
-	public boolean use(Player player, String ability, String abilityFull, long recharge, boolean inform, boolean attachItem, boolean attachDurability)
+	public boolean use(Player player, String ability, String abilityFull, long recharge, boolean inform, boolean attachItem, boolean attachDurability,boolean display_bar)
 	{
 		if (recharge == 0)
 			return true;
@@ -130,7 +134,7 @@ public class Recharge extends MiniPlugin
 			return false;
 		}
 
-		UseRecharge(player, ability, recharge, attachItem, attachDurability);
+		UseRecharge(player, ability, recharge, attachItem, attachDurability,display_bar);
 
 		return true;
 	}
@@ -142,7 +146,7 @@ public class Recharge extends MiniPlugin
 	
 	public void useForce(Player player, String ability, long recharge, boolean attachItem)
 	{
-		UseRecharge(player, ability, recharge, attachItem, false);
+		UseRecharge(player, ability, recharge, attachItem, false,false);
 	}
 	
 	public boolean usable(Player player, String ability)
@@ -167,13 +171,13 @@ public class Recharge extends MiniPlugin
 		}
 	}
 	
-	public void UseRecharge(Player player, String ability, long recharge, boolean attachItem, boolean attachDurability)
+	public void UseRecharge(Player player, String ability, long recharge, boolean attachItem, boolean attachDurability,boolean display_bar)
 	{
 		RechargeEvent rechargeEvent = new RechargeEvent(player, ability, recharge);
 		UtilServer.getServer().getPluginManager().callEvent(rechargeEvent);
 		
 		Get(player).put(ability, new RechargeData(this, player, ability, player.getItemInHand(), 
-				rechargeEvent.GetRecharge(), attachItem, attachDurability));
+				rechargeEvent.GetRecharge(), attachItem, attachDurability,display_bar));
 	}
 	
 	public void recharge(Player player, String ability)

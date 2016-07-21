@@ -1,7 +1,9 @@
 package me.hub;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -9,6 +11,7 @@ import me.acf.Magic_Chest.MagicMananger;
 import me.hub.API.Util.UtilTablist;
 import me.hub.API.Util.UtilTitle;
 import me.hub.Scoreboard.ScoreboardAPI;
+import me.hub.recharge.Recharge;
 import me.security.Accout.AccountAPI;
 import me.security.Accout.buffer.AccountBuffer;
 
@@ -21,6 +24,7 @@ public class Test extends MiniPlugin {
 		super("Tests", plugin);
 		MagicMananger magic = new MagicMananger(plugin);
 		System.out.print(texto);
+		Recharge.Initialize(plugin);
 	}
 	
 	 public static void CriarScoreboard(Player j)  {
@@ -29,6 +33,20 @@ public class Test extends MiniPlugin {
 	    }
 	 
 	 
+	 
+	 @EventHandler
+	 public void Test(PlayerInteractEvent event)
+	 {
+		if (event.getClickedBlock().getType() == Material.CHEST)
+		{
+			event.setCancelled(true);
+			 if (!Recharge.Instance.use(event.getPlayer(),"chest", 1900L, true, false,false,true)) {
+			        return;
+			} 
+			 event.getPlayer().sendMessage("ok");
+			
+		}
+	 }
 	 
 	
 	 @EventHandler
