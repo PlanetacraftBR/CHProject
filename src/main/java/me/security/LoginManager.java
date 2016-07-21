@@ -39,7 +39,7 @@ import me.acf.FormatText.Format;
 import me.acf.FullPvP.CombatLog;
 import me.hub.Main;
 import me.hub.MiniPlugin;
-import me.hub.API.Chat;
+import me.hub.API.Util.UtilActionBar;
 import me.hub.API.Util.UtilPlayer;
 import me.hub.API.Util.UtilTitle;
 import me.hub.Bungee.Bungee;
@@ -252,7 +252,7 @@ public class LoginManager extends MiniPlugin {
 		    		   return;
 		    	   if (Original.contains(event.getPlayer().getUniqueId().toString()))
 		    		   return;
-				   Chat.ActionBar(event.getPlayer(), "§c§lSeja Bem-Vindo Original!");
+				   UtilActionBar.ActionBar(event.getPlayer(), "§c§lSeja Bem-Vindo Original!");
 				   event.getPlayer().sendMessage("§c§lSeja Bem-Vindo original!");
 				Bungee.SendPlayerToServer(event.getPlayer(), "lobby"); 
 				Original.add(event.getPlayer().getUniqueId().toString());
@@ -283,7 +283,7 @@ public class LoginManager extends MiniPlugin {
 				p.setGameMode(GameMode.ADVENTURE);
 				if (Original.contains(p.getUniqueId().toString()))
 				{
-					   Chat.ActionBar(p, "§e§lVOCÊ SAIU ??? ENTÃO USE §c§l/limbo");
+					   UtilActionBar.ActionBar(p, "§e§lVOCÊ SAIU ??? ENTÃO USE §c§l/limbo");
 					   Bungee.SendPlayerToServer(p, "lobby");
 				}
 			}
@@ -292,11 +292,11 @@ public class LoginManager extends MiniPlugin {
 		
 				if (registrar.contains(p)) {
 			   
-			    Chat.ActionBar(p, "§e§lPARA SE REGISTRAR NO SERVIDOR USE §6§l/registrar (Senha) (E-Mail)");
+			    UtilActionBar.ActionBar(p, "§e§lPARA SE REGISTRAR NO SERVIDOR USE §6§l/registrar (Senha) (E-Mail)");
 				}
 			    else {
 			    
-					Chat.ActionBar(p, "§e§lPARA SE LOGAR NO SERVIDOR USE §6§l/logar (Senha) (E-Mail)");
+					UtilActionBar.ActionBar(p, "§e§lPARA SE LOGAR NO SERVIDOR USE §6§l/logar (Senha) (E-Mail)");
 			
 			    }
 			    }

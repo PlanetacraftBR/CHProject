@@ -3,15 +3,13 @@ package me.hub.API.Util;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import me.hub.API.Chat;
-
 public class UtilTextBottom
 {
 	public static void display(String text, Player... players)
 	{
 		for (Player player : players)
 		{
-           Chat.ActionBar(player, text);
+           UtilActionBar.ActionBar(player, text);
 		}
 	}
 	

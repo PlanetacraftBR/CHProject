@@ -1,26 +1,7 @@
 package me.acf.chat;
 
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import me.acf.clan.Clan;
-import me.acf.lobby.perfil.Perfil;
-import me.acf.protocolo.chat.ChatManager;
-import me.hub.Main;
-import me.hub.MiniPlugin;
-import me.hub.API.Util.UtilPlayer;
-import me.hub.Admin.Staff;
-import me.hub.comandos.geral.Fake;
-import me.site.account.Account;
-import me.site.account.rank.Rank;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ClickEvent.Action;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +9,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import me.acf.clan.Clan;
+import me.acf.lobby.perfil.Perfil;
+import me.acf.protocolo.chat.ChatManager;
+import me.hub.MiniPlugin;
+import me.hub.API.Util.UtilPlayer;
+import me.hub.comandos.geral.Fake;
+import me.site.account.Account;
+import me.site.account.rank.Rank;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Chat extends MiniPlugin{
 
@@ -38,6 +30,12 @@ public class Chat extends MiniPlugin{
 	  private static Map<String, Long> timeout = new HashMap<String, Long>();
 	  public static boolean Usar = true;
 	  
+	  public static String TransParaFrente(String MSG)
+	  {
+	  	String texto;
+	      texto = new StringBuilder(MSG).reverse().toString();
+	      return texto;
+	  }
 	  
 	  @EventHandler
 	  public static void Chats(AsyncPlayerChatEvent e)

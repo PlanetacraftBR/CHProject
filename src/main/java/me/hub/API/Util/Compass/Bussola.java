@@ -24,7 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.hub.MiniPlugin;
-import me.hub.API.Chat;
+import me.hub.API.Util.UtilActionBar;
 import me.hub.API.Util.UtilGear;
 import me.hub.API.Util.UtilInv;
 import me.hub.API.Util.UtilMath;
@@ -96,7 +96,7 @@ public class Bussola extends MiniPlugin
                 "    " + C.cWhite + C.Bold + "Distancia:§e " + UtilMath.format_Double(bestDist) + 
                 "    " + C.cWhite + C.Bold + "Altura:§e "  + UtilMath.format_Double(heightDiff);
         if (player.getItemInHand().getType() == Material.COMPASS)
-          Chat.ActionBar(player, text);
+        	UtilActionBar.ActionBar(player, text);
         if (msg.containsKey(player))
         	msg.remove(player);
         msg.put(player, text);
