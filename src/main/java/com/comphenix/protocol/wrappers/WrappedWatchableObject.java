@@ -16,28 +16,33 @@
  */
 package com.comphenix.protocol.wrappers;
 
+import static com.comphenix.protocol.utility.MinecraftReflection.is;
+
 import org.bukkit.inventory.ItemStack;
 
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.accessors.ConstructorAccessor;
 import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.EnumWrappers.Direction;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher.Serializer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.WrappedDataWatcherObject;
 import com.google.common.base.Optional;
 
 /**
- * Represents a DataWatcher Item in 1.9.
+ * Represents a DataWatcher Item in 1.8 thru 1.10.
  * @author dmulloy2
  */
-
 public class WrappedWatchableObject extends AbstractWrapper {
 	private static final Class<?> HANDLE_TYPE = MinecraftReflection.getDataWatcherItemClass();
+	private static Integer VALUE_INDEX = null;
+
 	private static ConstructorAccessor constructor;
 
 	private final StructureModifier<Object> modifier;
 
 	/**
-	 * Constructs a wrapped watchable object around an existing NMS data watcher item.
+	 * Constructs a DataWatcher Item wrapper from an existing NMS data watcher item.
 	 * @param handle Data watcher item
 	 */
 	public WrappedWatchableObject(Object handle) {
@@ -47,7 +52,18 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	}
 
 	/**
-	 * Constructs a wrapped watchable object with a given watcher object and initial value.
+	 * Constructs a DataWatcher Item wrapper from a given index and initial value.
+	 * <p>
+	 * Not recommended in 1.9 and up.
+	 * @param index Index of the Item
+	 * @param value Initial value
+	 */
+	public WrappedWatchableObject(int index, Object value) {
+		this(newHandle(WrappedDataWatcherObject.fromIndex(index), value));
+	}
+
+	/**
+	 * Constructs a DataWatcher Item wrapper from a given watcher object and initial value.
 	 * @param watcherObject Watcher object
 	 * @param value Initial value
 	 */
@@ -60,7 +76,12 @@ public class WrappedWatchableObject extends AbstractWrapper {
 			constructor = Accessors.getConstructorAccessor(HANDLE_TYPE.getConstructors()[0]);
 		}
 
-		return constructor.invoke(watcherObject.getHandle(), value);
+		if (MinecraftReflection.watcherObjectExists()) {
+			return constructor.invoke(watcherObject.getHandle(), value);
+		} else {
+			// new WatchableObject(classId, index, value)
+			return constructor.invoke(WrappedDataWatcher.getTypeID(value.getClass()), watcherObject.getIndex(), value);
+		}
 	}
 
 	// ---- Getter methods
@@ -78,7 +99,11 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @return The index
 	 */
 	public int getIndex() {
-		return getWatcherObject().getIndex();
+		if (MinecraftReflection.watcherObjectExists()) {
+			return getWatcherObject().getIndex();
+		}
+
+		return modifier.<Integer>withType(int.class).read(1);
 	}
 
 	/**
@@ -94,7 +119,11 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @return Raw value
 	 */
 	public Object getRawValue() {
-		return modifier.readSafely(1);
+		if (VALUE_INDEX == null) {
+			VALUE_INDEX = MinecraftReflection.watcherObjectExists() ? 1 : 2;
+		}
+
+		return modifier.readSafely(VALUE_INDEX);
 	}
 
 	/**
@@ -103,7 +132,11 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @param updateClient Whether or not to update the client
 	 */
 	public void setValue(Object value, boolean updateClient) {
-		modifier.write(1, getUnwrapped(value));
+		if (VALUE_INDEX == null) {
+			VALUE_INDEX = MinecraftReflection.watcherObjectExists() ? 1 : 2;
+		}
+
+		modifier.write(VALUE_INDEX, getUnwrapped(value));
 
 		if (updateClient) {
 			setDirtyState(true);
@@ -123,7 +156,7 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @return True if it must, false if not
 	 */
 	public boolean getDirtyState() {
-		return (boolean) modifier.read(2);
+		return modifier.<Boolean>withType(boolean.class).read(0);
 	}
 
 	/**
@@ -131,7 +164,7 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @param dirty New state
 	 */
 	public void setDirtyState(boolean dirty) {
-		modifier.write(2, dirty);
+		modifier.<Boolean>withType(boolean.class).write(0, dirty);
 	}
 
 	@Override
@@ -140,11 +173,10 @@ public class WrappedWatchableObject extends AbstractWrapper {
 		if (obj == null) return false;
 
 		if (obj instanceof WrappedWatchableObject) {
-			// watcher object, value, dirty state
-			WrappedWatchableObject other = (WrappedWatchableObject) obj;
-			return getWatcherObject().equals(other.getWatcherObject())
-					&& getRawValue().equals(other.getRawValue())
-					&& getDirtyState() == other.getDirtyState();
+			WrappedWatchableObject that = (WrappedWatchableObject) obj;
+			return this.getIndex() == that.getIndex() &&
+					this.getRawValue().equals(that.getRawValue()) &&
+					this.getDirtyState() == that.getDirtyState();
 		}
 
 		return false;
@@ -152,20 +184,26 @@ public class WrappedWatchableObject extends AbstractWrapper {
 
 	@Override
 	public String toString() {
-		return "DataWatcherItem[object=" + getWatcherObject() + ", value=" + getValue() + ", dirty=" + getDirtyState() + "]";
+		return "DataWatcherItem[index=" + getIndex() + ", value=" + getValue() + ", dirty=" + getDirtyState() + "]";
 	}
 
 	// ---- Wrapping
 
 	/**
-	 * Retrieve the wrapped object value, if needed.
+	 * Retrieve the wrapped object value, if needed. All non-primitive objects
+	 * with {@link Serializer}s should be covered by this.
 	 * 
 	 * @param value - the raw NMS object to wrap.
 	 * @return The wrapped object.
 	 */
 	@SuppressWarnings("rawtypes")
 	static Object getWrapped(Object value) {
-		// Deal with optionals first
+		// Handle watcher items first
+		if (is(MinecraftReflection.getDataWatcherItemClass(), value)) {
+			return getWrapped(new WrappedWatchableObject(value).getRawValue());
+		}
+
+		// Then deal with optionals
 		if (value instanceof Optional) {
 			Optional<?> optional = (Optional<?>) value;
 			if (optional.isPresent()) {
@@ -175,17 +213,29 @@ public class WrappedWatchableObject extends AbstractWrapper {
 			}
 		}
 
-		if (MinecraftReflection.isItemStack(value)) {
+		// Current supported classes
+		if (is(MinecraftReflection.getIChatBaseComponentClass(), value)) {
+			return WrappedChatComponent.fromHandle(value);
+		} else if (is(MinecraftReflection.getItemStackClass(), value)) {
 			return BukkitConverters.getItemStackConverter().getSpecific(value);
-		} else if (MinecraftReflection.isChunkCoordinates(value)) {
-			return new WrappedChunkCoordinate((Comparable) value);
-		} else if (MinecraftReflection.isBlockPosition(value)) {
+		} else if (is(MinecraftReflection.getIBlockDataClass(), value)) {
+			return BukkitConverters.getWrappedBlockDataConverter().getSpecific(value);
+		} else if (is (Vector3F.getMinecraftClass(), value)) {
+			return Vector3F.getConverter().getSpecific(value);
+		} else if (is(MinecraftReflection.getBlockPositionClass(), value)) {
 			return BlockPosition.getConverter().getSpecific(value);
-		} else if (MinecraftReflection.isChunkPosition(value)) {
-			return ChunkPosition.getConverter().getSpecific(value);
-		} else {
-			return value;
+		} else if (is(EnumWrappers.getDirectionClass(), value)) {
+			return EnumWrappers.getDirectionConverter().getSpecific(value);
 		}
+
+		// Legacy classes
+		if (is(MinecraftReflection.getChunkCoordinatesClass(), value)) {
+			return new WrappedChunkCoordinate((Comparable) value);
+		} else if (is(MinecraftReflection.getChunkPositionClass(), value)) {
+			return ChunkPosition.getConverter().getSpecific(value);
+		}
+
+		return value;
 	}
 
 	/**
@@ -194,6 +244,7 @@ public class WrappedWatchableObject extends AbstractWrapper {
 	 * @param wrapped - the wrapped position.
 	 * @return The raw NMS object.
 	 */
+	// Must be kept in sync with getWrapped!
 	static Object getUnwrapped(Object wrapped) {
 		if (wrapped instanceof Optional) {
 			Optional<?> optional = (Optional<?>) wrapped;
@@ -204,16 +255,28 @@ public class WrappedWatchableObject extends AbstractWrapper {
 			}
 		}
 
-		if (wrapped instanceof ItemStack) {
+		// Current supported classes
+		if (wrapped instanceof WrappedChatComponent) {
+			return ((WrappedChatComponent) wrapped).getHandle();
+		} else if (wrapped instanceof ItemStack) {
 			return BukkitConverters.getItemStackConverter().getGeneric(MinecraftReflection.getItemStackClass(), (ItemStack) wrapped);
-		} else if (wrapped instanceof WrappedChunkCoordinate) {
-			return ((WrappedChunkCoordinate) wrapped).getHandle();
+		} else if (wrapped instanceof WrappedBlockData) {
+			return BukkitConverters.getWrappedBlockDataConverter().getGeneric(MinecraftReflection.getIBlockDataClass(), (WrappedBlockData) wrapped);
+		} else if (wrapped instanceof Vector3F) {
+			return Vector3F.getConverter().getGeneric(Vector3F.getMinecraftClass(), (Vector3F) wrapped);
 		} else if (wrapped instanceof BlockPosition) {
 			return BlockPosition.getConverter().getGeneric(MinecraftReflection.getBlockPositionClass(), (BlockPosition) wrapped);
-		} else if (wrapped instanceof ChunkPosition) {
-			return ChunkPosition.getConverter().getGeneric(MinecraftReflection.getChunkPositionClass(), (ChunkPosition) wrapped);
-		} else {
-			return wrapped;
+		} else if (wrapped instanceof Direction) {
+			return EnumWrappers.getDirectionConverter().getGeneric(EnumWrappers.getDirectionClass(), (Direction) wrapped);
 		}
+
+		// Legacy classes
+		if (wrapped instanceof ChunkPosition) {
+			return ChunkPosition.getConverter().getGeneric(MinecraftReflection.getChunkPositionClass(), (ChunkPosition) wrapped);
+		} else if (wrapped instanceof WrappedChunkCoordinate) {
+			return ((WrappedChunkCoordinate) wrapped).getHandle();
+		}
+
+		return wrapped;
 	}
 }

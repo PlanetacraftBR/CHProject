@@ -16,10 +16,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
-import com.comphenix.entity.WrapperPlayClientUseEntity;
-import com.comphenix.entity.WrapperPlayServerEntityDestroy;
-import com.comphenix.entity.WrapperPlayServerNamedEntitySpawn;
-import com.comphenix.entity.WrapperPlayServerPlayerInfo;
+import com.comphenix.packetwrapper.WrapperPlayClientUseEntity;
+import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
+import com.comphenix.packetwrapper.WrapperPlayServerNamedEntitySpawn;
+import com.comphenix.packetwrapper.WrapperPlayServerPlayerInfo;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
@@ -71,11 +71,11 @@ public class UtilAuraCheck implements Listener {
       } else {
         spawnWrapper = getSpawnWrapper(this.checked.getLocation().add(2.0D * Math.cos(radians), 0.2D, 2.0D * Math.sin(radians)).toVector(), this.plugin);
       }
-      WrapperPlayServerPlayerInfo infoWrapper = getInfoWrapper(spawnWrapper.getPlayerUuid(), EnumWrappers.PlayerInfoAction.ADD_PLAYER);
+      WrapperPlayServerPlayerInfo infoWrapper = getInfoWrapper(spawnWrapper.getPlayerUUID(), EnumWrappers.PlayerInfoAction.ADD_PLAYER);
       infoWrapper.sendPacket(this.checked);
       spawnWrapper.sendPacket(this.checked);
-      this.entitiesSpawned.put(Integer.valueOf(spawnWrapper.getEntityId()), Boolean.valueOf(false));
-      WrapperPlayServerPlayerInfo RemoveinfoWrapper = getInfoWrapper(spawnWrapper.getPlayerUuid(), EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
+      this.entitiesSpawned.put(Integer.valueOf(spawnWrapper.getEntityID()), Boolean.valueOf(false));
+      WrapperPlayServerPlayerInfo RemoveinfoWrapper = getInfoWrapper(spawnWrapper.getPlayerUUID(), EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
       RemoveinfoWrapper.sendPacket(this.checked);
     }
     Bukkit.getScheduler().runTaskLater(this.plugin, new Runnable()
@@ -119,9 +119,9 @@ public class UtilAuraCheck implements Listener {
   public static WrapperPlayServerNamedEntitySpawn getSpawnWrapper(Vector loc, Main plugin)
   {
     WrapperPlayServerNamedEntitySpawn wrapper = new WrapperPlayServerNamedEntitySpawn();
-    wrapper.setEntityId(RANDOM.nextInt(20000));
+    wrapper.setEntityID(RANDOM.nextInt(20000));
     wrapper.setPosition(loc);
-    wrapper.setPlayerUuid(UUID.randomUUID());
+    wrapper.setPlayerUUID(UUID.randomUUID());
     wrapper.setYaw(0.0F);
     wrapper.setPitch(-45.0F);
     WrappedDataWatcher watcher = new WrappedDataWatcher();
@@ -148,7 +148,7 @@ public class UtilAuraCheck implements Listener {
   public static WrapperPlayServerEntityDestroy kill(int entity)
   {
     WrapperPlayServerEntityDestroy wrapper = new WrapperPlayServerEntityDestroy();
-    wrapper.setEntities(new int[] { entity });
+    wrapper.setEntityIds(new int[] { entity });
     return wrapper;
   }
   public void register() {

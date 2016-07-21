@@ -22,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.plugin.Plugin;
 
-
 import com.comphenix.protocol.error.ReportType;
 import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.utility.Util;
@@ -283,11 +282,11 @@ public abstract class Updater {
         }
     }
 
-	public static Updater create(Main main, int id, File file, UpdateType type, boolean announce) {
+	public static Updater create(Main protocolLib, int id, File file, UpdateType type, boolean announce) {
 		if (Util.isUsingSpigot()) {
-			return new SpigotUpdater(main, type, announce);
+			return new SpigotUpdater(protocolLib, type, announce);
 		} else {
-			return new BukkitUpdater(main, id, file, type, announce);
+			return new BukkitUpdater(protocolLib, id, file, type, announce);
 		}
 	}
 
