@@ -43,13 +43,13 @@ public class PunishAPI {
 	
 	private void Check_Ban()
 	{
-		if (Ban_Motivo != null)
+		if (Ban_Motivo.equals(""))
 			return;
 		
-		long tempo = UtilTime.DataTempo(UtilTime.TimeData(), Ban_ExpBan);
 		String info_tempo = "§aVitalico"; 
 		
-		if (!this.Ban_Motivo.contains("Vitalico")) {
+		if (!this.Ban_ExpBan.contains("Vitalico")) {
+			long tempo = UtilTime.DataTempo(UtilTime.TimeData(), Ban_ExpBan);
 			info_tempo = UtilTime.convertString(tempo, 0, UtilTime.TimeUnit.FIT);
 		
 		if (tempo <= 0)
