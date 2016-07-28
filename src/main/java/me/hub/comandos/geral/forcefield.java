@@ -47,38 +47,9 @@ public class forcefield implements CommandExecutor {
 	                 }
 					final Player alvo =  Bukkit.getPlayerExact(args[0]);
 					
+					 sender.sendMessage("Temporariamente desativado para manutenções!");
 					 UtilAuraCheck check = new UtilAuraCheck(Main.plugin, alvo);
-					    UtilAuraCheck.running.put(alvo.getUniqueId(), check);
-					    check.invoke(alvo, new UtilAuraCheck.Callback()
-					    {
-					      public void done(long started, long finished, AbstractMap.SimpleEntry<Integer, Integer> result, CommandSender invoker)
-					      {
-					        if (((invoker instanceof Player)) && (!((Player)invoker).isOnline())) {
-					          return;
-					        }
-					        
-					        Bukkit.getServer().getConsoleSender().sendMessage("§7Staff §fCONSOLE§7 testou o jogador§c " + alvo.getName() + "§7 hitou  §a" + result.getKey() + "§7/§a" + result.getValue());
-					        double time = finished != Long.MAX_VALUE ? (int)((finished - started) / 1000L) : 40 / 20.0D;
-					        Bukkit.getServer().getConsoleSender().sendMessage("§7Tempo de : (§a" + time + "§7) Seg");
-	                         if (result.getKey() >= 5){
-	                        	 Bukkit.getServer().getConsoleSender().sendMessage("§7Possibilidade de hack: §aSim");
-	                        	 Click.Host.addSuspicion(alvo, "Esta usando KillAura(ForceField) [Extremo]");
-	                        	 UtilPlayer.Kick(alvo, "Você esta muito suspeito de ser algum Cheat");
-	                         }
-	                         if (result.getKey() == 4){
-	                        	 Bukkit.getServer().getConsoleSender().sendMessage("§7Possibilidade de hack: §aSim");
-	                        	 Click.Host.addSuspicion(alvo, "Esta usando KillAura(ForceField) [Medio]");
-	                        	 UtilPlayer.Kick(alvo, "Você esta muito suspeito de ser algum Cheat");
-	                         }
-	                         if (result.getKey() == 3){
-	                        	 Bukkit.getServer().getConsoleSender().sendMessage("§7Possibilidade de hack: §aTalvez");
-	                         Click.Host.addSuspicion(alvo, "Talves está usando KillAura(ForceField) [Baixo]");
-	                         }
-	                         if (result.getKey() <= 2)
-	                        	 Bukkit.getServer().getConsoleSender().sendMessage("§7Possibilidade de hack: §aNão");
-	                         
-					      }
-					    });
+					 
 				}
 			    
 		   }
@@ -100,32 +71,9 @@ public class forcefield implements CommandExecutor {
                  }
 				final Player alvo =  Bukkit.getPlayerExact(args[0]);
 				
+				sender.sendMessage("Temporariamente desativado para manutenções!");
 				 UtilAuraCheck check = new UtilAuraCheck(Main.plugin, alvo);
-				    UtilAuraCheck.running.put(alvo.getUniqueId(), check);
-				    check.invoke(sender, new UtilAuraCheck.Callback()
-				    {
-				      public void done(long started, long finished, AbstractMap.SimpleEntry<Integer, Integer> result, CommandSender invoker)
-				      {
-				        if (((invoker instanceof Player)) && (!((Player)invoker).isOnline())) {
-				          return;
-				        }
-				        
-				        UtilServer.AnuncioStaff("§7Staff §f" + jogador.getName() + "§7 testou o jogador§c " + alvo.getName() + "§7 hitou  §a" + result.getKey() + "§7/§a" + result.getValue());
-				        double time = finished != Long.MAX_VALUE ? (int)((finished - started) / 1000L) : 40 / 20.0D;
-				        UtilServer.AnuncioStaff("§7Tempo de : (§a" + time + "§7) Seg");
-                         if (result.getKey() >= 4){
-                        	 UtilServer.AnuncioStaff("§7Possibilidade de hack: §aSim");
-                        	 Click.Host.addSuspicion(alvo, "Esta usando KillAura(ForceField) [Extremo]");
-                         }
-                         if (result.getKey() == 3){
-                        	 UtilServer.AnuncioStaff("§7Possibilidade de hack: §aTalvez");
-                        	 Click.Host.addSuspicion(alvo, "Esta usando KillAura(ForceField) [Medio]");
-                         }
-                         if (result.getKey() <= 2)
-                        	 UtilServer.AnuncioStaff("§7Possibilidade de hack: §aNão");
-                         
-				      }
-				    });
+				    
 			}
 		   }
 			
