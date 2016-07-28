@@ -54,6 +54,7 @@ import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilPlayer;
 import me.hub.API.Util.UtilServer;
+import me.security.Accout.Util.Chat;
 import me.security.Accout.buffer.AccountBuffer;
 import me.security.Accout.buffer.AccountInfo;
 import me.site.account.rank.Rank;
@@ -64,11 +65,22 @@ import me.site.account.rank.Rank;
 
 public class Account extends MiniPlugin {
 
+	
+	boolean Carregar_Chat = true;
+	
+	private JavaPlugin plugin;
 	public Account(JavaPlugin plugin) {
 		super("Account v2", plugin);
-		// TODO Auto-generated constructor stub
+		this.plugin = plugin;
+	
 	}
 
+	private void Loader()
+	{
+		Chat chat;
+		if (Carregar_Chat)
+			 chat = new Chat(plugin);
+	}
 
 	/** Nota AdrianCF:
 	 *  Account 2.0 

@@ -85,6 +85,8 @@ public class AccountAPI {
 	public int PlanetsAdd = 0;
 	public int ChavesAdd = 0;
 	
+	public boolean Mute = false;
+	
 	//Tempo online
 	public String info_on = "00/00/00 - 00:00:00";
 	public String info_leave = "00/00/00 - 00:00:00";
