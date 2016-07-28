@@ -42,11 +42,13 @@ Ass: αdяiαиcf - Códigos livres
 
 package me.security.Accout;
 
+import org.bukkit.entity.Player;
 import org.json.JSONObject;
 
 import me.acf.lobby.patentes.Patente;
 import me.hub.Main;
 import me.hub.API.Util.UtilTime;
+import me.security.Accout.Version.MinecraftVersions;
 import me.security.Accout.buffer.AccountBuffer;
 import me.site.account.AccountWeb;
 import me.site.account.rank.Rank;
@@ -80,12 +82,9 @@ public class AccountAPI {
 	public String erro_log;
 	public String erro_info;
 	
-	public int ExpAdd = 0;
-	public int CashAdd = 0;
-	public int PlanetsAdd = 0;
-	public int ChavesAdd = 0;
-	
 	public boolean Mute = false;
+	
+	public MinecraftVersions version;
 	
 	//Tempo online
 	public String info_on = "00/00/00 - 00:00:00";
@@ -114,6 +113,7 @@ public class AccountAPI {
 		ip = obj.getString("ip");	
 		info_on = UtilTime.TimeData();
 		
+		SetVersion("MINECRAFT_1_10");
 		Ban_Motivo = obj.getString("ban_mt");
 		Ban_Staff = obj.getString("ban_st");
 		Ban_Data = obj.getString("ban_at");
@@ -137,6 +137,10 @@ public class AccountAPI {
 	     return tempo;
 	}
 	
+	public void SetVersion(String nome)
+	{
+	 version = MinecraftVersions.valueOf(nome);	
+	}
 	
 	private void AddJogador()
 	{
@@ -158,18 +162,10 @@ public class AccountAPI {
 	    }
 	}
 	
-	public void Pedente()
-	{
-		AddExp();
-		AddPlanets();
-		AddCash();
-		AddChaves();
-	}
-	
 	public int Planets()
 	{
 		
-		return Integer.parseInt((String)planets.replace(".", ""))+this.PlanetsAdd;
+		return Integer.parseInt((String)planets.replace(".", ""));
 	}
 	
 	
@@ -185,55 +181,39 @@ public class AccountAPI {
 	
 	public int Cash()
 	{
-		return Integer.parseInt((String)cash.replace(".", ""))+this.CashAdd;
+		return Integer.parseInt((String)cash.replace(".", ""));
 	}
 	
-	 private void AddPlanets()
-	 {
-		 if (PlanetsAdd >= 1) {
-			 String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=ADD&nick=" + nome + "&quantidade=" + PlanetsAdd);
-		     System.out.print(buscar);
-		 }
-		 if (PlanetsAdd < 0) {
-			 String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=REMOVE&nick=" + nome + "&quantidade=" + PlanetsAdd);
-		     System.out.print(buscar);
-		 }
-	 }
 	 
-	 private void AddChaves()
-	 {
-		if (ChavesAdd >= 1) {
-		String buscar = AccountWeb.Conectar(Main.site + "/API/chave.php?modo=ADD&nick=" + nome + "&quantidade=" + PlanetsAdd);
-	    System.out.print(buscar); 
-		 }
-		if (ChavesAdd < 0) {
-		String buscar = AccountWeb.Conectar(Main.site + "/API/chave.php?modo=REMOVE&nick=" + nome + "&quantidade=" + PlanetsAdd);
-	    System.out.print(buscar);
-		  }
-		  
-	 }
-	 
+	public void AddPlanets(double contidade)
+    {
+  		String buscar = AccountWeb.Conectar(Main.site + "/API/planets.php?modo=ADD&nick=" + nome + "&quantidade=" + contidade);
+		 System.out.print(buscar);
+    }
+	  
+	public void AddCash(double contidade)
+	{
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/cash.php?modo=ADD&nick=" + nome + "&quantidade=" + contidade);
+		     System.out.print(buscar);
+    }
+	  
+	public void AddChave(int contidade)
+    {
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/chave.php?modo=ADD&nick=" + nome + "&quantidade=" + contidade);
+		     System.out.print(buscar);
+    }
+	  
+	public void removeChave(Player p, int contidade)
+    {
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/chave.php?modo=VENDA&nick=" + nome + "&quantidade=" + contidade);
+		     System.out.print(buscar);
+    }
+	  
+	public void AddExp(int contidade)
+	{
+			 String buscar = AccountWeb.Conectar(Main.site + "/API/exp.php?modo=UPAR&nick=" + nome + "&quantidade=" + contidade); 
+			 System.out.print(buscar);	    
+	}
 	
-	 private void AddExp()
-	  {
-		 if (ExpAdd >= 1) {
-		String buscar = AccountWeb.Conectar(Main.site + "/API/exp.php?modo=UPAR&nick=" + nome + "&quantidade=" + ExpAdd);
-		  System.out.print(buscar);  
-		 }
-	  }
-	 
-	 private void AddCash()
-	   {
-		  if (CashAdd >= 1) {
-			 String buscar = AccountWeb.Conectar(Main.site + "/API/cash.php?modo=ADD&nick=" + nome + "&quantidade=" + CashAdd);
-		     System.out.print(buscar);
-		  }
-		  if (CashAdd < 0) {
-			  String buscar = AccountWeb.Conectar(Main.site + "/API/cash.php?modo=REMOVE&nick=" + nome + "&quantidade=" + CashAdd);
-			     System.out.print(buscar);
-		  }
-			  
-		  }
-	 
 	
 }

@@ -25,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.acf.FormatText.Format;
+import me.acf.FullPvP.CombatLog;
 import me.hub.Main;
 import me.hub.MiniPlugin;
 import me.hub.API.Util.UtilServer;
@@ -117,7 +118,8 @@ public class SecurityManager extends MiniPlugin {
 	    else
 	    	event.setCancelled(false);
 	    
-	    
+	    if (CombatLog.combat.containsKey(event.getPlayer()))
+	    CombatLog.combat.remove(event.getPlayer());
 	  }
 	  
 	  @EventHandler
