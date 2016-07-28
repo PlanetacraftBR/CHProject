@@ -57,6 +57,7 @@ import me.hub.API.Util.UtilServer;
 import me.security.Accout.Util.Chat;
 import me.security.Accout.buffer.AccountBuffer;
 import me.security.Accout.buffer.AccountInfo;
+import me.security.Punish.PunishAPI;
 import me.site.account.rank.Rank;
 
 /**
@@ -131,8 +132,9 @@ public class Account extends MiniPlugin {
 		      
 		      UtilPlayer.Kick(event.getPlayer(),"§f§lServidor lotado compre §5§lVIP+ §f§lem nossa loja!\nAcesse: §a§l " + Main.site);
 		    }
-		  
-		  
+		   
+		    PunishAPI ban = new PunishAPI(event.getPlayer(), conta.json.getString("ban_mt"), conta.json.getString("ban_st"),conta.json.getString("ban_at"), conta.json.getString("ban_s"));
+            conta.ban = ban;		  
 	  }
 	
 	  

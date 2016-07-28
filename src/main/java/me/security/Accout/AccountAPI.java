@@ -50,6 +50,7 @@ import me.hub.Main;
 import me.hub.API.Util.UtilTime;
 import me.security.Accout.Version.MinecraftVersions;
 import me.security.Accout.buffer.AccountBuffer;
+import me.security.Punish.PunishAPI;
 import me.site.account.AccountWeb;
 import me.site.account.rank.Rank;
 
@@ -85,6 +86,8 @@ public class AccountAPI {
 	public boolean Mute = false;
 	
 	public MinecraftVersions version;
+	
+	public PunishAPI ban;
 	
 	//Tempo online
 	public String info_on = "00/00/00 - 00:00:00";
@@ -183,7 +186,6 @@ public class AccountAPI {
 	{
 		return Integer.parseInt((String)cash.replace(".", ""));
 	}
-	
 	 
 	public void AddPlanets(double contidade)
     {
